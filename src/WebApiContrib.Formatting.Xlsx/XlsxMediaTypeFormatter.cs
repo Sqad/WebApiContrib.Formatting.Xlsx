@@ -106,17 +106,8 @@ namespace WebApiContrib.Formatting.Xlsx
                                                       HttpContentHeaders headers,
                                                       MediaTypeHeaderValue mediaType)
         {
-            // Get the raw request URI.
-            string rawUri = System.Web.HttpContext.Current.Request.RawUrl;
 
-            // Remove query string if present.
-            int queryStringIndex = rawUri.IndexOf('?');
-            if (queryStringIndex > -1)
-            {
-                rawUri = rawUri.Substring(0, queryStringIndex);
-            }
-
-            string fileName;
+            string fileName = "data";
 
             // Look for ExcelDocumentAttribute on class.
             var itemType = util.GetEnumerableItemType(type);
@@ -129,6 +120,18 @@ namespace WebApiContrib.Formatting.Xlsx
             }
             else
             {
+                // Get the raw request URI.
+                string rawUri = System.Web.HttpContext.Current?.Request?.RawUrl;
+                if (string.IsNullOrEmpty(rawUri) != false)
+                {
+                    // Remove query string if present.
+                    int queryStringIndex = rawUri.IndexOf('?');
+                    if (queryStringIndex > -1)
+                    {
+                        rawUri = rawUri.Substring(0, queryStringIndex);
+                    }
+                }
+
                 // Otherwise, use either the URL file name component or just "data".
                 fileName = System.Web.VirtualPathUtility.GetFileName(rawUri) ?? "data";
             }
@@ -151,7 +154,7 @@ namespace WebApiContrib.Formatting.Xlsx
                                                 System.Net.TransportContext transportContext)
         {
             // Create a document builder.
-            var document = new XlsxDocumentBuilder(writeStream);
+            var document = new SqadXlsxDocumentBuilder(writeStream);
 
             if (value == null) return document.WriteToStream();
 

@@ -183,6 +183,21 @@ namespace WebApiContrib.Formatting.Xlsx
             return (T)value;
         }
 
+        public static List<Type> GetUnderlineTypes(Type type)
+        {
+            return type.GetProperties(PublicInstanceBindingFlags).Select(s => s.PropertyType).ToList();
+        }
+
+        public static DateTime ConvertFromDateTimeOffset(DateTimeOffset dateTime)
+        {
+            if (dateTime.Offset.Equals(TimeSpan.Zero))
+                return dateTime.UtcDateTime;
+            else if (dateTime.Offset.Equals(TimeZoneInfo.Local.GetUtcOffset(dateTime.DateTime)))
+                return DateTime.SpecifyKind(dateTime.DateTime, DateTimeKind.Local);
+            else
+                return dateTime.DateTime;
+        }
+
         /// <summary>
         /// Determine whether a type is simple (<c>String</c>, <c>Decimal</c>, <c>DateTime</c> etc.)
         /// or complex (i.e. custom class with public properties and methods).
@@ -203,6 +218,18 @@ namespace WebApiContrib.Formatting.Xlsx
                     typeof(Guid)
                 }.Contains(type) ||
                 Convert.GetTypeCode(type) != TypeCode.Object;
+        }
+
+        public  static bool IsExcelSupportedType(object expression)
+        {
+            return expression is String
+                || expression is Int16
+                || expression is Int32
+                || expression is Int64
+                || expression is Decimal
+                || expression is Single
+                || expression is Double
+                || expression is DateTime;
         }
 
     }

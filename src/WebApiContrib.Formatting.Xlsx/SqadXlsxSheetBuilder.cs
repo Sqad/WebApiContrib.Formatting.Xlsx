@@ -10,12 +10,13 @@ namespace WebApiContrib.Formatting.Xlsx
     public class SqadXlsxSheetBuilder
     {
         private ExcelWorksheet _worksheet { get; set; }
+        public ExcelWorksheet Worksheet => _worksheet;
         private int _rowCount { get; set; }
 
-        public SqadXlsxSheetBuilder(string SheetName)
+        public SqadXlsxSheetBuilder(ExcelWorksheet sheet)
         {
             _rowCount = 0;
-            _worksheet = new ExcelWorksheet(null,null,null,null,SheetName,0,0,eWorkSheetHidden.Visible);
+            _worksheet = sheet;
         }
 
         /// <summary>

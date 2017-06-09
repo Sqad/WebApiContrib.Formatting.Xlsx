@@ -10,10 +10,10 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 {
     public class DefaultSheetResolver : ISheetResolver
     {
-        public ExcelSheetInfoCollection GetExcelSheetInfo(Type itemType, IEnumerable<object> data)
+        public ExcelSheetInfoCollection GetExcelSheetInfo(Type itemType, object data)
         {
             var sheets = FormatterUtils.GetMemberNames(itemType);
-            var properties = GetSerialisablePropertyInfo(itemType, data);
+            var properties = GetSerialisablePropertyInfo(itemType);
 
             var sheetCollection = new  ExcelSheetInfoCollection();
 
@@ -21,19 +21,24 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
             {
                 var prop = properties.FirstOrDefault(p => p.Name == sheet);
 
-                if (prop == null) continue;
+                ExcelSheetAttribute attr = FormatterUtils.GetAttribute<ExcelSheetAttribute>(prop);
+
+                if (prop==null || attr==null ) continue;
 
                 sheetCollection.Add(new ExcelSheetInfo()
                 {
+                    SheetType = prop.PropertyType,
                     SheetName = sheet,
-                    ExcelSheetAttribute = FormatterUtils.GetAttribute<ExcelSheetAttribute>(prop)
+                    ExcelSheetAttribute = attr,
+                    PropertyName = prop.Name,
+                    SheetObject = FormatterUtils.GetFieldOrPropertyValue(data, prop.Name)
                 });
             }
 
             return sheetCollection;
         }
 
-        public virtual IEnumerable<PropertyInfo> GetSerialisablePropertyInfo(Type itemType, IEnumerable<object> data)
+        public virtual IEnumerable<PropertyInfo> GetSerialisablePropertyInfo(Type itemType)
         {
             return (from p in itemType.GetProperties()
                     where p.CanRead & p.GetGetMethod().IsPublic & p.GetGetMethod().GetParameters().Length == 0

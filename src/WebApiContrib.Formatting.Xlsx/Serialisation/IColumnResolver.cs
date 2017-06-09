@@ -17,6 +17,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         /// </summary>
         /// <param name="itemType">Type of item being serialised.</param>
         /// <param name="data">The collection of values being serialised.</param>
-        ExcelColumnInfoCollection GetExcelColumnInfo(Type itemType, IEnumerable<object> data);
+        //ExcelColumnInfoCollection GetExcelColumnInfo(Type itemType, IEnumerable<object> data);
+        ExcelColumnInfoCollection GetExcelColumnInfo(Type itemType, object data);
     }
 }

@@ -71,5 +71,10 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         {
             return (IDictionary<string, object>)item;
         }
+
+        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, SqadXlsxSheetBuilder sheetBuilder)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

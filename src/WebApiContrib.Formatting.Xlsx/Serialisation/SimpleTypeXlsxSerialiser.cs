@@ -29,5 +29,10 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 document.AppendRow(new object[] { val });
             }
         }
+
+        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, SqadXlsxSheetBuilder sheetBuilder)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

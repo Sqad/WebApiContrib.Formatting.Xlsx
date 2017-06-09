@@ -40,7 +40,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         /// types.)</param>
         /// <remarks>Any names specified in the per-request dictionary that aren't serialisable will be
         /// discarded.</remarks>
-        public override IEnumerable<string> GetSerialisableMemberNames(Type itemType, IEnumerable<object> data)
+        public override IEnumerable<string> GetSerialisableMemberNames(Type itemType, object data)
         {
             var defaultMemberNames = base.GetSerialisableMemberNames(itemType, data);
             var httpContextItems = HttpContextFactory.Current.Items;

@@ -8,6 +8,6 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 {
     public interface ISheetResolver
     {
-        ExcelSheetInfoCollection GetExcelSheetInfo(Type itemType, IEnumerable<object> data);
+        ExcelSheetInfoCollection GetExcelSheetInfo(Type itemType, object data);
     }
 }

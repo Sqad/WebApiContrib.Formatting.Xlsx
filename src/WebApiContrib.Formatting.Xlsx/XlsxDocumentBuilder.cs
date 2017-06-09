@@ -73,5 +73,10 @@ namespace WebApiContrib.Formatting.Xlsx
                 || expression is double
                 || expression is DateTime;
         }
+
+        public ExcelWorksheet AppendSheet(string sheetName)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

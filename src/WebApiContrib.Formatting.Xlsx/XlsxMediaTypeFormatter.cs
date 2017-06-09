@@ -92,7 +92,8 @@ namespace WebApiContrib.Formatting.Xlsx
             HeaderStyle = headerStyle;
 
             // Initialise serialisers.
-            Serialisers = new List<IXlsxSerialiser> { new ExpandoSerialiser(),
+            Serialisers = new List<IXlsxSerialiser> { new SqadXlsxSerialiser(),
+                                                      new ExpandoSerialiser(),
                                                       new SimpleTypeXlsxSerialiser() };
 
             DefaultSerializer = new DefaultXlsxSerialiser();
@@ -141,7 +142,7 @@ namespace WebApiContrib.Formatting.Xlsx
 
             // Set content disposition to use this file name.
             headers.ContentDisposition = new ContentDispositionHeaderValue("inline")
-                                             { FileName = fileName };
+            { FileName = fileName };
 
             base.SetDefaultContentHeaders(type, headers, mediaType);
         }
@@ -160,7 +161,7 @@ namespace WebApiContrib.Formatting.Xlsx
 
             var valueType = value.GetType();
 
-            
+
 
             // Get the item type.
             var itemType = (util.IsSimpleType(valueType))
@@ -171,7 +172,7 @@ namespace WebApiContrib.Formatting.Xlsx
             if (itemType == null)
             {
                 itemType = valueType;
-                value = new object[] { value };
+                //value = new object[] { value };
             }
 
             // Used if no other matching serialiser can be found.
@@ -187,21 +188,21 @@ namespace WebApiContrib.Formatting.Xlsx
                 }
             }
 
-            serialiser.Serialise(itemType, value, document);
+            serialiser.Serialise(itemType, value, document, null);
 
             // Apply cell styles.
-            CellStyle?.Invoke(document.Worksheet.Cells.Style);
+            //CellStyle?.Invoke(document.Worksheet.Cells.Style);
 
             // Only format spreadsheet if it has content.
-            if (document.RowCount > 0)
-            {
-                if (serialiser.IgnoreFormatting)
-                {
-                    // Autofit cells if specified.
-                    if (AutoFit) document.AutoFit();
-                }
-                else FormatDocument(document);
-            }
+            //if (document.RowCount > 0)
+            //{
+            //    if (serialiser.IgnoreFormatting)
+            //    {
+            //        // Autofit cells if specified.
+            //        if (AutoFit) document.AutoFit();
+            //    }
+            //    else FormatDocument(document);
+            //}
 
             return document.WriteToStream();
         }

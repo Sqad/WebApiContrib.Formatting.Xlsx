@@ -20,7 +20,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         /// <param name="itemType">Type of item being serialised.</param>
         /// <param name="data">The collection of values being serialised. (Not used, provided for use by derived
         /// types.)</param>
-        public virtual ExcelColumnInfoCollection GetExcelColumnInfo(Type itemType, IEnumerable<object> data)
+        public virtual ExcelColumnInfoCollection GetExcelColumnInfo(Type itemType, object data)
         {
             var fields = GetSerialisableMemberNames(itemType, data);
             var properties = GetSerialisablePropertyInfo(itemType, data);
@@ -35,7 +35,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
                 if (prop == null) continue;
 
-                fieldInfo.Add(new ExcelColumnInfo(field, util.GetAttribute<ExcelColumnAttribute>(prop)));
+                ExcelColumnAttribute attribute = util.GetAttribute<ExcelColumnAttribute>(prop);
+                if (attribute != null)
+                    fieldInfo.Add(new ExcelColumnInfo(field, attribute));
             }
 
             PopulateFieldInfoFromMetadata(fieldInfo, itemType, data);
@@ -49,7 +51,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         /// <param name="itemType">Type of item being serialised.</param>
         /// <param name="data">The collection of values being serialised. (Not used, provided for use by derived
         /// types.)</param>
-        public virtual IEnumerable<string> GetSerialisableMemberNames(Type itemType, IEnumerable<object> data)
+        public virtual IEnumerable<string> GetSerialisableMemberNames(Type itemType, object data)
         {
             return util.GetMemberNames(itemType);
         }
@@ -60,7 +62,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         /// <param name="itemType">Type of item being serialised.</param>
         /// <param name="data">The collection of values being serialised. (Not used, provided for use by derived
         /// types.)</param>
-        public virtual IEnumerable<PropertyInfo> GetSerialisablePropertyInfo(Type itemType, IEnumerable<object> data)
+        public virtual IEnumerable<PropertyInfo> GetSerialisablePropertyInfo(Type itemType, object data)
         {
             return (from p in itemType.GetProperties()
                     where p.CanRead & p.GetGetMethod().IsPublic & p.GetGetMethod().GetParameters().Length == 0
@@ -76,7 +78,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         /// types.)</param>
         protected virtual void PopulateFieldInfoFromMetadata(ExcelColumnInfoCollection fieldInfo,
                                                              Type itemType,
-                                                             IEnumerable<object> data)
+                                                             object data)
         {
             // Populate missing attribute information from metadata.
             var metadata = ModelMetadataProviders.Current.GetMetadataForType(null, itemType);

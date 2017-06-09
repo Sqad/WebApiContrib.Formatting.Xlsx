@@ -1,4 +1,5 @@
-﻿using System;
+﻿using OfficeOpenXml;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +10,9 @@ namespace WebApiContrib.Formatting.Xlsx
     public interface IXlsxDocumentBuilder
     {
         Task WriteToStream();
+
         bool IsExcelSupportedType(object expression);
+
+        ExcelWorksheet AppendSheet(string sheetName);
     }
 }

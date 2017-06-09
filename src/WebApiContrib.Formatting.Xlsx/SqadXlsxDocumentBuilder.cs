@@ -33,7 +33,11 @@ namespace WebApiContrib.Formatting.Xlsx
         {
             return Task.Factory.StartNew(() => Package.SaveAs(_stream));
         }
-        
+
+        public ExcelWorksheet AppendSheet(string sheetName)
+        {
+            return Package.Workbook.Worksheets.Add(sheetName);
+        }
 
         public bool IsExcelSupportedType(object expression)
         {

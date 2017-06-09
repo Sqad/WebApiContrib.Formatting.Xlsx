@@ -81,11 +81,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         protected virtual object FormatCellValue(object cellValue, ExcelColumnInfo info)
         {
             // Boolean transformations.
-            if (info.ExcelAttribute != null && info.ExcelAttribute.TrueValue != null && cellValue.Equals("True"))
-                return info.ExcelAttribute.TrueValue;
+            if (info.ExcelColumnAttribute != null && info.ExcelColumnAttribute.TrueValue != null && cellValue.Equals("True"))
+                return info.ExcelColumnAttribute.TrueValue;
 
-            else if (info.ExcelAttribute != null && info.ExcelAttribute.FalseValue != null && cellValue.Equals("False"))
-                return info.ExcelAttribute.FalseValue;
+            else if (info.ExcelColumnAttribute != null && info.ExcelColumnAttribute.FalseValue != null && cellValue.Equals("False"))
+                return info.ExcelColumnAttribute.FalseValue;
 
             else if (!string.IsNullOrWhiteSpace(info.FormatString) & string.IsNullOrEmpty(info.ExcelNumberFormat))
                 return string.Format(info.FormatString, cellValue);
@@ -139,6 +139,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 return DateTime.SpecifyKind(dateTime.DateTime, DateTimeKind.Local);
             else
                 return dateTime.DateTime;
+        }
+
+        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document)
+        {
+            throw new NotImplementedException();
         }
     }
 }

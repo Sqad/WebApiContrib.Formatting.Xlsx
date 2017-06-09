@@ -9,7 +9,7 @@ using WebApiContrib.Formatting.Xlsx.Serialisation;
 
 namespace WebApiContrib.Formatting.Xlsx
 {
-    public class XlsxDocumentBuilder
+    public class XlsxDocumentBuilder : IXlsxDocumentBuilder
     {
         public ExcelPackage Package { get; set; }
         public ExcelWorksheet Worksheet { get; set; }
@@ -62,7 +62,7 @@ namespace WebApiContrib.Formatting.Xlsx
                 Worksheet.Cells[firstRow, column, RowCount, column].Style.Numberformat.Format = format;
         }
 
-        public static bool IsExcelSupportedType(object expression)
+        public bool IsExcelSupportedType(object expression)
         {
             return expression is string
                 || expression is short

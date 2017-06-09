@@ -6,11 +6,21 @@ using System.Threading.Tasks;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation
 {
-    public class SqadXlsxSerialiser : DefaultXlsxSerialiser
+    public class SqadXlsxSerialiser : IXlsxSerialiser
     {
-        public override void Serialise(Type itemType, object value, XlsxDocumentBuilder document)
+        private IColumnResolver _columnResolver { get; set; }
+        private ISheetResolver _sheetResolver { get; set; }
+
+        public bool IgnoreFormatting => throw new NotImplementedException();
+
+        public bool CanSerialiseType(Type valueType, Type itemType)
         {
-            base.Serialise(itemType, value, document);
+            return true;
+        }
+
+        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document)
+        {
+            var data = value as IEnumerable<object>;
         }
     }
 }

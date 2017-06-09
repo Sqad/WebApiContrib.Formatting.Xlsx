@@ -160,8 +160,7 @@ namespace WebApiContrib.Formatting.Xlsx
 
             var valueType = value.GetType();
 
-            // Apply cell styles.
-            if (CellStyle != null) CellStyle(document.Worksheet.Cells.Style);
+            
 
             // Get the item type.
             var itemType = (util.IsSimpleType(valueType))
@@ -189,6 +188,9 @@ namespace WebApiContrib.Formatting.Xlsx
             }
 
             serialiser.Serialise(itemType, value, document);
+
+            // Apply cell styles.
+            CellStyle?.Invoke(document.Worksheet.Cells.Style);
 
             // Only format spreadsheet if it has content.
             if (document.RowCount > 0)

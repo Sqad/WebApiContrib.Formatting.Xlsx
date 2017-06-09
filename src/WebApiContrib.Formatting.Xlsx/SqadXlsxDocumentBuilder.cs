@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace WebApiContrib.Formatting.Xlsx
 {
-    public class SqadXlsxDocumentBuilder
+    public class SqadXlsxDocumentBuilder : IXlsxDocumentBuilder
     {
         private ExcelPackage Package { get; set; }
         
@@ -35,7 +35,7 @@ namespace WebApiContrib.Formatting.Xlsx
         }
         
 
-        public static bool IsExcelSupportedType(object expression)
+        public bool IsExcelSupportedType(object expression)
         {
             return expression is string
                 || expression is short

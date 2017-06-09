@@ -90,7 +90,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                     if (!fieldInfo.Contains(propertyName)) continue;
 
                     var field = fieldInfo[propertyName];
-                    var attribute = field.ExcelAttribute;
+                    var attribute = field.ExcelColumnAttribute;
 
                     if (!field.IsExcelHeaderDefined)
                         field.Header = modelProp.DisplayName ?? propertyName;

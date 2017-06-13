@@ -41,5 +41,11 @@ namespace WebApiContrib.Formatting.Xlsx
             if (firstRow <= _rowCount)
                 _worksheet.Cells[firstRow, column, _rowCount, column].Style.Numberformat.Format = format;
         }
+
+        public void AutoFit()
+        {
+            if (_worksheet.Dimension != null)
+                _worksheet.Cells[_worksheet.Dimension.Address].AutoFitColumns();
+        }
     }
 }

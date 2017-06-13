@@ -23,11 +23,7 @@ namespace WebApiContrib.Formatting.Xlsx
 
         }
 
-        public void AutoFit()
-        {
-            throw new NotImplementedException();
-            //Worksheet.Cells[Worksheet.Dimension.Address].AutoFitColumns();
-        }
+        
 
         public Task WriteToStream()
         {

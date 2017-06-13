@@ -25,14 +25,22 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
                 if (prop==null || attr==null ) continue;
 
-                sheetCollection.Add(new ExcelSheetInfo()
+                var sheetInfo = new ExcelSheetInfo()
                 {
                     SheetType = prop.PropertyType,
                     SheetName = sheet,
                     ExcelSheetAttribute = attr,
                     PropertyName = prop.Name,
                     SheetObject = FormatterUtils.GetFieldOrPropertyValue(data, prop.Name)
-                });
+                };
+
+                if (prop.PropertyType.Name.StartsWith("List"))
+                {
+                    var dataAsAList = sheetInfo.SheetObject as IEnumerable<object>;
+                    sheetInfo.SheetType = dataAsAList.Count()>0 ? dataAsAList.First().GetType() : itemType;
+                }
+
+                sheetCollection.Add(sheetInfo);
             }
 
             return sheetCollection;

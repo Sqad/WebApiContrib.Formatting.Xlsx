@@ -26,10 +26,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
             return true;
         }
 
+
         public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, SqadXlsxSheetBuilder sheetBuilder)
         {
-            //var data = value as IEnumerable<object>;
-
             var columnInfo = _columnResolver.GetExcelColumnInfo(itemType, value);
             string sheetName = string.Empty;
 
@@ -40,49 +39,69 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 sheetBuilder = new SqadXlsxSheetBuilder(document.AppendSheet(sheetName));
             }
 
-            //adding column header
-            sheetBuilder.AppendRow(columnInfo.Select(s => s.Header));
+            if (columnInfo.Count() > 0)
+                sheetBuilder.AppendRow(columnInfo.Select(s => s.Header));
 
             //adding rows data
             if (value != null)
             {
                 var columns = columnInfo.Keys.ToList();
-                //foreach (var dataObj in value as IEnumerable<object>)
-                //{
-                    var row = new List<object>();
 
-                    for (int i = 0; i <= columns.Count - 1; i++)
+                if (value is IEnumerable<object>)
+                {
+                    foreach (var dataObj in value as IEnumerable<object>)
                     {
-                        var cellValue = GetFieldOrPropertyValue(value, columns[i]);
-                        var info = columnInfo[i];
-
-                        //row.Add(FormatCellValue(cellValue, info));
-                        row.Add(FormatCellValue(cellValue, info));
+                        PopulateRows(columns, dataObj, sheetBuilder, columnInfo);
+                        //this.Serialise(itemType, dataObj, document, sheetBuilder);
+                        var deepSheetsInfo = _sheetResolver.GetExcelSheetInfo(itemType, dataObj);
+                        PopulateInnerObjectSheets(deepSheetsInfo, document, itemType, sheetBuilder);
                     }
-
-                    sheetBuilder.AppendRow(row.ToList());
-                //}
+                }
+                else
+                {
+                    PopulateRows(columns, value, sheetBuilder, columnInfo);
+                    var sheetsInfo = _sheetResolver.GetExcelSheetInfo(itemType, value);
+                    PopulateInnerObjectSheets(sheetsInfo, document, itemType, sheetBuilder);
+                }
             }
 
+            sheetBuilder.AutoFit();
+        }
 
+        private void PopulateRows(List<string> columns, object value, SqadXlsxSheetBuilder sheetBuilder, ExcelColumnInfoCollection columnInfo)
+        {
 
+            var row = new List<object>();
 
+            for (int i = 0; i <= columns.Count - 1; i++)
+            {
+                var cellValue = GetFieldOrPropertyValue(value, columns[i]);
+                var info = columnInfo[i];
 
-            var sheetsInfo = _sheetResolver.GetExcelSheetInfo(itemType, value);
+                //row.Add(FormatCellValue(cellValue, info));
+                row.Add(FormatCellValue(cellValue, info));
+            }
 
+            sheetBuilder.AppendRow(row.ToList());
+        }
+
+        private void PopulateInnerObjectSheets(ExcelSheetInfoCollection sheetsInfo, IXlsxDocumentBuilder document, Type itemType, SqadXlsxSheetBuilder sheetBuilder)
+        {
             foreach (var sheet in sheetsInfo)
             {
                 if (!(sheet.ExcelSheetAttribute is Attributes.ExcelSheetAttribute))
                     continue;
 
-                sheetName = sheet.ExcelSheetAttribute != null ? (sheet.ExcelSheetAttribute as Attributes.ExcelSheetAttribute).SheetName : itemType.Name;
+                string sheetName = sheet.ExcelSheetAttribute != null ? (sheet.ExcelSheetAttribute as Attributes.ExcelSheetAttribute).SheetName : itemType.Name;
+                if (sheetName == null)
+                    sheetName = sheet.SheetName;
+
                 sheetBuilder = new SqadXlsxSheetBuilder(document.AppendSheet(sheetName));
 
                 this.Serialise(sheet.SheetType, sheet.SheetObject, document, sheetBuilder);
 
                 //sheetBuilder = null;
             }
-
         }
 
         protected virtual object GetFieldOrPropertyValue(object rowObject, string name)

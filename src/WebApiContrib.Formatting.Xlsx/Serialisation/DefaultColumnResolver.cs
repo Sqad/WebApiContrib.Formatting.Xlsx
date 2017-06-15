@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Web.ModelBinding;
 using WebApiContrib.Formatting.Xlsx.Attributes;
-using util = WebApiContrib.Formatting.Xlsx.FormatterUtils;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation
 {
@@ -20,7 +19,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         /// <param name="itemType">Type of item being serialised.</param>
         /// <param name="data">The collection of values being serialised. (Not used, provided for use by derived
         /// types.)</param>
-        public virtual ExcelColumnInfoCollection GetExcelColumnInfo(Type itemType, object data)
+        public virtual ExcelColumnInfoCollection GetExcelColumnInfo(Type itemType, object data, string namePrefix = "", bool isComplexColumn = false)
         {
             var fields = GetSerialisableMemberNames(itemType, data);
             var properties = GetSerialisablePropertyInfo(itemType, data);
@@ -35,9 +34,23 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
                 if (prop == null) continue;
 
-                ExcelColumnAttribute attribute = util.GetAttribute<ExcelColumnAttribute>(prop);
+
+                ExcelColumnAttribute attribute = FormatterUtils.GetAttribute<ExcelColumnAttribute>(prop);
                 if (attribute != null)
-                    fieldInfo.Add(new ExcelColumnInfo(field, attribute));
+                {
+                    if (!FormatterUtils.IsSimpleType(prop.PropertyType))
+                    {
+                        //getting a complex class columns populates as ComplexName:InnerProperty
+                        ExcelColumnInfoCollection columnCollection = GetExcelColumnInfo(prop.PropertyType, null, prop.Name, true);
+                        foreach (var subcolumn in columnCollection)
+                            fieldInfo.Add(subcolumn);
+                    }
+                    else
+                    {
+                        string propertyName = isComplexColumn ? $"{namePrefix}:{field}" : field; 
+                        fieldInfo.Add(new ExcelColumnInfo(propertyName, attribute, null));
+                    }
+                }
             }
 
             PopulateFieldInfoFromMetadata(fieldInfo, itemType, data);
@@ -53,7 +66,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         /// types.)</param>
         public virtual IEnumerable<string> GetSerialisableMemberNames(Type itemType, object data)
         {
-            return util.GetMemberNames(itemType);
+            return FormatterUtils.GetMemberNames(itemType);
         }
 
         /// <summary>

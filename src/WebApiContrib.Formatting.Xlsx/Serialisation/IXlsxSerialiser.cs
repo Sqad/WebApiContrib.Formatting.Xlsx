@@ -27,7 +27,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         /// <param name="itemType">Type of item being serialised.</param>
         /// <param name="value">Value passed for serialisation, cast to an <c>IEnumerable</c> if necessary.</param>
         /// <param name="document">Document builder utility class.</param>
-        void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, SqadXlsxSheetBuilder sheetBuilder);
+        void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName);// SqadXlsxSheetBuilder sheetBuilder);
 
 
     }

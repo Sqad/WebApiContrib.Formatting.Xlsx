@@ -182,12 +182,7 @@ namespace WebApiContrib.Formatting.Xlsx
 
             return (T)value;
         }
-
-        public static List<Type> GetUnderlineTypes(Type type)
-        {
-            return type.GetProperties(PublicInstanceBindingFlags).Select(s => s.PropertyType).ToList();
-        }
-
+        
         public static DateTime ConvertFromDateTimeOffset(DateTimeOffset dateTime)
         {
             if (dateTime.Offset.Equals(TimeSpan.Zero))
@@ -210,12 +205,20 @@ namespace WebApiContrib.Formatting.Xlsx
                 type.IsValueType ||
                 type.IsPrimitive ||
                 new Type[] {
+                    typeof(int),
                     typeof(string),
                     typeof(decimal),
                     typeof(DateTime),
                     typeof(DateTimeOffset),
                     typeof(TimeSpan),
-                    typeof(Guid)
+                    typeof(Guid),
+                    //take nullable types into consideration
+                    typeof(int?),
+                    typeof(decimal?),
+                    typeof(DateTime?),
+                    typeof(DateTimeOffset?),
+                    typeof(TimeSpan?),
+                    typeof(Guid?),
                 }.Contains(type) ||
                 Convert.GetTypeCode(type) != TypeCode.Object;
         }

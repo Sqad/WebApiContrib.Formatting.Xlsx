@@ -27,37 +27,39 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         }
 
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, SqadXlsxSheetBuilder sheetBuilder)
+        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName = null)//, SqadXlsxSheetBuilder sheetBuilder)
         {
             var columnInfo = _columnResolver.GetExcelColumnInfo(itemType, value);
-            string sheetName = string.Empty;
 
-            if (sheetBuilder == null)
+            SqadXlsxSheetBuilder sheetBuilder = null;
+
+            if (sheetName == null)
             {
                 var sheetAttribute = itemType.GetCustomAttributes(true).SingleOrDefault(s => s is Attributes.ExcelSheetAttribute);
                 sheetName = sheetAttribute != null ? (sheetAttribute as Attributes.ExcelSheetAttribute).SheetName : itemType.Name;
-                sheetBuilder = new SqadXlsxSheetBuilder(document.AppendSheet(sheetName));
             }
 
             if (columnInfo.Count() > 0)
+            {
+                sheetBuilder = new SqadXlsxSheetBuilder(document.AppendSheet(sheetName));
                 sheetBuilder.AppendRow(columnInfo.Select(s => s.Header));
+            }
 
             //adding rows data
             if (value != null)
             {
                 var columns = columnInfo.Keys.ToList();
 
-                if (value is IEnumerable<object>)
+                if (value is IEnumerable<object> && (value as IEnumerable<object>).Count() > 0)
                 {
                     foreach (var dataObj in value as IEnumerable<object>)
                     {
                         PopulateRows(columns, dataObj, sheetBuilder, columnInfo);
-                        //this.Serialise(itemType, dataObj, document, sheetBuilder);
                         var deepSheetsInfo = _sheetResolver.GetExcelSheetInfo(itemType, dataObj);
                         PopulateInnerObjectSheets(deepSheetsInfo, document, itemType, sheetBuilder);
                     }
                 }
-                else
+                else if (!(value is IEnumerable<object>))
                 {
                     PopulateRows(columns, value, sheetBuilder, columnInfo);
                     var sheetsInfo = _sheetResolver.GetExcelSheetInfo(itemType, value);
@@ -65,21 +67,38 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 }
             }
 
-            sheetBuilder.AutoFit();
+            if (sheetBuilder != null)
+                sheetBuilder.AutoFit();
         }
 
         private void PopulateRows(List<string> columns, object value, SqadXlsxSheetBuilder sheetBuilder, ExcelColumnInfoCollection columnInfo)
         {
+            if (sheetBuilder == null)
+                return;
 
             var row = new List<object>();
 
             for (int i = 0; i <= columns.Count - 1; i++)
             {
-                var cellValue = GetFieldOrPropertyValue(value, columns[i]);
-                var info = columnInfo[i];
+                string columnName = columns[i];
+                object lookUpObject = value;
+                if (columnName.Contains(":"))
+                {
+                    string[] columnPath = columnName.Split(':');
+                    columnName = columnPath.Last();
 
-                //row.Add(FormatCellValue(cellValue, info));
+
+                    for (int l = 0; l < columnPath.Count() - 1; l++)
+                    {
+                        lookUpObject = FormatterUtils.GetFieldOrPropertyValue(lookUpObject, columnPath[l]);
+                    }
+
+                }
+
+                var cellValue = GetFieldOrPropertyValue(lookUpObject, columnName);
+                var info = columnInfo[i];
                 row.Add(FormatCellValue(cellValue, info));
+
             }
 
             sheetBuilder.AppendRow(row.ToList());
@@ -96,9 +115,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 if (sheetName == null)
                     sheetName = sheet.SheetName;
 
-                sheetBuilder = new SqadXlsxSheetBuilder(document.AppendSheet(sheetName));
+                //sheetBuilder = new SqadXlsxSheetBuilder(document.AppendSheet(sheetName));
 
-                this.Serialise(sheet.SheetType, sheet.SheetObject, document, sheetBuilder);
+                this.Serialise(sheet.SheetType, sheet.SheetObject, document, sheetName);//, sheetBuilder);
 
                 //sheetBuilder = null;
             }

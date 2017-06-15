@@ -35,10 +35,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 };
 
                 if (prop.PropertyType.Name.StartsWith("List"))
-                {
-                    var dataAsAList = sheetInfo.SheetObject as IEnumerable<object>;
-                    sheetInfo.SheetType = dataAsAList.Count()>0 ? dataAsAList.First().GetType() : itemType;
-                }
+                    sheetInfo.SheetType = FormatterUtils.GetEnumerableItemType(sheetInfo.SheetObject.GetType());
 
                 sheetCollection.Add(sheetInfo);
             }

@@ -41,7 +41,10 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                     if (!FormatterUtils.IsSimpleType(prop.PropertyType))
                     {
                         //getting a complex class columns populates as ComplexName:InnerProperty
-                        ExcelColumnInfoCollection columnCollection = GetExcelColumnInfo(prop.PropertyType, null, prop.Name, true);
+
+                        string prefix = string.IsNullOrEmpty(namePrefix)==false ? $"{namePrefix}:{prop.Name}" : prop.Name;
+
+                        ExcelColumnInfoCollection columnCollection = GetExcelColumnInfo(prop.PropertyType, null, prefix, true);
                         foreach (var subcolumn in columnCollection)
                             fieldInfo.Add(subcolumn);
                     }

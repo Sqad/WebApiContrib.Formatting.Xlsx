@@ -29,7 +29,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
         public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName = null)//, SqadXlsxSheetBuilder sheetBuilder)
         {
-            var columnInfo = _columnResolver.GetExcelColumnInfo(itemType, value);
+            var columnInfo = _columnResolver.GetExcelColumnInfo(itemType, value, sheetName);
 
             SqadXlsxSheetBuilder sheetBuilder = null;
 
@@ -88,7 +88,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                     columnName = columnPath.Last();
 
 
-                    for (int l = 0; l < columnPath.Count() - 1; l++)
+                    for (int l = 1; l < columnPath.Count() - 1; l++)
                     {
                         lookUpObject = FormatterUtils.GetFieldOrPropertyValue(lookUpObject, columnPath[l]);
                     }
@@ -149,6 +149,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
             else if (!string.IsNullOrWhiteSpace(info.FormatString) & string.IsNullOrEmpty(info.ExcelNumberFormat))
                 return string.Format(info.FormatString, cellValue);
+
+            else if (cellValue.GetType() == typeof(DateTime))
+                return string.Format("{0:MM/dd/yyyy}", cellValue);
 
             else
                 return cellValue;

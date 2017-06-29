@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
+using WebApiContrib.Formatting.Xlsx.Interfaces;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation
 {

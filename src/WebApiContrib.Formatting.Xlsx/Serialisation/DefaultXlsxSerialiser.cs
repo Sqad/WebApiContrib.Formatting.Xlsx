@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using WebApiContrib.Formatting.Xlsx.Interfaces;
 using util = WebApiContrib.Formatting.Xlsx.FormatterUtils;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation
@@ -37,7 +38,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
             var data = value as IEnumerable<object>;
             var columnInfo = Resolver.GetExcelColumnInfo(itemType, data);
 
-            if (columnInfo.Count == 0) return;
+            if (columnInfo.Count() == 0) return;
 
             var columns = columnInfo.Keys.ToList();
 
@@ -51,7 +52,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 {
                     var row = new List<object>();
 
-                    for (int i = 0; i <= columns.Count - 1; i++)
+                    for (int i = 0; i <= (columns.Count() - 1); i++)
                     {
                         var cellValue = GetFieldOrPropertyValue(dataObject, columns[i]);
                         var info = columnInfo[i];
@@ -64,7 +65,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
             }
 
             // Enforce any attributes on columns.
-            for (int i = 1; i <= columns.Count; i++)
+            for (int i = 1; i <= columns.Count(); i++)
             {
                 if (!string.IsNullOrEmpty(columnInfo[i - 1].ExcelNumberFormat))
                 {

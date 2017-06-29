@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using WebApiContrib.Formatting.Xlsx.Interfaces;
 using WebApiContrib.Formatting.Xlsx.Serialisation;
 
 namespace WebApiContrib.Formatting.Xlsx
@@ -64,17 +65,10 @@ namespace WebApiContrib.Formatting.Xlsx
 
         public bool IsExcelSupportedType(object expression)
         {
-            return expression is string
-                || expression is short
-                || expression is int
-                || expression is long
-                || expression is decimal
-                || expression is float
-                || expression is double
-                || expression is DateTime;
+            return FormatterUtils.IsExcelSupportedType(expression);
         }
 
-        public ExcelWorksheet AppendSheet(string sheetName)
+        public void AppendSheet(SqadXlsxSheetBuilder sheet)
         {
             throw new NotImplementedException();
         }

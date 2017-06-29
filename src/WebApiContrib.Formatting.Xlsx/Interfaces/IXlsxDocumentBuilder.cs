@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebApiContrib.Formatting.Xlsx
+namespace WebApiContrib.Formatting.Xlsx.Interfaces
 {
     public interface IXlsxDocumentBuilder
     {
@@ -13,6 +13,6 @@ namespace WebApiContrib.Formatting.Xlsx
 
         bool IsExcelSupportedType(object expression);
 
-        ExcelWorksheet AppendSheet(string sheetName);
+        void AppendSheet(SqadXlsxSheetBuilder sheet);
     }
 }

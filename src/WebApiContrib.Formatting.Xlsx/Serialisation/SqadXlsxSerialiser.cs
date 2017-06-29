@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WebApiContrib.Formatting.Xlsx.Interfaces;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation
 {
@@ -10,15 +12,19 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
     {
         private IColumnResolver _columnResolver { get; set; }
         private ISheetResolver _sheetResolver { get; set; }
-
+        private Func<string, DataTable> _staticValuesResolver { get; set; }
         public bool IgnoreFormatting => false;
 
-        public SqadXlsxSerialiser() : this(new DefaultSheetResolver(), new DefaultColumnResolver()) { }
+        public SqadXlsxSerialiser(Func<string, DataTable> staticValuesResolver) : this(new DefaultSheetResolver(), new DefaultColumnResolver(), staticValuesResolver)
+        {
 
-        public SqadXlsxSerialiser(ISheetResolver sheetResolver, IColumnResolver columnResolver)
+        }
+
+        public SqadXlsxSerialiser(ISheetResolver sheetResolver, IColumnResolver columnResolver, Func<string, DataTable> StaticValuesResolver)
         {
             _sheetResolver = sheetResolver;
             _columnResolver = columnResolver;
+            this._staticValuesResolver = StaticValuesResolver;
         }
 
         public bool CanSerialiseType(Type valueType, Type itemType)
@@ -41,7 +47,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
             if (columnInfo.Count() > 0)
             {
-                sheetBuilder = new SqadXlsxSheetBuilder(document.AppendSheet(sheetName));
+                sheetBuilder = new SqadXlsxSheetBuilder(sheetName);
                 sheetBuilder.AppendRow(columnInfo.Select(s => s.Header));
             }
 
@@ -56,23 +62,26 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                     {
                         PopulateRows(columns, dataObj, sheetBuilder, columnInfo);
                         var deepSheetsInfo = _sheetResolver.GetExcelSheetInfo(itemType, dataObj);
-                        PopulateInnerObjectSheets(deepSheetsInfo, document, itemType, sheetBuilder);
+                        PopulateInnerObjectSheets(deepSheetsInfo, document, itemType);
                     }
                 }
                 else if (!(value is IEnumerable<object>))
                 {
                     PopulateRows(columns, value, sheetBuilder, columnInfo);
                     var sheetsInfo = _sheetResolver.GetExcelSheetInfo(itemType, value);
-                    PopulateInnerObjectSheets(sheetsInfo, document, itemType, sheetBuilder);
+                    PopulateInnerObjectSheets(sheetsInfo, document, itemType);
                 }
             }
 
             if (sheetBuilder != null)
                 sheetBuilder.AutoFit();
+
+            document.AppendSheet(sheetBuilder);
         }
 
         private void PopulateRows(List<string> columns, object value, SqadXlsxSheetBuilder sheetBuilder, ExcelColumnInfoCollection columnInfo)
         {
+
             if (sheetBuilder == null)
                 return;
 
@@ -87,24 +96,57 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                     string[] columnPath = columnName.Split(':');
                     columnName = columnPath.Last();
 
-
                     for (int l = 1; l < columnPath.Count() - 1; l++)
                     {
                         lookUpObject = FormatterUtils.GetFieldOrPropertyValue(lookUpObject, columnPath[l]);
                     }
-
                 }
 
                 var cellValue = GetFieldOrPropertyValue(lookUpObject, columnName);
-                var info = columnInfo[i];
+
+                ExcelColumnInfo info = null;
+                if (columnInfo != null) {
+                    info = columnInfo[i];
+
+                    if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false && _staticValuesResolver != null)
+                    {
+                        DataTable columntResolveTable = _staticValuesResolver(info.ExcelColumnAttribute.ResolveFromTable);
+                        columntResolveTable.TableName = info.ExcelColumnAttribute.ResolveFromTable;
+                        if (string.IsNullOrEmpty(info.ExcelColumnAttribute.OverrideResolveTableName) == false)
+                            columntResolveTable.TableName = info.ExcelColumnAttribute.OverrideResolveTableName;
+
+                        this.PopulateReferenceSheet(columntResolveTable);
+
+                        columntResolveTable = null;
+                    }
+                }
                 row.Add(FormatCellValue(cellValue, info));
-
             }
-
             sheetBuilder.AppendRow(row.ToList());
         }
 
-        private void PopulateInnerObjectSheets(ExcelSheetInfoCollection sheetsInfo, IXlsxDocumentBuilder document, Type itemType, SqadXlsxSheetBuilder sheetBuilder)
+        private void PopulateReferenceSheet(DataTable ReferenceSheet)
+        {
+            List<string> sheetResolveColumns = new List<string>();
+
+            foreach (DataColumn c in ReferenceSheet.Columns)
+                sheetResolveColumns.Add(c.Caption);
+
+            SqadXlsxSheetBuilder sb = new SqadXlsxSheetBuilder(ReferenceSheet.TableName,true);
+            sb.AppendRow(sheetResolveColumns);
+
+            foreach (DataRow r in ReferenceSheet.Rows)
+            {
+                Dictionary<string, string> resolveRow = new Dictionary<string, string>();
+
+                foreach (var col in sheetResolveColumns)
+                    resolveRow.Add(col, r[col].ToString());
+
+                this.PopulateRows(sheetResolveColumns, resolveRow, sb, null);
+            }
+        }
+
+        private void PopulateInnerObjectSheets(ExcelSheetInfoCollection sheetsInfo, IXlsxDocumentBuilder document, Type itemType)
         {
             foreach (var sheet in sheetsInfo)
             {
@@ -130,31 +172,39 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
             if (rowValue is DateTimeOffset)
                 return FormatterUtils.ConvertFromDateTimeOffset((DateTimeOffset)rowValue);
 
+            else if (rowObject is Dictionary<string, string>)
+                return (rowObject as Dictionary<string,string>)[name];
+
             else if (FormatterUtils.IsExcelSupportedType(rowValue))
                 return rowValue;
+
+            else if ((rowValue is IEnumerable<object>))
+                return string.Join(",", rowValue as IEnumerable<object>);
 
             return rowValue == null || DBNull.Value.Equals(rowValue)
                 ? string.Empty
                 : rowValue.ToString();
         }
 
-        protected virtual object FormatCellValue(object cellValue, ExcelColumnInfo info)
+        protected virtual object FormatCellValue(object cellValue, ExcelColumnInfo info=null)
         {
-            // Boolean transformations.
-            if (info.ExcelColumnAttribute != null && info.ExcelColumnAttribute.TrueValue != null && cellValue.Equals("True"))
-                return info.ExcelColumnAttribute.TrueValue;
+            if (info != null)
+            {
+                // Boolean transformations.
+                if (info.ExcelColumnAttribute != null && info.ExcelColumnAttribute.TrueValue != null && cellValue.Equals("True"))
+                    return info.ExcelColumnAttribute.TrueValue;
 
-            else if (info.ExcelColumnAttribute != null && info.ExcelColumnAttribute.FalseValue != null && cellValue.Equals("False"))
-                return info.ExcelColumnAttribute.FalseValue;
+                else if (info.ExcelColumnAttribute != null && info.ExcelColumnAttribute.FalseValue != null && cellValue.Equals("False"))
+                    return info.ExcelColumnAttribute.FalseValue;
 
-            else if (!string.IsNullOrWhiteSpace(info.FormatString) & string.IsNullOrEmpty(info.ExcelNumberFormat))
-                return string.Format(info.FormatString, cellValue);
+                else if (!string.IsNullOrWhiteSpace(info.FormatString) & string.IsNullOrEmpty(info.ExcelNumberFormat))
+                    return string.Format(info.FormatString, cellValue);
 
-            else if (cellValue.GetType() == typeof(DateTime))
-                return string.Format("{0:MM/dd/yyyy}", cellValue);
+                else if (cellValue.GetType() == typeof(DateTime))
+                    return string.Format("{0:MM/dd/yyyy}", cellValue);
+            }
 
-            else
-                return cellValue;
+            return cellValue;
         }
     }
 }

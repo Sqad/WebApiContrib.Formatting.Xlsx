@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace WebApiContrib.Formatting.Xlsx.Serialisation
+namespace WebApiContrib.Formatting.Xlsx.Interfaces
 {
     /// <summary>
     /// Exposes access to serialisation logic for complete customisation of serialised output.
@@ -10,7 +10,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         /// <summary>
         /// If true, no formatting beyond auto-fitting rows should be applied after serialisation.
         /// </summary>
-        bool IgnoreFormatting { get; }
+       // bool IgnoreFormatting { get; }
 
         /// <summary>
         /// Indicates whether the provided types can be serialised by this serialiser implementation.

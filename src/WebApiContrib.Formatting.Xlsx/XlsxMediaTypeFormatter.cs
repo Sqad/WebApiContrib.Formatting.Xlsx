@@ -5,9 +5,10 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Security.Permissions;
 using System.Threading.Tasks;
-using util = WebApiContrib.Formatting.Xlsx.FormatterUtils;
-using WebApiContrib.Formatting.Xlsx.Attributes;
+using System.Data;
+using WebApiContrib.Formatting.Xlsx.Interfaces;
 using WebApiContrib.Formatting.Xlsx.Serialisation;
+using WebApiContrib.Formatting.Xlsx.Attributes;
 
 namespace WebApiContrib.Formatting.Xlsx
 {
@@ -78,7 +79,8 @@ namespace WebApiContrib.Formatting.Xlsx
                                       bool freezeHeader = false,
                                       double? headerHeight = null,
                                       Action<ExcelStyle> cellStyle = null,
-                                      Action<ExcelStyle> headerStyle = null)
+                                      Action<ExcelStyle> headerStyle = null,
+                                      Func<string, DataTable> staticValuesResolver = null)
         {
             SupportedMediaTypes.Clear();
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
@@ -92,11 +94,11 @@ namespace WebApiContrib.Formatting.Xlsx
             HeaderStyle = headerStyle;
 
             // Initialise serialisers.
-            Serialisers = new List<IXlsxSerialiser> { new SqadXlsxSerialiser(),
-                                                      new ExpandoSerialiser(),
-                                                      new SimpleTypeXlsxSerialiser() };
+            Serialisers = new List<IXlsxSerialiser> { new SqadXlsxSerialiser(staticValuesResolver),
+                                                     // new ExpandoSerialiser()
+                                                    };
 
-            DefaultSerializer = new DefaultXlsxSerialiser();
+            //DefaultSerializer = new SqadXlsxSerialiser(staticValuesResolver); //new DefaultXlsxSerialiser();
         }
 
         #endregion
@@ -111,8 +113,8 @@ namespace WebApiContrib.Formatting.Xlsx
             string fileName = "data";
 
             // Look for ExcelDocumentAttribute on class.
-            var itemType = util.GetEnumerableItemType(type);
-            var excelDocumentAttribute = util.GetAttribute<ExcelDocumentAttribute>(itemType ?? type);
+            var itemType = FormatterUtils.GetEnumerableItemType(type);
+            var excelDocumentAttribute = FormatterUtils.GetAttribute<ExcelDocumentAttribute>(itemType ?? type);
 
             if (excelDocumentAttribute != null && !string.IsNullOrEmpty(excelDocumentAttribute.FileName))
             {
@@ -164,9 +166,9 @@ namespace WebApiContrib.Formatting.Xlsx
 
 
             // Get the item type.
-            var itemType = (util.IsSimpleType(valueType))
+            var itemType = (FormatterUtils.IsSimpleType(valueType))
                 ? null
-                : util.GetEnumerableItemType(valueType);
+                : FormatterUtils.GetEnumerableItemType(valueType);
 
             // If a single object was passed, treat it like a list with one value.
             if (itemType == null)
@@ -176,7 +178,7 @@ namespace WebApiContrib.Formatting.Xlsx
             }
 
             // Used if no other matching serialiser can be found.
-            IXlsxSerialiser serialiser = DefaultSerializer;
+            IXlsxSerialiser serialiser = null;// new SqadXlsxSerialiser(_staticValuesResolver); //DefaultSerializer;
 
             // Determine if a more specific serialiser might apply.
             foreach (var s in Serialisers)

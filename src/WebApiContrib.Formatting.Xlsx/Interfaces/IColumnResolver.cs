@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using WebApiContrib.Formatting.Xlsx.Serialisation;
 
-namespace WebApiContrib.Formatting.Xlsx.Serialisation
+namespace WebApiContrib.Formatting.Xlsx.Interfaces
 {
     /// <summary>
     /// Allows easy customisation of what columns are generated from a type and how they should be formatted.

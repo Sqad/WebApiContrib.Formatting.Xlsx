@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Web.ModelBinding;
 using WebApiContrib.Formatting.Xlsx.Attributes;
+using WebApiContrib.Formatting.Xlsx.Interfaces;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation
 {
@@ -38,6 +39,13 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 ExcelColumnAttribute attribute = FormatterUtils.GetAttribute<ExcelColumnAttribute>(prop);
                 if (attribute != null)
                 {
+                    if (prop.PropertyType.Name.StartsWith("List"))
+                    {
+                        Type typeOfList = FormatterUtils.GetEnumerableItemType(prop.PropertyType);
+
+                        if (FormatterUtils.IsSimpleType(typeOfList))
+                            fieldInfo.Add(new ExcelColumnInfo(prop.Name, attribute,null));
+                    }
                     if (!FormatterUtils.IsSimpleType(prop.PropertyType))
                     {
                         //getting a complex class columns populates as ComplexName:InnerProperty

@@ -9,14 +9,19 @@ namespace WebApiContrib.Formatting.Xlsx
 {
     public class SqadXlsxSheetBuilder
     {
-        private ExcelWorksheet _worksheet { get; set; }
-        public ExcelWorksheet Worksheet => _worksheet;
-        private int _rowCount { get; set; }
+        private string _sheetName { get; set; }
+        public string SheetName => _sheetName;
 
-        public SqadXlsxSheetBuilder(ExcelWorksheet sheet)
+        private  bool _isReferenceSheet { get; set; }
+        public bool IsReferenceSheet => _isReferenceSheet;
+
+        private List<Dictionary<int, object>> _valueByColumnNumber { get; set; }
+
+        public SqadXlsxSheetBuilder(string SheetName, bool IsReferenceSheet=false)
         {
-            _rowCount = 0;
-            _worksheet = sheet;
+            _sheetName = SheetName;
+            _isReferenceSheet = IsReferenceSheet;
+            _valueByColumnNumber = new List<Dictionary<int, object>>();
         }
 
         /// <summary>
@@ -25,27 +30,30 @@ namespace WebApiContrib.Formatting.Xlsx
         /// <param name="row">The row to append to this instance.</param>
         public void AppendRow(IEnumerable<object> row)
         {
-            _rowCount++;
+            Dictionary<int, object> newRow = new Dictionary<int, object>();
 
-            int i = 0;
-            foreach (var col in row)
+            foreach (var colValue in row)
             {
-                _worksheet.Cells[_rowCount, ++i].Value = col;
+                //new ExcelWorksheet().Cells[]
+                //_worksheet.Cells[_rowCount, ++i].Value = col;
+                newRow.Add(newRow.Count + 1, colValue);
             }
+
+            _valueByColumnNumber.Add(newRow);
         }
 
-        public void FormatColumn(int column, string format, bool skipHeaderRow = true)
-        {
-            var firstRow = skipHeaderRow ? 2 : 1;
+        //public void FormatColumn(int column, string format, bool skipHeaderRow = true)
+        //{
+        //    var firstRow = skipHeaderRow ? 2 : 1;
 
-            if (firstRow <= _rowCount)
-                _worksheet.Cells[firstRow, column, _rowCount, column].Style.Numberformat.Format = format;
-        }
+        //    if (firstRow <= _rowCount)
+        //        _worksheet.Cells[firstRow, column, _rowCount, column].Style.Numberformat.Format = format;
+        //}
 
         public void AutoFit()
         {
-            if (_worksheet.Dimension != null)
-                _worksheet.Cells[_worksheet.Dimension.Address].AutoFitColumns();
+            //if (_worksheet.Dimension != null)
+            //    _worksheet.Cells[_worksheet.Dimension.Address].AutoFitColumns();
         }
     }
 }

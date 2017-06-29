@@ -59,5 +59,9 @@ namespace WebApiContrib.Formatting.Xlsx.Attributes
         /// Apply the specified Excel number format string to this property in the generated Excel output.
         /// </summary>
         public string NumberFormat { get; set; }
+
+        public string ResolveFromTable { get; set; }
+
+        public string OverrideResolveTableName { get; set; }
     }
 }

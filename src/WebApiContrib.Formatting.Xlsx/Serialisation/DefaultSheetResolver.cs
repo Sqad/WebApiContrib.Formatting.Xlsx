@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using WebApiContrib.Formatting.Xlsx.Attributes;
+using WebApiContrib.Formatting.Xlsx.Interfaces;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation
 {

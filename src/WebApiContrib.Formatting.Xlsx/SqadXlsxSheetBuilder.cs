@@ -15,6 +15,8 @@ namespace WebApiContrib.Formatting.Xlsx
         private  bool _isReferenceSheet { get; set; }
         public bool IsReferenceSheet => _isReferenceSheet;
 
+        public bool ShouldAutoFit { get; set; }
+
         private List<Dictionary<int, object>> _valueByColumnNumber { get; set; }
 
         public SqadXlsxSheetBuilder(string SheetName, bool IsReferenceSheet=false)
@@ -42,6 +44,28 @@ namespace WebApiContrib.Formatting.Xlsx
             _valueByColumnNumber.Add(newRow);
         }
 
+        public void CompileSheet(ExcelPackage package)
+        {
+            if (_valueByColumnNumber.Count() == 0)
+                return ;
+
+            ExcelWorksheet worksheet = package.Workbook.Worksheets.Add(SheetName) ;
+
+            int rowCount = 0;
+            foreach (var row in _valueByColumnNumber)
+            {
+                rowCount++;
+                foreach (var col in row)
+                {
+                    worksheet.Cells[rowCount, col.Key].Value = col.Value;
+                }
+            }
+
+            if (worksheet.Dimension != null && ShouldAutoFit)
+                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+        }
+
         //public void FormatColumn(int column, string format, bool skipHeaderRow = true)
         //{
         //    var firstRow = skipHeaderRow ? 2 : 1;
@@ -52,8 +76,7 @@ namespace WebApiContrib.Formatting.Xlsx
 
         public void AutoFit()
         {
-            //if (_worksheet.Dimension != null)
-            //    _worksheet.Cells[_worksheet.Dimension.Address].AutoFitColumns();
+            
         }
     }
 }

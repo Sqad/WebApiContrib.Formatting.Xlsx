@@ -49,6 +49,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
             {
                 sheetBuilder = new SqadXlsxSheetBuilder(sheetName);
                 sheetBuilder.AppendRow(columnInfo.Select(s => s.Header));
+                document.AppendSheet(sheetBuilder);
             }
 
             //adding rows data
@@ -61,6 +62,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                     foreach (var dataObj in value as IEnumerable<object>)
                     {
                         PopulateRows(columns, dataObj, sheetBuilder, columnInfo);
+                        CheckColumnsForResolveSheets(document, columnInfo);
                         var deepSheetsInfo = _sheetResolver.GetExcelSheetInfo(itemType, dataObj);
                         PopulateInnerObjectSheets(deepSheetsInfo, document, itemType);
                     }
@@ -68,15 +70,14 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 else if (!(value is IEnumerable<object>))
                 {
                     PopulateRows(columns, value, sheetBuilder, columnInfo);
+                    CheckColumnsForResolveSheets(document, columnInfo);
                     var sheetsInfo = _sheetResolver.GetExcelSheetInfo(itemType, value);
                     PopulateInnerObjectSheets(sheetsInfo, document, itemType);
                 }
             }
 
             if (sheetBuilder != null)
-                sheetBuilder.AutoFit();
-
-            document.AppendSheet(sheetBuilder);
+                sheetBuilder.ShouldAutoFit = true;
         }
 
         private void PopulateRows(List<string> columns, object value, SqadXlsxSheetBuilder sheetBuilder, ExcelColumnInfoCollection columnInfo)
@@ -105,27 +106,38 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 var cellValue = GetFieldOrPropertyValue(lookUpObject, columnName);
 
                 ExcelColumnInfo info = null;
-                if (columnInfo != null) {
+                if (columnInfo != null)
                     info = columnInfo[i];
 
-                    if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false && _staticValuesResolver != null)
-                    {
-                        DataTable columntResolveTable = _staticValuesResolver(info.ExcelColumnAttribute.ResolveFromTable);
-                        columntResolveTable.TableName = info.ExcelColumnAttribute.ResolveFromTable;
-                        if (string.IsNullOrEmpty(info.ExcelColumnAttribute.OverrideResolveTableName) == false)
-                            columntResolveTable.TableName = info.ExcelColumnAttribute.OverrideResolveTableName;
-
-                        this.PopulateReferenceSheet(columntResolveTable);
-
-                        columntResolveTable = null;
-                    }
-                }
                 row.Add(FormatCellValue(cellValue, info));
             }
             sheetBuilder.AppendRow(row.ToList());
         }
 
-        private void PopulateReferenceSheet(DataTable ReferenceSheet)
+        private void CheckColumnsForResolveSheets(IXlsxDocumentBuilder document,ExcelColumnInfoCollection columnInfo)
+        {
+            if (columnInfo == null)
+                return;
+
+            foreach (var cInfo in columnInfo)
+            {
+                if (string.IsNullOrEmpty(cInfo.ExcelColumnAttribute.ResolveFromTable) == false && _staticValuesResolver != null)
+                {
+                    DataTable columntResolveTable = _staticValuesResolver(cInfo.ExcelColumnAttribute.ResolveFromTable);
+                    columntResolveTable.TableName = cInfo.ExcelColumnAttribute.ResolveFromTable;
+                    if (string.IsNullOrEmpty(cInfo.ExcelColumnAttribute.OverrideResolveTableName) == false)
+                        columntResolveTable.TableName = cInfo.ExcelColumnAttribute.OverrideResolveTableName;
+
+                    var referenceSheetBuilder = this.PopulateReferenceSheet(columntResolveTable);
+
+                    document.AppendSheet(referenceSheetBuilder);
+
+                    columntResolveTable = null;
+                }
+            }
+        }
+
+        private SqadXlsxSheetBuilder PopulateReferenceSheet(DataTable ReferenceSheet)
         {
             List<string> sheetResolveColumns = new List<string>();
 
@@ -144,6 +156,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
                 this.PopulateRows(sheetResolveColumns, resolveRow, sb, null);
             }
+
+            return sb;
         }
 
         private void PopulateInnerObjectSheets(ExcelSheetInfoCollection sheetsInfo, IXlsxDocumentBuilder document, Type itemType)

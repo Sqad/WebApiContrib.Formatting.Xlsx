@@ -11,7 +11,7 @@ namespace WebApiContrib.Formatting.Xlsx
 {
     public class SqadXlsxDocumentBuilder : IXlsxDocumentBuilder
     {
-        //private ExcelPackage Package { get; set; }
+        //private  { get; set; }
 
         private Stream _stream;
 
@@ -37,18 +37,24 @@ namespace WebApiContrib.Formatting.Xlsx
             _sheets.Add(sheet);
         }
 
-
         public Task WriteToStream()
         {
-            //return Task.Factory.StartNew(() => Package.SaveAs(_stream));
-            return null;
+            ExcelPackage package = Compile();
+
+            return Task.Factory.StartNew(() => package.SaveAs(_stream));
         }
 
-        //public ExcelWorksheet AppendSheet(string sheetName)
-        //{
-        //    //return Package.Workbook.Worksheets.Add(sheetName);
-        //    return null;
-        //}
+        private ExcelPackage Compile()
+        {
+            ExcelPackage package = new ExcelPackage();
+
+            foreach (var sheet in _sheets.OrderBy(o=>o.IsReferenceSheet))
+            {
+                sheet.CompileSheet(package);
+            }
+
+            return package;
+        }
 
         public bool IsExcelSupportedType(object expression)
         {

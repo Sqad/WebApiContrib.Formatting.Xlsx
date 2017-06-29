@@ -114,7 +114,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
             sheetBuilder.AppendRow(row.ToList());
         }
 
-        private void CheckColumnsForResolveSheets(IXlsxDocumentBuilder document,ExcelColumnInfoCollection columnInfo)
+        private void CheckColumnsForResolveSheets(IXlsxDocumentBuilder document, ExcelColumnInfoCollection columnInfo)
         {
             if (columnInfo == null)
                 return;
@@ -144,15 +144,34 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
             foreach (DataColumn c in ReferenceSheet.Columns)
                 sheetResolveColumns.Add(c.Caption);
 
-            SqadXlsxSheetBuilder sb = new SqadXlsxSheetBuilder(ReferenceSheet.TableName,true);
+            SqadXlsxSheetBuilder sb = new SqadXlsxSheetBuilder(ReferenceSheet.TableName, true);
             sb.AppendRow(sheetResolveColumns);
+            sb.ShouldAutoFit = true;
 
             foreach (DataRow r in ReferenceSheet.Rows)
             {
-                Dictionary<string, string> resolveRow = new Dictionary<string, string>();
+                Dictionary<string, object> resolveRow = new Dictionary<string, object>();
 
-                foreach (var col in sheetResolveColumns)
-                    resolveRow.Add(col, r[col].ToString());
+
+                foreach (DataColumn c in ReferenceSheet.Columns)
+                {
+
+                    if (c.DataType == typeof(int))
+                    {
+                        resolveRow.Add(c.Caption, Convert.ToInt32(r[c]));
+                    }
+                    else if (c.DataType == typeof(DateTime))
+                    {
+                        resolveRow.Add(c.Caption, Convert.ToDateTime(r[c]));
+                    }
+                    else
+                        resolveRow.Add(c.Caption, r[c].ToString());
+
+                }
+
+
+                //foreach (var col in sheetResolveColumns)
+                //    resolveRow.Add(col, r[col].ToString());
 
                 this.PopulateRows(sheetResolveColumns, resolveRow, sb, null);
             }
@@ -186,8 +205,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
             if (rowValue is DateTimeOffset)
                 return FormatterUtils.ConvertFromDateTimeOffset((DateTimeOffset)rowValue);
 
-            else if (rowObject is Dictionary<string, string>)
-                return (rowObject as Dictionary<string,string>)[name];
+            else if (rowObject is Dictionary<string, object>)
+                return (rowObject as Dictionary<string, object>)[name];
 
             else if (FormatterUtils.IsExcelSupportedType(rowValue))
                 return rowValue;
@@ -200,7 +219,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 : rowValue.ToString();
         }
 
-        protected virtual object FormatCellValue(object cellValue, ExcelColumnInfo info=null)
+        protected virtual object FormatCellValue(object cellValue, ExcelColumnInfo info = null)
         {
             if (info != null)
             {

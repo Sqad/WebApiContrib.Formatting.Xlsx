@@ -74,9 +74,5 @@ namespace WebApiContrib.Formatting.Xlsx
         //        _worksheet.Cells[firstRow, column, _rowCount, column].Style.Numberformat.Format = format;
         //}
 
-        public void AutoFit()
-        {
-            
-        }
     }
 }

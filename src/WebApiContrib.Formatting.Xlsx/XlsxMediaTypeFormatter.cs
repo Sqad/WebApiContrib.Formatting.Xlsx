@@ -192,20 +192,6 @@ namespace WebApiContrib.Formatting.Xlsx
 
             serialiser.Serialise(itemType, value, document, null);
 
-            // Apply cell styles.
-            //CellStyle?.Invoke(document.Worksheet.Cells.Style);
-
-            // Only format spreadsheet if it has content.
-            //if (document.RowCount > 0)
-            //{
-            //    if (serialiser.IgnoreFormatting)
-            //    {
-            //        // Autofit cells if specified.
-            //        if (AutoFit) document.AutoFit();
-            //    }
-            //    else FormatDocument(document);
-            //}
-
             return document.WriteToStream();
         }
 

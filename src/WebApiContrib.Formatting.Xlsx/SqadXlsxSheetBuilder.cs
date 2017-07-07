@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using WebApiContrib.Formatting.Xlsx.Serialisation;
 
 namespace WebApiContrib.Formatting.Xlsx
 {
@@ -12,25 +13,21 @@ namespace WebApiContrib.Formatting.Xlsx
         private string _sheetName { get; set; }
         public string SheetName => _sheetName;
 
-        private  bool _isReferenceSheet { get; set; }
+        private bool _isReferenceSheet { get; set; }
         public bool IsReferenceSheet => _isReferenceSheet;
 
         public bool ShouldAutoFit { get; set; }
 
         private List<Dictionary<int, object>> _valueByColumnNumber { get; set; }
 
-        public SqadXlsxSheetBuilder(string SheetName, bool IsReferenceSheet=false)
+        public SqadXlsxSheetBuilder(string SheetName, bool IsReferenceSheet = false)
         {
             _sheetName = SheetName;
             _isReferenceSheet = IsReferenceSheet;
             _valueByColumnNumber = new List<Dictionary<int, object>>();
         }
 
-        /// <summary>
-        /// Append a row to the XLSX worksheet.
-        /// </summary>
-        /// <param name="row">The row to append to this instance.</param>
-        public void AppendRow(IEnumerable<object> row)
+        public void AppendHeaderRow(IEnumerable<string> row)
         {
             Dictionary<int, object> newRow = new Dictionary<int, object>();
 
@@ -44,12 +41,28 @@ namespace WebApiContrib.Formatting.Xlsx
             _valueByColumnNumber.Add(newRow);
         }
 
+        /// <summary>
+        /// Append a row to the XLSX worksheet.
+        /// </summary>
+        /// <param name="row">The row to append to this instance.</param>
+        public void AppendRow(IEnumerable<ExcelCell> row)
+        {
+            Dictionary<int, object> newRow = new Dictionary<int, object>();
+
+            foreach (var colValue in row)
+            {
+                newRow.Add(newRow.Count + 1, colValue);
+            }
+
+            _valueByColumnNumber.Add(newRow);
+        }
+
         public void CompileSheet(ExcelPackage package)
         {
             if (_valueByColumnNumber.Count() == 0)
-                return ;
+                return;
 
-            ExcelWorksheet worksheet = package.Workbook.Worksheets.Add(SheetName) ;
+            ExcelWorksheet worksheet = package.Workbook.Worksheets.Add(SheetName);
 
             int rowCount = 0;
             foreach (var row in _valueByColumnNumber)
@@ -57,7 +70,14 @@ namespace WebApiContrib.Formatting.Xlsx
                 rowCount++;
                 foreach (var col in row)
                 {
-                    worksheet.Cells[rowCount, col.Key].Value = col.Value;
+                    if (col.Value is string)
+                    {
+                        worksheet.Cells[rowCount, col.Key].Value = col.Value;
+                    }
+                    else if(col.Value is ExcelCell)
+                    {
+                        aaa
+                    }
                 }
             }
 

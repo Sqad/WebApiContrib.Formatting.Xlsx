@@ -68,6 +68,7 @@
     <Compile Include="Serialisation\DefaultColumnResolver.cs" />
     <Compile Include="Serialisation\DefaultSheetResolver.cs" />
     <Compile Include="Serialisation\DefaultXlsxSerialiser.cs" />
+    <Compile Include="Serialisation\ExcelCell.cs" />
     <Compile Include="Serialisation\ExcelSheetInfo.cs" />
     <Compile Include="Serialisation\ExcelSheetInfoCollection.cs" />
     <Compile Include="Serialisation\ExpandoSerialiser.cs" />

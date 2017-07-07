@@ -12,6 +12,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         public string FormatString { get; set; }
         public string Header { get; set; }
 
+        
+
         public string ExcelNumberFormat
         {
             get { return ExcelColumnAttribute != null ? ExcelColumnAttribute.NumberFormat : null; }

@@ -122,6 +122,25 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                         cell.DataValidationSheet = columntResolveTable.TableName;
 
                         var referenceSheetBuilder = this.PopulateReferenceSheet(document,columntResolveTable);
+
+                        cell.DataValidationRowsCount = referenceSheetBuilder.ValueByColumnNumber.Count();
+
+                        var firstRow = referenceSheetBuilder.ValueByColumnNumber.FirstOrDefault();
+                        if (firstRow != null)
+                        {
+                            if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveName) == false)
+                            {
+                                if (firstRow.Where(w => w.Value.ToString().ToLower() == info.ExcelColumnAttribute.ResolveName.ToLower()).Any())
+                                    cell.DataValidationNameCellIndex = firstRow.Where(w => w.Value.ToString().ToLower() == info.ExcelColumnAttribute.ResolveName.ToLower()).Select(s => s.Key).First();
+                            }
+
+                            if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveValue) == false)
+                            {
+                                if (firstRow.Where(w => w.Value.ToString().ToLower() == info.ExcelColumnAttribute.ResolveValue.ToLower()).Any())
+                                    cell.DataValidationValueCellIndex = firstRow.Where(w => w.Value.ToString().ToLower() == info.ExcelColumnAttribute.ResolveValue.ToLower()).Select(s => s.Key).First();
+                            }
+                        }
+
                         document.AppendSheet(referenceSheetBuilder);
                     }
                     #endregion Reference Row

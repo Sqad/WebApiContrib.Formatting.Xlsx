@@ -19,6 +19,7 @@ namespace WebApiContrib.Formatting.Xlsx
         public bool ShouldAutoFit { get; set; }
 
         private List<Dictionary<int, object>> _valueByColumnNumber { get; set; }
+        public List<Dictionary<int, object>> ValueByColumnNumber => _valueByColumnNumber;
 
         public SqadXlsxSheetBuilder(string SheetName, bool IsReferenceSheet = false)
         {
@@ -74,9 +75,25 @@ namespace WebApiContrib.Formatting.Xlsx
                     {
                         worksheet.Cells[rowCount, col.Key].Value = col.Value;
                     }
-                    else if(col.Value is ExcelCell)
+                    else if (col.Value is ExcelCell)
                     {
-                        aaa
+                        ExcelCell cell = col.Value as ExcelCell;
+
+                        worksheet.Cells[rowCount, col.Key].Value = cell.CellValue;
+
+                        if (!string.IsNullOrEmpty(cell.DataValidationSheet))
+                        {
+                            var dataValidation = worksheet.DataValidations.AddListValidation(worksheet.Cells[rowCount, col.Key].Address);
+                            dataValidation.ShowErrorMessage = true;
+
+                            string validationAddress = cell.DataValidationSheet;
+                            if (validationAddress.Contains(" "))
+                                validationAddress = $"'{validationAddress}'!{worksheet.Cells[2,cell.DataValidationNameCellIndex,cell.DataValidationRowsCount, cell.DataValidationNameCellIndex]}";
+
+                            dataValidation.Formula.ExcelFormula = validationAddress;
+
+                        }
+
                     }
                 }
             }

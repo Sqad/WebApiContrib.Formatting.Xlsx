@@ -11,7 +11,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         public string CellHeader { get; set; }
         public object CellValue { get; set; }
         public string DataValidationSheet { get; set; }
-        public string DataValidationValue { get; set; } = "ID";
-        public string DataValidationName { get; set; } = "Name";
+        public int DataValidationValueCellIndex { get; set; }
+        public int DataValidationNameCellIndex { get; set; }
+        public int DataValidationRowsCount { get; set; }
     }
 }

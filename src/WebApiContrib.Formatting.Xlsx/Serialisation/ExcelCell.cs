@@ -13,6 +13,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         public string DataValidationSheet { get; set; }
         public int DataValidationValueCellIndex { get; set; }
         public int DataValidationNameCellIndex { get; set; }
+        public int DataValidationBeginRow { get; set; }
         public int DataValidationRowsCount { get; set; }
     }
 }

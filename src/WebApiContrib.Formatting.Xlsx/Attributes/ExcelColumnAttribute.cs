@@ -63,7 +63,13 @@ namespace WebApiContrib.Formatting.Xlsx.Attributes
         public string ResolveFromTable { get; set; }
 
         public string OverrideResolveTableName { get; set; }
+        /// <summary>
+        /// Default Value is ID
+        /// </summary>
         public string ResolveValue { get; set; } = "ID";
+        /// <summary>
+        /// Default Value is Name
+        /// </summary>
         public string ResolveName { get; set; } = "Name";
     }
 }

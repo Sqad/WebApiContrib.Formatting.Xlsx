@@ -140,7 +140,7 @@ namespace WebApiContrib.Formatting.Xlsx
             }
 
             // Add XLSX extension if not present.
-            if (!fileName.EndsWith("xlsx", StringComparison.CurrentCultureIgnoreCase)) fileName += ".xlsx";
+            if (!fileName.EndsWith("xlsm", StringComparison.CurrentCultureIgnoreCase)) fileName += ".xlsm";
 
             // Set content disposition to use this file name.
             headers.ContentDisposition = new ContentDispositionHeaderValue("inline")

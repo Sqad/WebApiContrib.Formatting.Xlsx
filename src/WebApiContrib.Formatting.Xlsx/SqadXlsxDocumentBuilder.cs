@@ -37,6 +37,11 @@ namespace WebApiContrib.Formatting.Xlsx
             _sheets.Add(sheet);
         }
 
+        public SqadXlsxSheetBuilder GetReferenceSheet()
+        {
+            return _sheets.Where(w=>w.IsReferenceSheet).FirstOrDefault();
+        }
+
         public Task WriteToStream()
         {
             ExcelPackage package = Compile();
@@ -60,5 +65,7 @@ namespace WebApiContrib.Formatting.Xlsx
         {
             return FormatterUtils.IsExcelSupportedType(expression);
         }
+
+        
     }
 }

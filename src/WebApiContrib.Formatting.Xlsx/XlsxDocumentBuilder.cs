@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using WebApiContrib.Formatting.Xlsx.Interfaces;
 using WebApiContrib.Formatting.Xlsx.Serialisation;
+using System.Data;
 
 namespace WebApiContrib.Formatting.Xlsx
 {
@@ -66,6 +67,16 @@ namespace WebApiContrib.Formatting.Xlsx
         public bool IsExcelSupportedType(object expression)
         {
             return FormatterUtils.IsExcelSupportedType(expression);
+        }
+
+        public SqadXlsxSheetBuilder GetReferenceSheet()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AppendSheet(DataTable sheet)
+        {
+            throw new NotImplementedException();
         }
 
         public void AppendSheet(SqadXlsxSheetBuilder sheet)

@@ -47,7 +47,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
             if (columnInfo.Count() > 0)
             {
                 sheetBuilder = new SqadXlsxSheetBuilder(sheetName);
-                sheetBuilder.AppendHeaderRow(columnInfo.Select(s => s.Header));
+                sheetBuilder.AppendHeaderRow(columnInfo);
                 document.AppendSheet(sheetBuilder);
             }
 
@@ -92,6 +92,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 ExcelCell cell = new ExcelCell();
 
                 string columnName = columns[i];
+
+                cell.CellHeader = columnName;
+
                 object lookUpObject = value;
                 if (columnName.Contains(":"))
                 {
@@ -148,6 +151,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                     #endregion Reference Row
                 }
 
+
                 cell.CellValue = FormatCellValue(cellValue, info);
 
                 row.Add(cell);
@@ -180,25 +184,17 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
         private void PopulateReferenceSheet(SqadXlsxSheetBuilder referenceSheet, DataTable ReferenceSheet)
         {
-            List<string> sheetResolveColumns = new List<string>();
+            //SqadXlsxSheetBuilder sb = new SqadXlsxSheetBuilder(ReferenceSheet.TableName, true);
+            referenceSheet.AppendHeaderRow(ReferenceSheet.Columns);
+            referenceSheet.ShouldAutoFit = true;
 
-            foreach (DataColumn c in ReferenceSheet.Columns)
-            {
-                sheetResolveColumns.Add(c.Caption);
-            }
-
-            SqadXlsxSheetBuilder sb = new SqadXlsxSheetBuilder(ReferenceSheet.TableName, true);
-            sb.AppendHeaderRow(sheetResolveColumns);
-            sb.ShouldAutoFit = true;
 
             foreach (DataRow r in ReferenceSheet.Rows)
             {
                 Dictionary<string, object> resolveRow = new Dictionary<string, object>();
 
-
                 foreach (DataColumn c in ReferenceSheet.Columns)
                 {
-
                     if (c.DataType == typeof(int))
                     {
                         resolveRow.Add(c.Caption, Convert.ToInt32(r[c]));
@@ -211,7 +207,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                         resolveRow.Add(c.Caption, r[c].ToString());
                 }
 
-                this.PopulateRows(sheetResolveColumns, resolveRow, sb);
+                this.PopulateRows(resolveRow.Keys.ToList(), resolveRow, referenceSheet);
             }
 
             //return sb;
@@ -250,7 +246,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 return rowValue;
 
             else if ((rowValue is IEnumerable<object>))
-                return string.Join(",", rowValue as IEnumerable<object>);
+                return rowValue;
+            // return string.Join(",", rowValue as IEnumerable<object>);
 
             return rowValue == null || DBNull.Value.Equals(rowValue)
                 ? string.Empty

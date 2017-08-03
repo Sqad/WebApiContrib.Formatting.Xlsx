@@ -38,30 +38,37 @@ namespace WebApiContrib.Formatting.Xlsx
             _sheetTables.Add(_currentTable);
         }
 
-        public void AppendHeaderRow(IEnumerable<string> row)
+        public void AppendHeaderRow(ExcelColumnInfoCollection columns)
         {
-            _currentTable.Columns.AddRange(row.Select(s => new DataColumn(s)).ToArray());
+            _currentTable.Columns.AddRange(columns.Select(s => new DataColumn(s.PropertyName, s.PropertyType)).ToArray());
+        }
+
+        public void AppendHeaderRow(DataColumnCollection columns)
+        {
+            foreach (DataColumn c in columns)
+            {
+                _currentTable.Columns.Add(c.ColumnName);
+            }
         }
 
         public void AppendRow(IEnumerable<ExcelCell> row)
         {
             var dRow = _currentTable.NewRow();
-            int index = 0;
             foreach (var cell in row)
             {
-                if (cell.CellValue is string)
-                    _currentTable.Columns[index].DataType = typeof(string);
-                else if (cell.CellValue is int)
-                    _currentTable.Columns[index].DataType = typeof(int);
-                else if (cell.CellValue is decimal)
-                    _currentTable.Columns[index].DataType = typeof(decimal);
-                else if (cell.CellValue is double)
-                    _currentTable.Columns[index].DataType = typeof(double);
-                else if (cell.CellValue is DateTime)
-                    _currentTable.Columns[index].DataType = typeof(DateTime);
+                //if (cell.CellValue is string)
+                //    _currentTable.Columns[index].DataType = typeof(string);
+                //else if (cell.CellValue is int)
+                //    _currentTable.Columns[index].DataType = typeof(int);
+                //else if (cell.CellValue is decimal)
+                //    _currentTable.Columns[index].DataType = typeof(decimal);
+                //else if (cell.CellValue is double)
+                //    _currentTable.Columns[index].DataType = typeof(double);
+                //else if (cell.CellValue is DateTime)
+                //    _currentTable.Columns[index].DataType = typeof(DateTime);
 
-
-                dRow.SetField(index++, cell.CellValue);
+                if (string.IsNullOrEmpty(cell.CellValue.ToString()) == false)
+                    dRow.SetField(cell.CellHeader, cell.CellValue);
             }
             _currentTable.Rows.Add(dRow);
         }
@@ -111,10 +118,13 @@ namespace WebApiContrib.Formatting.Xlsx
                     var mergeTitleCell = worksheet.Cells[rowCount, 1, rowCount, 3];
                     mergeTitleCell.Value = table.TableName;
                     mergeTitleCell.Merge = true;
+                    mergeTitleCell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    mergeTitleCell.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGreen);
+                    rowCount++;
                 }
 
                 foreach (DataColumn col in table.Columns)
-                    worksheet.Cells[rowCount, col.Ordinal+1].Value = col.ColumnName;
+                    worksheet.Cells[rowCount, col.Ordinal + 1].Value = col.ColumnName;
 
                 foreach (DataRow row in table.Rows)
                 {
@@ -123,7 +133,7 @@ namespace WebApiContrib.Formatting.Xlsx
                     {
                         var colObject = row[col];
                         int excelColumnIndex = col.Ordinal + 1; //adjustment for excel column count index (start from 1. nondevelopment count, duh!)
-                        if (colObject is string)
+                        if (!(colObject is ExcelCell))
                         {
                             worksheet.Cells[rowCount, excelColumnIndex].Value = colObject;
                         }
@@ -159,6 +169,8 @@ namespace WebApiContrib.Formatting.Xlsx
                         }
                     }
                 }
+
+                rowCount += __ROWS_BETWEEN_REFERENCE_SHEETS__;
 
             }
 

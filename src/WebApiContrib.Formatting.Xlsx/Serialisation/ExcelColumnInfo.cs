@@ -1,4 +1,5 @@
-﻿using WebApiContrib.Formatting.Xlsx.Attributes;
+﻿using System;
+using WebApiContrib.Formatting.Xlsx.Attributes;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation
 {
@@ -11,7 +12,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         public ExcelColumnAttribute ExcelColumnAttribute { get; set; }
         public string FormatString { get; set; }
         public string Header { get; set; }
-
+        public Type PropertyType { get; set; }
         
 
         public string ExcelNumberFormat
@@ -24,12 +25,13 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
             get { return ExcelColumnAttribute != null && ExcelColumnAttribute.Header != null; }
         }
 
-        public ExcelColumnInfo(string propertyName, ExcelColumnAttribute excelAttribute = null, string formatString = null)
+        public ExcelColumnInfo(string propertyName, Type propType, ExcelColumnAttribute excelAttribute = null, string formatString = null)
         {
             PropertyName = propertyName;
             ExcelColumnAttribute = excelAttribute;
             FormatString = formatString;
             Header = IsExcelHeaderDefined ? ExcelColumnAttribute.Header : propertyName;
+            PropertyType = propType;
         }
     }
 }

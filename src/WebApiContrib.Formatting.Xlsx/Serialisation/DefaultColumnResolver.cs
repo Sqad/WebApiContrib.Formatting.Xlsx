@@ -35,31 +35,40 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
                 if (prop == null) continue;
 
+                Type propertyType = prop.PropertyType;
+                if (propertyType.IsGenericType &&
+                    propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                {
+                    propertyType = propertyType.GetGenericArguments()[0];
+                }
 
                 ExcelColumnAttribute attribute = FormatterUtils.GetAttribute<ExcelColumnAttribute>(prop);
                 if (attribute != null)
                 {
-                    if (prop.PropertyType.Name.StartsWith("List"))
+                    if (propertyType.Name.StartsWith("List"))
                     {
-                        Type typeOfList = FormatterUtils.GetEnumerableItemType(prop.PropertyType);
+                        Type typeOfList = FormatterUtils.GetEnumerableItemType(propertyType);
 
                         if (FormatterUtils.IsSimpleType(typeOfList))
-                            fieldInfo.Add(new ExcelColumnInfo(prop.Name, attribute,null));
+                            fieldInfo.Add(new ExcelColumnInfo(prop.Name, propertyType, attribute, null));
                     }
-                    if (!FormatterUtils.IsSimpleType(prop.PropertyType))
+                    else if (!FormatterUtils.IsSimpleType(propertyType))
                     {
                         //getting a complex class columns populates as ComplexName:InnerProperty
 
-                        string prefix = string.IsNullOrEmpty(namePrefix)==false ? $"{namePrefix}:{prop.Name}" : prop.Name;
+                        string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;
 
-                        ExcelColumnInfoCollection columnCollection = GetExcelColumnInfo(prop.PropertyType, null, prefix, true);
+                        ExcelColumnInfoCollection columnCollection = GetExcelColumnInfo(propertyType, null, prefix, true);
                         foreach (var subcolumn in columnCollection)
                             fieldInfo.Add(subcolumn);
                     }
                     else
                     {
-                        string propertyName = isComplexColumn ? $"{namePrefix}:{field}" : field; 
-                        fieldInfo.Add(new ExcelColumnInfo(propertyName, attribute, null));
+                        string propertyName = isComplexColumn ? $"{namePrefix}:{field}" : field;
+                        if (FormatterUtils.IsExcelSupportedType(propertyType))
+                            fieldInfo.Add(new ExcelColumnInfo(propertyName, propertyType, attribute, null));
+                        else
+                            fieldInfo.Add(new ExcelColumnInfo(propertyName, typeof(string), attribute, null));
                     }
                 }
             }
@@ -116,6 +125,15 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                     if (!fieldInfo.Contains(propertyName)) continue;
 
                     var field = fieldInfo[propertyName];
+
+                    field.PropertyType = modelProp.ModelType;
+                    if (field.PropertyType.IsGenericType &&
+                        field.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                    {
+                        field.PropertyType = field.PropertyType.GetGenericArguments()[0];
+                    }
+
+
                     var attribute = field.ExcelColumnAttribute;
 
                     if (!field.IsExcelHeaderDefined)

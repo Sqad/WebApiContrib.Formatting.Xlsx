@@ -40,35 +40,24 @@ namespace WebApiContrib.Formatting.Xlsx
 
         public void AppendHeaderRow(ExcelColumnInfoCollection columns)
         {
-            _currentTable.Columns.AddRange(columns.Select(s => new DataColumn(s.PropertyName, s.PropertyType)).ToArray());
+            _currentTable.Columns.AddRange(columns.Select(s => new DataColumn(s.PropertyName, typeof(ExcelCell))).ToArray());
         }
 
         public void AppendHeaderRow(DataColumnCollection columns)
         {
             foreach (DataColumn c in columns)
             {
-                _currentTable.Columns.Add(c.ColumnName);
+                _currentTable.Columns.Add(c.ColumnName, typeof(ExcelCell));
             }
         }
 
         public void AppendRow(IEnumerable<ExcelCell> row)
         {
-            var dRow = _currentTable.NewRow();
+            DataRow dRow = _currentTable.NewRow();
             foreach (var cell in row)
             {
-                //if (cell.CellValue is string)
-                //    _currentTable.Columns[index].DataType = typeof(string);
-                //else if (cell.CellValue is int)
-                //    _currentTable.Columns[index].DataType = typeof(int);
-                //else if (cell.CellValue is decimal)
-                //    _currentTable.Columns[index].DataType = typeof(decimal);
-                //else if (cell.CellValue is double)
-                //    _currentTable.Columns[index].DataType = typeof(double);
-                //else if (cell.CellValue is DateTime)
-                //    _currentTable.Columns[index].DataType = typeof(DateTime);
-
-                if (string.IsNullOrEmpty(cell.CellValue.ToString()) == false)
-                    dRow.SetField(cell.CellHeader, cell.CellValue);
+                //if (string.IsNullOrEmpty(cell.CellValue.ToString()) == false)
+                dRow.SetField(cell.CellHeader, cell);
             }
             _currentTable.Rows.Add(dRow);
         }
@@ -79,9 +68,10 @@ namespace WebApiContrib.Formatting.Xlsx
             //multiply by two (rows between the sheets)
             int totalRows = _sheetTables.Select(s => s.Rows.Count).Sum();
             if (totalRows == 0)
-                return 0; // completely new reference sheet no need to shift from top
+                return 1 + __ROWS_BETWEEN_REFERENCE_SHEETS__; // completely new reference sheet no need to shift from top
             else
-                return totalRows + (_sheetTables.Count() * __ROWS_BETWEEN_REFERENCE_SHEETS__);//already rows there, need to make space for next reference table
+                //total rows  plus number or tables adjustment for emptry row increast everytime plus number of sheets multiply rows between sheets
+                return totalRows + _sheetTables.Count() + (_sheetTables.Count() * __ROWS_BETWEEN_REFERENCE_SHEETS__);//already rows there, need to make space for next reference table
         }
 
         public int GetCurrentRowCount => _currentTable.Rows.Count;
@@ -106,7 +96,10 @@ namespace WebApiContrib.Formatting.Xlsx
             ExcelWorksheet worksheet = null;
 
             if (_isReferenceSheet == true)
+            {
                 worksheet = package.Workbook.Worksheets.Add("Reference");
+                worksheet.Hidden = eWorkSheetHidden.VeryHidden;
+            }
             else
                 worksheet = package.Workbook.Worksheets.Add(_currentTable.TableName);
 
@@ -148,16 +141,13 @@ namespace WebApiContrib.Formatting.Xlsx
                                 var dataValidation = worksheet.DataValidations.AddListValidation(worksheet.Cells[rowCount, excelColumnIndex].Address);
                                 dataValidation.ShowErrorMessage = true;
 
-                                string validationAddress = cell.DataValidationSheet;
-                                if (validationAddress.Contains(" "))
-                                    validationAddress = $"'{validationAddress}'!{worksheet.Cells[2, cell.DataValidationNameCellIndex, cell.DataValidationRowsCount, cell.DataValidationNameCellIndex]}";
-
+                                string validationAddress = $"'Reference'!{worksheet.Cells[cell.DataValidationBeginRow, cell.DataValidationNameCellIndex, (cell.DataValidationBeginRow + cell.DataValidationRowsCount) - 1, cell.DataValidationNameCellIndex]}";
                                 dataValidation.Formula.ExcelFormula = validationAddress;
 
                                 string code = string.Empty;
                                 code += $"If Target.Column = {excelColumnIndex} Then \n";
-                                code += $"   matchVal = Application.Match(Target.Value, Worksheets(\"{cell.DataValidationSheet}\").Range(\"{worksheet.Cells[2, cell.DataValidationNameCellIndex, cell.DataValidationRowsCount, cell.DataValidationNameCellIndex].Address}\"), 0) \n";
-                                code += $"   selectedNum = Application.Index(Worksheets(\"{cell.DataValidationSheet}\").Range(\"{worksheet.Cells[2, cell.DataValidationValueCellIndex, cell.DataValidationRowsCount, cell.DataValidationValueCellIndex].Address}\"), matchVal, 1) \n";
+                                code += $"   matchVal = Application.Match(Target.Value, Worksheets(\"Reference\").Range(\"{worksheet.Cells[cell.DataValidationBeginRow, cell.DataValidationNameCellIndex, (cell.DataValidationBeginRow + cell.DataValidationRowsCount) - 1, cell.DataValidationNameCellIndex].Address}\"), 0) \n";
+                                code += $"   selectedNum = Application.Index(Worksheets(\"Reference\").Range(\"{worksheet.Cells[cell.DataValidationBeginRow, cell.DataValidationValueCellIndex, (cell.DataValidationBeginRow + cell.DataValidationRowsCount) - 1, cell.DataValidationValueCellIndex].Address}\"), matchVal, 1) \n";
                                 code += "   If Not IsError(selectedNum) Then \n";
                                 code += "       Target.Value = selectedNum \n";
                                 code += "   End If \n";
@@ -165,7 +155,13 @@ namespace WebApiContrib.Formatting.Xlsx
 
                                 sheetCodeColumnStatements.Add(code);
                             }
-
+                            else if (bool.TryParse(cell.CellValue.ToString(), out var result))
+                            {
+                                var dataValidation = worksheet.DataValidations.AddListValidation(worksheet.Cells[rowCount, excelColumnIndex].Address);
+                                dataValidation.ShowErrorMessage = true;
+                                dataValidation.Formula.Values.Add("True");
+                                dataValidation.Formula.Values.Add("False");
+                            }
                         }
                     }
                 }
@@ -197,7 +193,8 @@ namespace WebApiContrib.Formatting.Xlsx
 
                 worksheetOnChangeCode += "End Sub";
 
-                worksheet.Workbook.CreateVBAProject();
+                if (worksheet.Workbook.VbaProject == null)
+                    worksheet.Workbook.CreateVBAProject();
                 worksheet.CodeModule.Code = worksheetOnChangeCode;
             }
             #endregion sheet code to resolve reference column

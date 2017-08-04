@@ -159,7 +159,8 @@ namespace WebApiContrib.Formatting.Xlsx
             // Create a document builder.
             var document = new SqadXlsxDocumentBuilder(writeStream);
 
-            if (value == null) return document.WriteToStream();
+            if (value == null)
+                return document.WriteToStream();
 
             var valueType = value.GetType();
 
@@ -191,6 +192,11 @@ namespace WebApiContrib.Formatting.Xlsx
             }
 
             serialiser.Serialise(itemType, value, document, null);
+
+            if (!document.IsVBA)
+            {
+                content.Headers.ContentDisposition.FileName = content.Headers.ContentDisposition.FileName.Replace("xlsm", "xlsx");
+            }
 
             return document.WriteToStream();
         }

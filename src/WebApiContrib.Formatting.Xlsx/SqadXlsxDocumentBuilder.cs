@@ -19,15 +19,9 @@ namespace WebApiContrib.Formatting.Xlsx
         //New Stuff
         private List<SqadXlsxSheetBuilder> _sheets { get; set; }
 
-
-
         public SqadXlsxDocumentBuilder(Stream stream)
         {
             _stream = stream;
-
-            // Create a worksheet
-            //Package = new ExcelPackage();
-
             _sheets = new List<SqadXlsxSheetBuilder>();
         }
 
@@ -37,22 +31,20 @@ namespace WebApiContrib.Formatting.Xlsx
             _sheets.Add(sheet);
         }
 
-        public SqadXlsxSheetBuilder GetReferenceSheet()
-        {
-            return _sheets.Where(w=>w.IsReferenceSheet).FirstOrDefault();
-        }
+        public SqadXlsxSheetBuilder GetReferenceSheet() => _sheets.Where(w=>w.IsReferenceSheet).FirstOrDefault();
+
+        public bool IsVBA => _sheets.Any(a => a.IsReferenceSheet);
 
         public Task WriteToStream()
         {
             ExcelPackage package = Compile();
-
             return Task.Factory.StartNew(() => package.SaveAs(_stream));
         }
 
         private ExcelPackage Compile()
         {
             ExcelPackage package = new ExcelPackage();
-
+           
             foreach (var sheet in _sheets.OrderBy(o=>o.IsReferenceSheet))
             {
                 sheet.CompileSheet(package);
@@ -65,7 +57,5 @@ namespace WebApiContrib.Formatting.Xlsx
         {
             return FormatterUtils.IsExcelSupportedType(expression);
         }
-
-        
     }
 }

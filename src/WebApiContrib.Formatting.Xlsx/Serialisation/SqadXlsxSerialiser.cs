@@ -197,7 +197,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 {
                     if (c.DataType == typeof(int))
                     {
-                        resolveRow.Add(c.Caption, Convert.ToInt32(r[c]));
+                        int i = 0;
+                        if (int.TryParse(r[c].ToString(), out i))
+                            resolveRow.Add(c.Caption, Convert.ToInt32(i));
                     }
                     else if (c.DataType == typeof(DateTime))
                     {

@@ -51,6 +51,13 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
                         if (FormatterUtils.IsSimpleType(typeOfList))
                             fieldInfo.Add(new ExcelColumnInfo(prop.Name, propertyType, attribute, null));
+                        else
+                        {
+                            string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;
+                            ExcelColumnInfoCollection columnCollection = GetExcelColumnInfo(typeOfList, null, prefix, true);
+                            foreach (var subcolumn in columnCollection)
+                                fieldInfo.Add(subcolumn);
+                        }
                     }
                     else if (!FormatterUtils.IsSimpleType(propertyType))
                     {
@@ -65,10 +72,15 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                     else
                     {
                         string propertyName = isComplexColumn ? $"{namePrefix}:{field}" : field;
-                        if (FormatterUtils.IsExcelSupportedType(propertyType))
-                            fieldInfo.Add(new ExcelColumnInfo(propertyName, propertyType, attribute, null));
-                        else
-                            fieldInfo.Add(new ExcelColumnInfo(propertyName, typeof(string), attribute, null));
+
+                        bool columnAlreadyadded = fieldInfo.Any(a => a.PropertyName == propertyName);
+                        if (!columnAlreadyadded)
+                        {
+                            if (FormatterUtils.IsExcelSupportedType(propertyType))
+                                fieldInfo.Add(new ExcelColumnInfo(propertyName, propertyType, attribute, null));
+                            else
+                                fieldInfo.Add(new ExcelColumnInfo(propertyName, typeof(string), attribute, null));
+                        }
                     }
                 }
             }

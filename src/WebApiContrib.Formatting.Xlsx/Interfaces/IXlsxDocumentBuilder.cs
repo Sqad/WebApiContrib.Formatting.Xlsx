@@ -17,5 +17,7 @@ namespace WebApiContrib.Formatting.Xlsx.Interfaces
         void AppendSheet(SqadXlsxSheetBuilder sheet);
 
         SqadXlsxSheetBuilder GetReferenceSheet();
+
+        SqadXlsxSheetBuilder GetSheetByName(string name);
     }
 }

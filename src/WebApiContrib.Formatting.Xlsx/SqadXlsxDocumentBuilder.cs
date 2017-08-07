@@ -33,6 +33,8 @@ namespace WebApiContrib.Formatting.Xlsx
 
         public SqadXlsxSheetBuilder GetReferenceSheet() => _sheets.Where(w=>w.IsReferenceSheet).FirstOrDefault();
 
+        public SqadXlsxSheetBuilder GetSheetByName(string name) => _sheets.Where(w => w.SheetTables.Select(s => s.TableName).Contains(name)).FirstOrDefault();
+
         public bool IsVBA => _sheets.Any(a => a.IsReferenceSheet);
 
         public Task WriteToStream()

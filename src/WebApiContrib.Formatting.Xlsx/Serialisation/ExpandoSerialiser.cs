@@ -77,5 +77,10 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         {
             throw new NotImplementedException();
         }
+
+        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, List<string> columnsOverride)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

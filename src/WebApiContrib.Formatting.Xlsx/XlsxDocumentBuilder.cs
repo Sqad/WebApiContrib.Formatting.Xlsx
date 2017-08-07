@@ -83,5 +83,10 @@ namespace WebApiContrib.Formatting.Xlsx
         {
             throw new NotImplementedException();
         }
+
+        public SqadXlsxSheetBuilder GetSheetByName(string name)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

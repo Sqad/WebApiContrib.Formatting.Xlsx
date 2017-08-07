@@ -23,6 +23,8 @@ namespace WebApiContrib.Formatting.Xlsx
 
         private List<DataTable> _sheetTables { get; set; }
 
+        public  List<DataTable> SheetTables => _sheetTables;
+
         public SqadXlsxSheetBuilder(string sheetName, bool isReferenceSheet = false)
         {
             _isReferenceSheet = isReferenceSheet;

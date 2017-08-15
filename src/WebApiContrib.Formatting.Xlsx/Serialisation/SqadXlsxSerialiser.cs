@@ -46,9 +46,14 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
             
             if (columnInfo.Count() > 0)
             {
-                sheetBuilder = new SqadXlsxSheetBuilder(sheetName);
-                sheetBuilder.AppendHeaderRow(columnInfo);
-                document.AppendSheet(sheetBuilder);
+                sheetBuilder = document.GetSheetByName(sheetName);
+
+                if (sheetBuilder == null)
+                {
+                    sheetBuilder = new SqadXlsxSheetBuilder(sheetName);
+                    sheetBuilder.AppendHeaderRow(columnInfo);
+                    document.AppendSheet(sheetBuilder);
+                }
             }
 
             if (sheetName != null && sheetBuilder == null)
@@ -114,6 +119,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                         if (lookUpObject != null && lookUpObject.GetType().Name.StartsWith("List"))
                         {
                             lookUpObjectIsList = true;
+                            columnName = columnPath[l];
                             break;
                         }
 
@@ -122,7 +128,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
                 if (lookUpObjectIsList)
                 {
-                    this.Serialise(FormatterUtils.GetEnumerableItemType(lookUpObject.GetType()), lookUpObject as IEnumerable<object>, document, sheetBuilder.CurrentTableName);
+                    this.Serialise(FormatterUtils.GetEnumerableItemType(lookUpObject.GetType()), lookUpObject as IEnumerable<object>, document, columnName); //sheetBuilder.CurrentTableName);
                     
                 }
                 else

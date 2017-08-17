@@ -199,7 +199,7 @@ namespace WebApiContrib.Formatting.Xlsx
         /// </summary>
         /// <see cref="https://gist.github.com/jonathanconway/3330614"/>
         /// <see cref="http://stackoverflow.com/questions/2442534/how-to-test-if-type-is-primitive"/>
-        public static bool IsSimpleType(Type type)
+        public static bool IsSimpleType(this Type type)
         {
             return
                 type.IsValueType ||

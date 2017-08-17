@@ -43,7 +43,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 var sheetAttribute = itemType.GetCustomAttributes(true).SingleOrDefault(s => s is Attributes.ExcelSheetAttribute);
                 sheetName = sheetAttribute != null ? (sheetAttribute as Attributes.ExcelSheetAttribute).SheetName : itemType.Name;
             }
-            
+
             if (columnInfo.Count() > 0)
             {
                 sheetBuilder = new SqadXlsxSheetBuilder(sheetName);
@@ -100,81 +100,81 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
                 cell.CellHeader = columnName;
 
-                bool lookUpObjectIsList = false;
-                object lookUpObject = value;
-                if (columnName.Contains(":"))
+                //bool lookUpObjectIsList = false;
+                //object lookUpObject = value;
+                //if (columnName.Contains(":"))
+                //{
+                //    string[] columnPath = columnName.Split(':');
+                //    columnName = columnPath.Last();
+
+                //    for (int l = 1; l < columnPath.Count() - 1; l++)
+                //    {
+                //        lookUpObject = FormatterUtils.GetFieldOrPropertyValue(lookUpObject, columnPath[l]);
+
+                //        if (lookUpObject != null && lookUpObject.GetType().Name.StartsWith("List"))
+                //        {
+                //            lookUpObjectIsList = true;
+                //            break;
+                //        }
+
+                //    }
+                //}
+
+                //if (lookUpObjectIsList)
+                //{
+                //    this.Serialise(FormatterUtils.GetEnumerableItemType(lookUpObject.GetType()), lookUpObject as IEnumerable<object>, document, sheetBuilder.CurrentTableName);
+
+                //}
+                //else
+                //{
+                var cellValue = GetFieldOrPropertyValue(value, columnName);
+
+                ExcelColumnInfo info = null;
+                if (columnInfo != null)
                 {
-                    string[] columnPath = columnName.Split(':');
-                    columnName = columnPath.Last();
-
-                    for (int l = 1; l < columnPath.Count() - 1; l++)
+                    info = columnInfo[i];
+                    #region Reference Row
+                    if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false && _staticValuesResolver != null)
                     {
-                        lookUpObject = FormatterUtils.GetFieldOrPropertyValue(lookUpObject, columnPath[l]);
+                        DataTable columntResolveTable = _staticValuesResolver(info.ExcelColumnAttribute.ResolveFromTable);
+                        columntResolveTable.TableName = info.ExcelColumnAttribute.ResolveFromTable;
+                        if (string.IsNullOrEmpty(info.ExcelColumnAttribute.OverrideResolveTableName) == false)
+                            columntResolveTable.TableName = info.ExcelColumnAttribute.OverrideResolveTableName;
 
-                        if (lookUpObject != null && lookUpObject.GetType().Name.StartsWith("List"))
+                        cell.DataValidationSheet = columntResolveTable.TableName;
+
+                        var referenceSheet = document.GetReferenceSheet();
+
+                        if (referenceSheet == null)
                         {
-                            lookUpObjectIsList = true;
-                            break;
+                            referenceSheet = new SqadXlsxSheetBuilder(cell.DataValidationSheet, true);
+                            document.AppendSheet(referenceSheet);
+                        }
+                        else
+                        {
+                            referenceSheet.AddAndActivateNewTable(cell.DataValidationSheet);
                         }
 
+                        cell.DataValidationBeginRow = referenceSheet.GetNextAvailalbleRow();
+
+                        this.PopulateReferenceSheet(referenceSheet, columntResolveTable);
+
+                        cell.DataValidationRowsCount = referenceSheet.GetCurrentRowCount;
+
+                        if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveName) == false)
+                            cell.DataValidationNameCellIndex = referenceSheet.GetColumnIndexByColumnName(info.ExcelColumnAttribute.ResolveName);
+
+                        if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveValue) == false)
+                            cell.DataValidationValueCellIndex = referenceSheet.GetColumnIndexByColumnName(info.ExcelColumnAttribute.ResolveValue);
+
                     }
+                    #endregion Reference Row
                 }
 
-                if (lookUpObjectIsList)
-                {
-                    this.Serialise(FormatterUtils.GetEnumerableItemType(lookUpObject.GetType()), lookUpObject as IEnumerable<object>, document, sheetBuilder.CurrentTableName);
-                    
-                }
-                else
-                {
-                    var cellValue = GetFieldOrPropertyValue(lookUpObject, columnName);
+                cell.CellValue = FormatCellValue(cellValue, info);
 
-                    ExcelColumnInfo info = null;
-                    if (columnInfo != null)
-                    {
-                        info = columnInfo[i];
-                        #region Reference Row
-                        if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false && _staticValuesResolver != null)
-                        {
-                            DataTable columntResolveTable = _staticValuesResolver(info.ExcelColumnAttribute.ResolveFromTable);
-                            columntResolveTable.TableName = info.ExcelColumnAttribute.ResolveFromTable;
-                            if (string.IsNullOrEmpty(info.ExcelColumnAttribute.OverrideResolveTableName) == false)
-                                columntResolveTable.TableName = info.ExcelColumnAttribute.OverrideResolveTableName;
-
-                            cell.DataValidationSheet = columntResolveTable.TableName;
-
-                            var referenceSheet = document.GetReferenceSheet();
-
-                            if (referenceSheet == null)
-                            {
-                                referenceSheet = new SqadXlsxSheetBuilder(cell.DataValidationSheet, true);
-                                document.AppendSheet(referenceSheet);
-                            }
-                            else
-                            {
-                                referenceSheet.AddAndActivateNewTable(cell.DataValidationSheet);
-                            }
-
-                            cell.DataValidationBeginRow = referenceSheet.GetNextAvailalbleRow();
-
-                            this.PopulateReferenceSheet(referenceSheet, columntResolveTable);
-
-                            cell.DataValidationRowsCount = referenceSheet.GetCurrentRowCount;
-
-                            if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveName) == false)
-                                cell.DataValidationNameCellIndex = referenceSheet.GetColumnIndexByColumnName(info.ExcelColumnAttribute.ResolveName);
-
-                            if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveValue) == false)
-                                cell.DataValidationValueCellIndex = referenceSheet.GetColumnIndexByColumnName(info.ExcelColumnAttribute.ResolveValue);
-
-                        }
-                        #endregion Reference Row
-                    }
-
-                    cell.CellValue = FormatCellValue(cellValue, info);
-
-                    row.Add(cell);
-                }
+                row.Add(cell);
+                //}
             }
 
             if (row.Count() > 0)

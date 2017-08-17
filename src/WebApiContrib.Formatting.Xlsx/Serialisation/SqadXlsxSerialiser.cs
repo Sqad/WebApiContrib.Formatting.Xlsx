@@ -46,9 +46,14 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
             if (columnInfo.Count() > 0)
             {
-                sheetBuilder = new SqadXlsxSheetBuilder(sheetName);
-                sheetBuilder.AppendHeaderRow(columnInfo);
-                document.AppendSheet(sheetBuilder);
+                sheetBuilder = document.GetSheetByName(sheetName);
+
+                if (sheetBuilder == null)
+                {
+                    sheetBuilder = new SqadXlsxSheetBuilder(sheetName);
+                    sheetBuilder.AppendHeaderRow(columnInfo);
+                    document.AppendSheet(sheetBuilder);
+                }
             }
 
             if (sheetName != null && sheetBuilder == null)

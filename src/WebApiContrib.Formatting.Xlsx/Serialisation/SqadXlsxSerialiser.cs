@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using WebApiContrib.Formatting.Xlsx.Interfaces;
@@ -134,6 +135,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 //{
                 var cellValue = GetFieldOrPropertyValue(value, columnName);
 
+                if (columnName.Contains(":") && (cellValue == null || (cellValue != null && string.IsNullOrEmpty(cellValue.ToString()))))
+                {
+                    cellValue = GetFieldPathValue(value, columnName);
+                }
+
                 ExcelColumnInfo info = null;
                 if (columnInfo != null)
                 {
@@ -176,7 +182,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                     #endregion Reference Row
                 }
 
-                cell.CellValue = FormatCellValue(cellValue, info);
+                if (cellValue != null)
+                    cell.CellValue = FormatCellValue(cellValue, info);
 
                 row.Add(cell);
                 //}
@@ -281,6 +288,81 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
             return rowValue == null || DBNull.Value.Equals(rowValue)
                 ? string.Empty
                 : rowValue.ToString();
+        }
+
+        private object GetFieldPathValue(object rowObject, string path)
+        {
+            string[] pathSplit = path.Split(':').Skip(1).ToArray();
+
+            List<object> resultsList = new List<object>();
+
+            List<object> itemsToProcess = new List<object>() { rowObject };
+
+            int index = 0;
+            foreach (string objName in pathSplit)
+            {
+                index++;
+
+                var tempItemsToProcess = itemsToProcess.ToList();
+                itemsToProcess.Clear();
+
+                foreach (var obj in tempItemsToProcess)
+                {
+                    if (obj == null)
+                        continue;
+
+                    Type type = obj.GetType();
+                    System.Reflection.MemberInfo member = type.GetField(objName) ?? type.GetProperty(objName) as System.Reflection.MemberInfo;
+                    if (member == null)
+                    {
+                        return null;
+                    }
+                    var result = new object();
+
+                    switch (member.MemberType)
+                    {
+                        case MemberTypes.Property:
+                            result = ((PropertyInfo)member).GetValue(obj, null);
+                            break;
+                        case MemberTypes.Field:
+                            result = ((FieldInfo)member).GetValue(obj);
+                            break;
+                        default:
+                            result = null;
+                            break;
+                    }
+
+                    if (index == pathSplit.Count())
+                    {
+                        if (result != null)
+                        {
+                            if (result.GetType().Name.StartsWith("List"))
+                            {
+                                List<object> list = new List<object>();
+                                var enumerator = ((System.Collections.IEnumerable)result).GetEnumerator();
+                                while (enumerator.MoveNext())
+                                {
+                                    resultsList.Add(enumerator.Current);
+                                }
+                            }
+                            else
+                                resultsList.Add(result);
+                        }
+                    }
+                    else
+                    {
+                        if (result != null)
+                        {
+                            if (result.GetType().Name.StartsWith("List"))
+                                itemsToProcess.AddRange(result as IEnumerable<object>);
+                            else
+                                itemsToProcess.Add(result);
+                        }
+                    }
+                }
+            }
+
+            return string.Join(":", resultsList);
         }
 
         protected virtual object FormatCellValue(object cellValue, ExcelColumnInfo info = null)

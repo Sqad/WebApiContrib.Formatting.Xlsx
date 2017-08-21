@@ -50,7 +50,10 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                         Type typeOfList = FormatterUtils.GetEnumerableItemType(propertyType);
 
                         if (FormatterUtils.IsSimpleType(typeOfList))
-                            fieldInfo.Add(new ExcelColumnInfo(prop.Name, propertyType, attribute, null));
+                        {
+                            string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;
+                            fieldInfo.Add(new ExcelColumnInfo(prefix, typeOfList, attribute, null));
+                        }
                         else
                         {
                             string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;

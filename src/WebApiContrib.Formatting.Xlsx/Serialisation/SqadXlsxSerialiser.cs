@@ -378,7 +378,12 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                 }
             }
 
-            return string.Join(":", resultsList);
+            string returnString = string.Empty;
+            for (int i = 1; i <= resultsList.Count(); i++)
+            {
+                returnString += $"{i}->{resultsList[i-1]}, ";
+            }
+            return returnString;
         }
 
         protected virtual object FormatCellValue(object cellValue, ExcelColumnInfo info = null)

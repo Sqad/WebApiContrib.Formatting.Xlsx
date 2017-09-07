@@ -315,15 +315,19 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
                     System.Reflection.MemberInfo member = null;
 
-                    var matchingProperties = type.GetProperties().Where(w => w.Name == "Value").ToList();
-                    if (matchingProperties.Count() > 1)
+                    var matchingProperties = type.GetProperties().Where(w => w.Name == objName).ToList();
+                    if (matchingProperties.Count() > 0)
+                    {
+                        member = matchingProperties.First();
+                    }
+                    else if ((matchingProperties = type.GetProperties().Where(w => w.Name == "Value").ToList()).Count() > 1)
                     {
                         //property overwriten, and must take first
                         member = matchingProperties.First();
                     }
                     else
                     {
-                       member =  type.GetField(objName) ?? type.GetProperty(objName) as System.Reflection.MemberInfo;
+                        member = type.GetField(objName) ?? type.GetProperty(objName) as System.Reflection.MemberInfo;
                     }
                     if (member == null)
                     {

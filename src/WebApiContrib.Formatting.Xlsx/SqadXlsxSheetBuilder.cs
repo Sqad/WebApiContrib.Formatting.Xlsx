@@ -157,7 +157,7 @@ namespace WebApiContrib.Formatting.Xlsx
 
                                 sheetCodeColumnStatements.Add(code);
                             }
-                            else if (bool.TryParse(cell.CellValue.ToString(), out var result))
+                            else if (cell.CellValue !=null && bool.TryParse(cell.CellValue.ToString(), out var result))
                             {
                                 var dataValidation = worksheet.DataValidations.AddListValidation(worksheet.Cells[rowCount, excelColumnIndex].Address);
                                 dataValidation.ShowErrorMessage = true;

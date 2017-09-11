@@ -298,6 +298,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
             List<object> itemsToProcess = new List<object>() { rowObject };
 
+            bool isResultList = false;
+
             int index = 0;
             foreach (string objName in pathSplit)
             {
@@ -360,6 +362,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
                                 {
                                     resultsList.Add(enumerator.Current);
                                 }
+                                isResultList = true;
                             }
                             else
                                 resultsList.Add(result);
@@ -379,9 +382,17 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
             }
 
             string returnString = string.Empty;
-            for (int i = 1; i <= resultsList.Count(); i++)
+
+            if (isResultList)
             {
-                returnString += $"{i}->{resultsList[i-1]}, ";
+                for (int i = 1; i <= resultsList.Count(); i++)
+                {
+                    returnString += $"{i}->{resultsList[i - 1]}, ";
+                }
+            }
+            else
+            {
+                returnString = resultsList.Count() > 0 ? resultsList.First().ToString() : string.Empty;
             }
             return returnString;
         }

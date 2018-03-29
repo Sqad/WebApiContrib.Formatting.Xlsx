@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Data;
 using WebApiContrib.Formatting.Xlsx.Interfaces;
 using WebApiContrib.Formatting.Xlsx.Serialisation;
-using WebApiContrib.Formatting.Xlsx.Attributes;
+using SQAD.MTNext.Business.Models.Attributes;
 
 namespace WebApiContrib.Formatting.Xlsx
 {

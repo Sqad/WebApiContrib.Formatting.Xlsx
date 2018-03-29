@@ -41,8 +41,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
 
             if (sheetName == null)
             {
-                var sheetAttribute = itemType.GetCustomAttributes(true).SingleOrDefault(s => s is Attributes.ExcelSheetAttribute);
-                sheetName = sheetAttribute != null ? (sheetAttribute as Attributes.ExcelSheetAttribute).SheetName : itemType.Name;
+                var sheetAttribute = itemType.GetCustomAttributes(true).SingleOrDefault(s => s is SQAD.MTNext.Business.Models.Attributes.ExcelSheetAttribute);
+                sheetName = sheetAttribute != null ? (sheetAttribute as SQAD.MTNext.Business.Models.Attributes.ExcelSheetAttribute).SheetName : itemType.Name;
             }
 
             if (columnInfo.Count() > 0)
@@ -253,10 +253,10 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation
         {
             foreach (var sheet in sheetsInfo)
             {
-                if (!(sheet.ExcelSheetAttribute is Attributes.ExcelSheetAttribute))
+                if (!(sheet.ExcelSheetAttribute is SQAD.MTNext.Business.Models.Attributes.ExcelSheetAttribute))
                     continue;
 
-                string sheetName = sheet.ExcelSheetAttribute != null ? (sheet.ExcelSheetAttribute as Attributes.ExcelSheetAttribute).SheetName : itemType.Name;
+                string sheetName = sheet.ExcelSheetAttribute != null ? (sheet.ExcelSheetAttribute as SQAD.MTNext.Business.Models.Attributes.ExcelSheetAttribute).SheetName : itemType.Name;
                 if (sheetName == null)
                     sheetName = sheet.SheetName;
 

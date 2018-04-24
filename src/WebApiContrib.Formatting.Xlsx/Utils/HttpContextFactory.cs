@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Web;
 
-namespace WebApiContrib.Formatting.Xlsx.Utils {
+namespace SQAD.MTNext.Utils.WebApiContrib.Formatting.Xlsx.Utils {
     public class HttpContextFactory
     {
         private static HttpContextBase currentContext;

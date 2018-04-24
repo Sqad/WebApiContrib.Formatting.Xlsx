@@ -1,13 +1,13 @@
 ﻿using OfficeOpenXml;
+using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WebApiContrib.Formatting.Xlsx.Serialisation;
 
-namespace WebApiContrib.Formatting.Xlsx
+namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
     public class SqadXlsxSheetBuilder
     {

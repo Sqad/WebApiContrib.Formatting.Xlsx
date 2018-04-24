@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using WebApiContrib.Formatting.Xlsx.Attributes;
 
-namespace WebApiContrib.Formatting.Xlsx.Serialisation
+namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 {
     public class ExcelSheetInfo
     {

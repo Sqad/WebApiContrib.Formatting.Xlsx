@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebApiContrib.Formatting.Xlsx.Serialisation
+namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 {
     public class KeyedCollectionBase<T> : KeyedCollection<string, T>
     {

@@ -6,11 +6,11 @@ using System.Net.Http.Headers;
 using System.Security.Permissions;
 using System.Threading.Tasks;
 using System.Data;
-using WebApiContrib.Formatting.Xlsx.Interfaces;
-using WebApiContrib.Formatting.Xlsx.Serialisation;
 using WebApiContrib.Formatting.Xlsx.Attributes;
+using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
+using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 
-namespace WebApiContrib.Formatting.Xlsx
+namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
 
     /// <summary>

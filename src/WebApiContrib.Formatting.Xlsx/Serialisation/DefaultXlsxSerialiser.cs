@@ -1,10 +1,11 @@
-﻿using System;
+﻿using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using WebApiContrib.Formatting.Xlsx.Interfaces;
-using util = WebApiContrib.Formatting.Xlsx.FormatterUtils;
+using util = SQAD.MTNext.WebApiContrib.Formatting.Xlsx.FormatterUtils;
 
-namespace WebApiContrib.Formatting.Xlsx.Serialisation
+namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 {
     /// <summary>
     /// Serialises public, parameterless properties of a class, taking account of any custom attributes.

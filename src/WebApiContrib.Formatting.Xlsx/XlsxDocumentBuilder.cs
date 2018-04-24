@@ -5,11 +5,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using WebApiContrib.Formatting.Xlsx.Interfaces;
-using WebApiContrib.Formatting.Xlsx.Serialisation;
 using System.Data;
+using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 
-namespace WebApiContrib.Formatting.Xlsx
+namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
     public class XlsxDocumentBuilder : IXlsxDocumentBuilder
     {

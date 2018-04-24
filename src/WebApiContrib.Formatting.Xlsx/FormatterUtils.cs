@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using WebApiContrib.Formatting.Xlsx.Attributes;
 
-namespace WebApiContrib.Formatting.Xlsx
+namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
     public static class FormatterUtils
     {

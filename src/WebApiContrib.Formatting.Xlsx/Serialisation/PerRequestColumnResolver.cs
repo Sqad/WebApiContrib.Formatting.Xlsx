@@ -1,11 +1,11 @@
-﻿using System;
+﻿using SQAD.MTNext.Utils.WebApiContrib.Formatting.Xlsx.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WebApiContrib.Formatting.Xlsx.Utils;
 
-namespace WebApiContrib.Formatting.Xlsx.Serialisation
+namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 {
     /// <summary>
     /// Resolves the properties whitelisted by name in an item (default <c>XlsxSerialisableProperties</c>) of the

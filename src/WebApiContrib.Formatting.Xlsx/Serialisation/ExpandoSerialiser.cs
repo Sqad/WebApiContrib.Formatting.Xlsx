@@ -1,11 +1,12 @@
-﻿using System;
+﻿using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx;
+using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
-using WebApiContrib.Formatting.Xlsx.Interfaces;
 
-namespace WebApiContrib.Formatting.Xlsx.Serialisation
+namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 {
     /// <summary>
     /// Custom serialiser for <c>ExpandoObject</c>.

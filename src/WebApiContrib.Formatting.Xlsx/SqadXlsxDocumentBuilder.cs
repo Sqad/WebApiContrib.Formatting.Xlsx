@@ -1,13 +1,13 @@
 ﻿using OfficeOpenXml;
+using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WebApiContrib.Formatting.Xlsx.Interfaces;
 
-namespace WebApiContrib.Formatting.Xlsx
+namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
     public class SqadXlsxDocumentBuilder : IXlsxDocumentBuilder
     {

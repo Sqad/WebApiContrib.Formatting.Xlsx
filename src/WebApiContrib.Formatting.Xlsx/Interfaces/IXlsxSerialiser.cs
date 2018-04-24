@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace WebApiContrib.Formatting.Xlsx.Interfaces
+namespace SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces
 {
     /// <summary>
     /// Exposes access to serialisation logic for complete customisation of serialised output.

@@ -1,7 +1,7 @@
 ﻿using System;
 using WebApiContrib.Formatting.Xlsx.Attributes;
 
-namespace WebApiContrib.Formatting.Xlsx.Serialisation
+namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 {
     /// <summary>
     /// Formatting information for an Excel column based on attribute values specified on a class.

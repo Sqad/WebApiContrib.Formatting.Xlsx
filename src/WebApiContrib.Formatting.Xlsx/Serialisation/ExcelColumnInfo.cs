@@ -1,5 +1,5 @@
-﻿using System;
-using WebApiContrib.Formatting.Xlsx.Attributes;
+﻿using SQAD.MTNext.Attributes.WebApiContrib.Formatting.Xlsx.Attributes;
+using System;
 
 namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 {

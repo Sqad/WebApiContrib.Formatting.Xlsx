@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WebApiContrib.Formatting.Xlsx.Attributes
+namespace SQAD.MTNext.Attributes.WebApiContrib.Formatting.Xlsx.Attributes
 {
     public class ExcelSheetAttribute : Attribute
     {

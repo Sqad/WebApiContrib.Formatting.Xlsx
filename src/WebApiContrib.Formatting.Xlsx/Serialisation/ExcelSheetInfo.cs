@@ -1,9 +1,9 @@
-﻿using System;
+﻿using SQAD.MTNext.Attributes.WebApiContrib.Formatting.Xlsx.Attributes;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using WebApiContrib.Formatting.Xlsx.Attributes;
 
 namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 {

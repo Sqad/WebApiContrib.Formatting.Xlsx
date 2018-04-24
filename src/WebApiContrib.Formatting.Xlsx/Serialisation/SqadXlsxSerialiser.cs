@@ -1,4 +1,5 @@
-﻿using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
+﻿using SQAD.MTNext.Attributes.WebApiContrib.Formatting.Xlsx.Attributes;
+using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx;
 using System;
 using System.Collections.Generic;
@@ -42,8 +43,8 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 
             if (sheetName == null)
             {
-                var sheetAttribute = itemType.GetCustomAttributes(true).SingleOrDefault(s => s is Attributes.ExcelSheetAttribute);
-                sheetName = sheetAttribute != null ? (sheetAttribute as Attributes.ExcelSheetAttribute).SheetName : itemType.Name;
+                var sheetAttribute = itemType.GetCustomAttributes(true).SingleOrDefault(s => s is ExcelSheetAttribute);
+                sheetName = sheetAttribute != null ? (sheetAttribute as ExcelSheetAttribute).SheetName : itemType.Name;
             }
 
             if (columnInfo.Count() > 0)
@@ -254,10 +255,10 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
         {
             foreach (var sheet in sheetsInfo)
             {
-                if (!(sheet.ExcelSheetAttribute is Attributes.ExcelSheetAttribute))
+                if (!(sheet.ExcelSheetAttribute is ExcelSheetAttribute))
                     continue;
 
-                string sheetName = sheet.ExcelSheetAttribute != null ? (sheet.ExcelSheetAttribute as Attributes.ExcelSheetAttribute).SheetName : itemType.Name;
+                string sheetName = sheet.ExcelSheetAttribute != null ? (sheet.ExcelSheetAttribute as ExcelSheetAttribute).SheetName : itemType.Name;
                 if (sheetName == null)
                     sheetName = sheet.SheetName;
 

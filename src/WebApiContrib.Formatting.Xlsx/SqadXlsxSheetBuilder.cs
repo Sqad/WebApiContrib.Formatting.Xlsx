@@ -124,6 +124,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
                 if (ShouldAddHeaderRow == true)
                 {
+                    worksheet.DefaultColWidth = 13;
                     var headerRow = worksheet.Row(1);
                     headerRow.Height = 45.60;
 

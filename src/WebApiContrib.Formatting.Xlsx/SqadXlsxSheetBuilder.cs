@@ -127,26 +127,54 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                     var headerRow = worksheet.Row(1);
                     headerRow.Height = 45.60;
 
-                    #region First Cell Logo
-                    worksheet.Column(1).Width = 10.22;
-                    var cell = worksheet.Cells[1, 1];
+                    #region Logo and Tab name
+                    var logoAndTabTitleCells = worksheet.Cells[1, 1, 1, 6];
+                    logoAndTabTitleCells.Merge = true;
+
+                    //Picture
                     var picture = worksheet.Drawings.AddPicture("SQADLogo", Resources.Properties.Resources.SQADLogo);
-                    picture.SetPosition(cell.Rows - 1, 2, cell.Columns - 1, 15);
-                    #endregion First Cell Logo
+                    picture.SetPosition(0, 2, 0, 5);
 
-                    #region Second Tab Name
-                    var cells = worksheet.Cells[1, 2, 1, 6];
-                    cells.Merge = true;
-
-                    var tabName = cells.RichText.Add($"{CurrentTableName.ToUpper()} ");
-                    var staticNameTabText = cells.RichText.Add("DATA FIELDS");
+                    //Tab name text
+                    var tabName = logoAndTabTitleCells.RichText.Add($"{CurrentTableName.ToUpper()} ");
+                    var staticNameTabText = logoAndTabTitleCells.RichText.Add("DATA FIELDS");
 
                     tabName.Size = staticNameTabText.Size = 40;
                     tabName.Color = staticNameTabText.Color = System.Drawing.Color.FromArgb(0, 159, 220);
                     tabName.FontName = staticNameTabText.FontName = "Calibri";
                     tabName.Bold = true;
 
-                    #endregion Second Tab Name
+                    logoAndTabTitleCells.Style.Indent = 7;
+                    
+                    #endregion Logo and Tab name
+
+                    #region Notice text
+                    var noticeTextCells = worksheet.Cells[1, 7, 1, 8];
+                    noticeTextCells.Merge = true;
+
+                    var noticeImportantText = noticeTextCells.RichText.Add("IMPORTANT: ");
+                    noticeImportantText.Bold = true;
+                    noticeImportantText.Size = 11;
+                    noticeImportantText.FontName = "Calibri";
+                    noticeImportantText.Color = System.Drawing.Color.White;
+
+                    var noticeWarningText = noticeTextCells.RichText.Add("Text instructions for how to complete this section of the page. (the first two lines of this sheet will be omitted from the import).");
+                    noticeWarningText.Size = 11;
+                    noticeWarningText.FontName = "Calibri";
+                    noticeWarningText.Bold = false;
+                    noticeWarningText.Color = System.Drawing.Color.White;
+
+                    noticeTextCells.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    noticeTextCells.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(132, 151, 176));
+                    noticeTextCells.Style.WrapText = true;
+                    noticeTextCells.Style.VerticalAlignment = OfficeOpenXml.Style.ExcelVerticalAlignment.Top;
+
+                    #endregion Notice text
+                    var fullLogoCells = worksheet.Cells[1, 9, 1, 12];
+                    fullLogoCells.Merge = true;
+
+                    var fullLogo = worksheet.Drawings.AddPicture("SQADLogoFull", Resources.Properties.Resources.SQADLogoFull);
+                    fullLogo.SetPosition(0, 2, 9, 0);
 
                 }
 

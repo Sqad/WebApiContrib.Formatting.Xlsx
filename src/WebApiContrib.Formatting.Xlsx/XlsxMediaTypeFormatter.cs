@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using System.Data;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
-using SQAD.MTNext.Attributes.WebApiContrib.Formatting.Xlsx.Attributes;
+using SQAD.MTNext.Business.Models.Attributes;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -94,9 +94,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             HeaderStyle = headerStyle;
 
             // Initialise serialisers.
-            Serialisers = new List<IXlsxSerialiser> { new SqadXlsxSerialiser(staticValuesResolver),
-                                                     // new ExpandoSerialiser()
-                                                    };
+            Serialisers = new List<IXlsxSerialiser> { new SqadXlsxSerialiser(staticValuesResolver) };
 
             //DefaultSerializer = new SqadXlsxSerialiser(staticValuesResolver); //new DefaultXlsxSerialiser();
         }

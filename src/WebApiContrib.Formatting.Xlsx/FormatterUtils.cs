@@ -1,4 +1,4 @@
-﻿using SQAD.MTNext.Attributes.WebApiContrib.Formatting.Xlsx.Attributes;
+﻿using SQAD.MTNext.Business.Models.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -6,6 +6,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Resources = SQAD.MTNext.Resources.Properties.Resources;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -21,9 +22,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
         public bool ShouldAutoFit { get; set; }
 
+        public bool ShouldAddHeaderRow { get; set; }
+
         private List<DataTable> _sheetTables { get; set; }
 
-        public  List<DataTable> SheetTables => _sheetTables;
+        public List<DataTable> SheetTables => _sheetTables;
 
         public SqadXlsxSheetBuilder(string sheetName, bool isReferenceSheet = false)
         {
@@ -40,12 +43,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             _sheetTables.Add(_currentTable);
         }
 
-        public void AppendHeaderRow(ExcelColumnInfoCollection columns)
+        public void AppendColumnHeaderRow(ExcelColumnInfoCollection columns)
         {
             _currentTable.Columns.AddRange(columns.Select(s => new DataColumn(s.PropertyName, typeof(ExcelCell))).ToArray());
         }
 
-        public void AppendHeaderRow(DataColumnCollection columns)
+        public void AppendColumnHeaderRow(DataColumnCollection columns)
         {
             foreach (DataColumn c in columns)
             {
@@ -105,7 +108,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             else
                 worksheet = package.Workbook.Worksheets.Add(_currentTable.TableName);
 
-            int rowCount = 1;
+            int rowCount = ShouldAddHeaderRow ? 3 : 1;
+
             foreach (var table in _sheetTables)
             {
                 if (_isReferenceSheet == true)
@@ -116,6 +120,34 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                     mergeTitleCell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
                     mergeTitleCell.Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.LightGreen);
                     rowCount++;
+                }
+
+                if (ShouldAddHeaderRow == true)
+                {
+                    var headerRow = worksheet.Row(1);
+                    headerRow.Height = 45.60;
+
+                    #region First Cell Logo
+                    worksheet.Column(1).Width = 10.22;
+                    var cell = worksheet.Cells[1, 1];
+                    var picture = worksheet.Drawings.AddPicture("SQADLogo", Resources.Properties.Resources.SQADLogo);
+                    picture.SetPosition(cell.Rows - 1, 2, cell.Columns - 1, 15);
+                    #endregion First Cell Logo
+
+                    #region Second Tab Name
+                    var cells = worksheet.Cells[1, 2, 1, 6];
+                    cells.Merge = true;
+
+                    var tabName = cells.RichText.Add($"{CurrentTableName.ToUpper()} ");
+                    var staticNameTabText = cells.RichText.Add("DATA FIELDS");
+
+                    tabName.Size = staticNameTabText.Size = 40;
+                    tabName.Color = staticNameTabText.Color = System.Drawing.Color.FromArgb(0, 159, 220);
+                    tabName.FontName = staticNameTabText.FontName = "Calibri";
+                    tabName.Bold = true;
+
+                    #endregion Second Tab Name
+
                 }
 
                 foreach (DataColumn col in table.Columns)
@@ -157,7 +189,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
                                 sheetCodeColumnStatements.Add(code);
                             }
-                            else if (cell.CellValue !=null && bool.TryParse(cell.CellValue.ToString(), out var result))
+                            else if (cell.CellValue != null && bool.TryParse(cell.CellValue.ToString(), out var result))
                             {
                                 var dataValidation = worksheet.DataValidations.AddListValidation(worksheet.Cells[rowCount, excelColumnIndex].Address);
                                 dataValidation.ShowErrorMessage = true;

@@ -1,4 +1,4 @@
-﻿using SQAD.MTNext.Attributes.WebApiContrib.Formatting.Xlsx.Attributes;
+﻿using SQAD.MTNext.Business.Models.Attributes;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx;
 using System;
@@ -54,7 +54,8 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                 if (sheetBuilder == null)
                 {
                     sheetBuilder = new SqadXlsxSheetBuilder(sheetName);
-                    sheetBuilder.AppendHeaderRow(columnInfo);
+                    sheetBuilder.AppendColumnHeaderRow(columnInfo);
+
                     document.AppendSheet(sheetBuilder);
                 }
             }
@@ -74,7 +75,6 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                     foreach (var dataObj in value as IEnumerable<object>)
                     {
                         PopulateRows(columns, dataObj, sheetBuilder, columnInfo, document);
-                        //CheckColumnsForResolveSheets(document, columnInfo);
                         var deepSheetsInfo = _sheetResolver.GetExcelSheetInfo(itemType, dataObj);
                         PopulateInnerObjectSheets(deepSheetsInfo, document, itemType);
                     }
@@ -82,14 +82,17 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                 else if (!(value is IEnumerable<object>))
                 {
                     PopulateRows(columns, value, sheetBuilder, columnInfo, document);
-                    //CheckColumnsForResolveSheets(document, columnInfo);
                     var sheetsInfo = _sheetResolver.GetExcelSheetInfo(itemType, value);
                     PopulateInnerObjectSheets(sheetsInfo, document, itemType);
                 }
             }
 
             if (sheetBuilder != null)
+            {
                 sheetBuilder.ShouldAutoFit = true;
+                sheetBuilder.ShouldAddHeaderRow = true;
+            }
+            
         }
 
         private void PopulateRows(List<string> columns, object value, SqadXlsxSheetBuilder sheetBuilder, ExcelColumnInfoCollection columnInfo = null, IXlsxDocumentBuilder document = null)
@@ -108,33 +111,6 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 
                 cell.CellHeader = columnName;
 
-                //bool lookUpObjectIsList = false;
-                //object lookUpObject = value;
-                //if (columnName.Contains(":"))
-                //{
-                //    string[] columnPath = columnName.Split(':');
-                //    columnName = columnPath.Last();
-
-                //    for (int l = 1; l < columnPath.Count() - 1; l++)
-                //    {
-                //        lookUpObject = FormatterUtils.GetFieldOrPropertyValue(lookUpObject, columnPath[l]);
-
-                //        if (lookUpObject != null && lookUpObject.GetType().Name.StartsWith("List"))
-                //        {
-                //            lookUpObjectIsList = true;
-                //            break;
-                //        }
-
-                //    }
-                //}
-
-                //if (lookUpObjectIsList)
-                //{
-                //    this.Serialise(FormatterUtils.GetEnumerableItemType(lookUpObject.GetType()), lookUpObject as IEnumerable<object>, document, sheetBuilder.CurrentTableName);
-
-                //}
-                //else
-                //{
                 var cellValue = GetFieldOrPropertyValue(value, columnName);
 
                 if (columnName.Contains(":") && (cellValue == null || (cellValue != null && string.IsNullOrEmpty(cellValue.ToString()))))
@@ -188,40 +164,16 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                     cell.CellValue = FormatCellValue(cellValue, info);
 
                 row.Add(cell);
-                //}
             }
 
             if (row.Count() > 0)
                 sheetBuilder.AppendRow(row.ToList());
         }
 
-        //private void CheckColumnsForResolveSheets(IXlsxDocumentBuilder document, ExcelColumnInfoCollection columnInfo)
-        //{
-        //    if (columnInfo == null)
-        //        return;
-
-        //    foreach (var cInfo in columnInfo)
-        //    {
-        //        if (string.IsNullOrEmpty(cInfo.ExcelColumnAttribute.ResolveFromTable) == false && _staticValuesResolver != null)
-        //        {
-        //            DataTable columntResolveTable = _staticValuesResolver(cInfo.ExcelColumnAttribute.ResolveFromTable);
-        //            columntResolveTable.TableName = cInfo.ExcelColumnAttribute.ResolveFromTable;
-        //            if (string.IsNullOrEmpty(cInfo.ExcelColumnAttribute.OverrideResolveTableName) == false)
-        //                columntResolveTable.TableName = cInfo.ExcelColumnAttribute.OverrideResolveTableName;
-
-        //            var referenceSheetBuilder = this.PopulateReferenceSheet(document,columntResolveTable);
-
-        //            document.AppendSheet(referenceSheetBuilder);
-
-        //            columntResolveTable = null;
-        //        }
-        //    }
-        //}
-
         private void PopulateReferenceSheet(SqadXlsxSheetBuilder referenceSheet, DataTable ReferenceSheet)
         {
             //SqadXlsxSheetBuilder sb = new SqadXlsxSheetBuilder(ReferenceSheet.TableName, true);
-            referenceSheet.AppendHeaderRow(ReferenceSheet.Columns);
+            referenceSheet.AppendColumnHeaderRow(ReferenceSheet.Columns);
             referenceSheet.ShouldAutoFit = true;
 
 
@@ -245,7 +197,7 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                         resolveRow.Add(c.Caption, r[c].ToString());
                 }
 
-                this.PopulateRows(resolveRow.Keys.ToList(), resolveRow, referenceSheet);
+                PopulateRows(resolveRow.Keys.ToList(), resolveRow, referenceSheet);
             }
 
             //return sb;

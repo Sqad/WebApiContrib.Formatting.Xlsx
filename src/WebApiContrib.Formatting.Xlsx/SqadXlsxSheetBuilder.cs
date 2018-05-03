@@ -146,7 +146,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                     tabName.Bold = true;
 
                     logoAndTabTitleCells.Style.Indent = 7;
-                    
+
                     #endregion Logo and Tab name
 
                     #region Notice text
@@ -179,12 +179,32 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
                 }
 
+
                 foreach (DataColumn col in table.Columns)
-                    worksheet.Cells[rowCount, col.Ordinal + 1].Value = col.ColumnName;
+                {
+                    var colName = worksheet.Cells[rowCount, col.Ordinal + 1].RichText.Add(col.ColumnName);
+                    colName.Bold = true;
+                    colName.Size = 13;
+
+                    worksheet.Cells[rowCount, col.Ordinal + 1].Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                    worksheet.Cells[rowCount, col.Ordinal + 1].Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
+
+                    if ((col.Ordinal + 1) % 2 == 0)
+                    {
+                        worksheet.Cells[rowCount, col.Ordinal + 1, 255, col.Ordinal + 1].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        worksheet.Cells[rowCount, col.Ordinal + 1, 255, col.Ordinal + 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(242, 242, 242));
+
+                        worksheet.Cells[rowCount, col.Ordinal + 1, 255, col.Ordinal + 1].Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                        worksheet.Cells[rowCount, col.Ordinal + 1, 255, col.Ordinal + 1].Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                        worksheet.Cells[rowCount, col.Ordinal + 1, 255, col.Ordinal + 1].Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
+                        worksheet.Cells[rowCount, col.Ordinal + 1, 255, col.Ordinal + 1].Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
+                    }
+                }
 
                 foreach (DataRow row in table.Rows)
                 {
                     rowCount++;
+
                     foreach (DataColumn col in table.Columns)
                     {
                         var colObject = row[col];
@@ -238,7 +258,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
 
             if (worksheet.Dimension != null && ShouldAutoFit)
+            {
                 worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+                worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(242, 242, 242));
+
+                worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thick;
+                worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Border.Bottom.Color.SetColor(System.Drawing.Color.Black);
+            }
 
             #region sheet code to resolve reference column
             if (sheetCodeColumnStatements.Count() > 0)

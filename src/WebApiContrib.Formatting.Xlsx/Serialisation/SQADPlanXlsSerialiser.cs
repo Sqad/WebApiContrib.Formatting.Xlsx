@@ -11,19 +11,19 @@ using System.Threading.Tasks;
 
 namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 {
-    public class SqadXlsxSerialiser : IXlsxSerialiser
+    public class SQADPlanXlsSerialiser : IXlsxSerialiser
     {
         private IColumnResolver _columnResolver { get; set; }
         private ISheetResolver _sheetResolver { get; set; }
         private Func<string, DataTable> _staticValuesResolver { get; set; }
         public bool IgnoreFormatting => false;
 
-        public SqadXlsxSerialiser(Func<string, DataTable> staticValuesResolver) : this(new DefaultSheetResolver(), new DefaultColumnResolver(), staticValuesResolver)
+        public SQADPlanXlsSerialiser(Func<string, DataTable> staticValuesResolver) : this(new DefaultSheetResolver(), new DefaultColumnResolver(), staticValuesResolver)
         {
 
         }
 
-        public SqadXlsxSerialiser(ISheetResolver sheetResolver, IColumnResolver columnResolver, Func<string, DataTable> StaticValuesResolver)
+        public SQADPlanXlsSerialiser(ISheetResolver sheetResolver, IColumnResolver columnResolver, Func<string, DataTable> StaticValuesResolver)
         {
             _sheetResolver = sheetResolver;
             _columnResolver = columnResolver;

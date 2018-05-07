@@ -74,7 +74,7 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
             return (IDictionary<string, object>)item;
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document,string sheetName)//, SqadXlsxSheetBuilder sheetBuilder)
+        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document,string sheetName)
         {
             throw new NotImplementedException();
         }

@@ -94,7 +94,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             HeaderStyle = headerStyle;
 
             // Initialise serialisers.
-            Serialisers = new List<IXlsxSerialiser> { new SqadXlsxSerialiser(staticValuesResolver) };
+            Serialisers = new List<IXlsxSerialiser> { new SQADPlanXlsSerialiser(staticValuesResolver) };
 
             //DefaultSerializer = new SqadXlsxSerialiser(staticValuesResolver); //new DefaultXlsxSerialiser();
         }

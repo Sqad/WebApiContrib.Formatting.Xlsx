@@ -84,7 +84,7 @@
     <Compile Include="Interfaces\IXlsxSerialiser.cs" />
     <Compile Include="Serialisation\KeyedCollectionBase.cs" />
     <Compile Include="Serialisation\PerRequestColumnResolver.cs" />
-    <Compile Include="Serialisation\SqadXlsxSerialiser.cs" />
+    <Compile Include="Serialisation\SQADPlanXlsSerialiser.cs" />
     <Compile Include="SqadXlsxDocumentBuilder.cs" />
     <Compile Include="SqadXlsxSheetBuilder.cs" />
     <Compile Include="Utils\HttpContextFactory.cs" />

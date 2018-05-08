@@ -1,4 +1,5 @@
 ﻿using SQAD.MTNext.Business.Models.Attributes;
+using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx;
 using System;
@@ -32,7 +33,8 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 
         public bool CanSerialiseType(Type valueType, Type itemType)
         {
-            return true;
+            
+            return valueType == typeof(ChartData);
         }
 
         public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName = null)//, SqadXlsxSheetBuilder sheetBuilder)

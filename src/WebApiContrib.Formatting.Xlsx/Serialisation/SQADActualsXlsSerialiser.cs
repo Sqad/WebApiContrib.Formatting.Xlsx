@@ -9,5 +9,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation
 {
     public class SQADActualsXlsSerialiser : IXlsxSerialiser
     {
+        public bool CanSerialiseType(Type valueType, Type itemType)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

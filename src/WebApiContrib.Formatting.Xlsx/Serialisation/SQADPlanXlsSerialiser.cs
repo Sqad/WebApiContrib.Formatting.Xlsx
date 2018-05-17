@@ -193,7 +193,10 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                     }
                     else if (c.DataType == typeof(DateTime))
                     {
-                        resolveRow.Add(c.Caption, Convert.ToDateTime(r[c]));
+                        if(r[c] is System.DBNull)
+                            resolveRow.Add(c.Caption, string.Empty);
+                        else
+                           resolveRow.Add(c.Caption, Convert.ToDateTime(r[c]));
                     }
                     else
                         resolveRow.Add(c.Caption, r[c].ToString());

@@ -182,6 +182,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
                 foreach (DataColumn col in table.Columns)
                 {
+                    if (worksheet.Name.Equals("Reference")) break;
+
                     var colName = worksheet.Cells[rowCount, col.Ordinal + 1].RichText.Add(col.ColumnName);
                     colName.Bold = true;
                     colName.Size = 13;
@@ -191,7 +193,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
                     if ((col.Ordinal + 1) % 2 == 0)
                     {
-                        worksheet.Cells[rowCount, col.Ordinal + 1, 255, col.Ordinal + 1].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        worksheet.Cells[rowCount,col.Ordinal + 1, 255, col.Ordinal + 1].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
                         worksheet.Cells[rowCount, col.Ordinal + 1, 255, col.Ordinal + 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(242, 242, 242));
 
                         worksheet.Cells[rowCount, col.Ordinal + 1, 255, col.Ordinal + 1].Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;

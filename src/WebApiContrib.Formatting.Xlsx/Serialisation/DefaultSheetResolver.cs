@@ -36,7 +36,7 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                     SheetObject = FormatterUtils.GetFieldOrPropertyValue(data, prop.Name)
                 };
 
-                if (prop.PropertyType.Name.StartsWith("List"))
+                if (prop.PropertyType.Name.StartsWith("List") && sheetInfo.SheetObject!=null)
                     sheetInfo.SheetType = FormatterUtils.GetEnumerableItemType(sheetInfo.SheetObject.GetType());
 
                 sheetCollection.Add(sheetInfo);

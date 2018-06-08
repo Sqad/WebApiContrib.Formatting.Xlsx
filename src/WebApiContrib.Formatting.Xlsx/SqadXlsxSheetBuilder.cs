@@ -193,13 +193,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
                     if ((col.Ordinal + 1) % 2 == 0)
                     {
-                        worksheet.Cells[rowCount,col.Ordinal + 1, 255, col.Ordinal + 1].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                        worksheet.Cells[rowCount, col.Ordinal + 1, 255, col.Ordinal + 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(242, 242, 242));
+                        int maxRows = rowCount + table.Rows.Count;
+                        worksheet.Cells[rowCount,col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        worksheet.Cells[rowCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(242, 242, 242));
 
-                        worksheet.Cells[rowCount, col.Ordinal + 1, 255, col.Ordinal + 1].Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-                        worksheet.Cells[rowCount, col.Ordinal + 1, 255, col.Ordinal + 1].Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-                        worksheet.Cells[rowCount, col.Ordinal + 1, 255, col.Ordinal + 1].Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
-                        worksheet.Cells[rowCount, col.Ordinal + 1, 255, col.Ordinal + 1].Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
+                        worksheet.Cells[rowCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                        worksheet.Cells[rowCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                        worksheet.Cells[rowCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
+                        worksheet.Cells[rowCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
                     }
                 }
 

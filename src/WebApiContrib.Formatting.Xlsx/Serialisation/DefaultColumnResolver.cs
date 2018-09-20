@@ -114,7 +114,8 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
         public virtual IEnumerable<PropertyInfo> GetSerialisablePropertyInfo(Type itemType, object data)
         {
             return (from p in itemType.GetProperties()
-                    where p.CanRead & p.GetGetMethod().IsPublic & p.GetGetMethod().GetParameters().Length == 0
+                    where p.CanRead
+                    where p.GetGetMethod()==null || p.GetGetMethod().IsPublic & p.GetGetMethod().GetParameters().Length == 0
                     select p).ToList();
         }
 

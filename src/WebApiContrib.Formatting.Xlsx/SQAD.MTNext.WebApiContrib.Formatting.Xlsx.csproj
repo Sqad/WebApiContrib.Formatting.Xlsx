@@ -108,6 +108,10 @@
       <Project>{52a526e9-4153-42cd-aa70-19db0d23965b}</Project>
       <Name>SQAD.MTNext.Resources</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\..\SQAD.MTNext.Services.Repositories\SQAD.MTNext.Services.Repositories.csproj">
+      <Project>{6D582102-42A1-40CB-B61E-747500515A33}</Project>
+      <Name>SQAD.MTNext.Services.Repositories</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />

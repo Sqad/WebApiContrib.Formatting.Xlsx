@@ -1,6 +1,7 @@
 ﻿using SQAD.MTNext.Business.Models.Attributes;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
+using SQAD.MTNext.Services.Repositories.Export;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx;
 using System;
 using System.Collections.Generic;
@@ -16,15 +17,15 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
     {
         private IColumnResolver _columnResolver { get; set; }
         private ISheetResolver _sheetResolver { get; set; }
-        private Func<string, DataTable> _staticValuesResolver { get; set; }
+        private IExportHelpersRepository _staticValuesResolver { get; set; }
         public bool IgnoreFormatting => false;
 
-        public SQADPlanXlsSerialiser(Func<string, DataTable> staticValuesResolver) : this(new DefaultSheetResolver(), new DefaultColumnResolver(), staticValuesResolver)
+        public SQADPlanXlsSerialiser(IExportHelpersRepository staticValuesResolver) : this(new DefaultSheetResolver(), new DefaultColumnResolver(), staticValuesResolver)
         {
 
         }
 
-        public SQADPlanXlsSerialiser(ISheetResolver sheetResolver, IColumnResolver columnResolver, Func<string, DataTable> StaticValuesResolver)
+        public SQADPlanXlsSerialiser(ISheetResolver sheetResolver, IColumnResolver columnResolver, IExportHelpersRepository StaticValuesResolver)
         {
             _sheetResolver = sheetResolver;
             _columnResolver = columnResolver;
@@ -125,40 +126,56 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                 {
                     info = columnInfo[i];
                     #region Reference Row
-                    if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false && _staticValuesResolver != null)
+
+                    if (_staticValuesResolver != null)
                     {
-                        DataTable columntResolveTable = _staticValuesResolver(info.ExcelColumnAttribute.ResolveFromTable);
-                        columntResolveTable.TableName = info.ExcelColumnAttribute.ResolveFromTable;
-                        if (string.IsNullOrEmpty(info.ExcelColumnAttribute.OverrideResolveTableName) == false)
-                            columntResolveTable.TableName = info.ExcelColumnAttribute.OverrideResolveTableName;
+                        DataTable columntResolveTable = null;
 
-                        cell.DataValidationSheet = columntResolveTable.TableName;
-
-                        var referenceSheet = document.GetReferenceSheet();
-
-                        if (referenceSheet == null)
+                        if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false)
                         {
-                            referenceSheet = new SqadXlsxSheetBuilder(cell.DataValidationSheet, true);
-                            document.AppendSheet(referenceSheet);
+                            columntResolveTable = _staticValuesResolver.GetRecordsByTableName(info.ExcelColumnAttribute.ResolveFromTable); ;
                         }
-                        else
+                        else if (info.PropertyType.BaseType == typeof(Enum))
                         {
-                            referenceSheet.AddAndActivateNewTable(cell.DataValidationSheet);
+                            columntResolveTable = _staticValuesResolver.GetRecordsFromEnum(info.PropertyType);
+                            info.ExcelColumnAttribute.ResolveFromTable = columnName;
                         }
+                        
+                        if (columntResolveTable != null)
+                        {
+                            columntResolveTable.TableName = info.ExcelColumnAttribute.ResolveFromTable;
+                            if (string.IsNullOrEmpty(info.ExcelColumnAttribute.OverrideResolveTableName) == false)
+                                columntResolveTable.TableName = info.ExcelColumnAttribute.OverrideResolveTableName;
 
-                        cell.DataValidationBeginRow = referenceSheet.GetNextAvailalbleRow();
+                            cell.DataValidationSheet = columntResolveTable.TableName;
 
-                        this.PopulateReferenceSheet(referenceSheet, columntResolveTable);
+                            var referenceSheet = document.GetReferenceSheet();
 
-                        cell.DataValidationRowsCount = referenceSheet.GetCurrentRowCount;
+                            if (referenceSheet == null)
+                            {
+                                referenceSheet = new SqadXlsxSheetBuilder(cell.DataValidationSheet, true);
+                                document.AppendSheet(referenceSheet);
+                            }
+                            else
+                            {
+                                referenceSheet.AddAndActivateNewTable(cell.DataValidationSheet);
+                            }
 
-                        if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveName) == false)
-                            cell.DataValidationNameCellIndex = referenceSheet.GetColumnIndexByColumnName(info.ExcelColumnAttribute.ResolveName);
+                            cell.DataValidationBeginRow = referenceSheet.GetNextAvailalbleRow();
 
-                        if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveValue) == false)
-                            cell.DataValidationValueCellIndex = referenceSheet.GetColumnIndexByColumnName(info.ExcelColumnAttribute.ResolveValue);
+                            this.PopulateReferenceSheet(referenceSheet, columntResolveTable);
 
+                            cell.DataValidationRowsCount = referenceSheet.GetCurrentRowCount;
+
+                            if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveName) == false)
+                                cell.DataValidationNameCellIndex = referenceSheet.GetColumnIndexByColumnName(info.ExcelColumnAttribute.ResolveName);
+
+                            if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveValue) == false)
+                                cell.DataValidationValueCellIndex = referenceSheet.GetColumnIndexByColumnName(info.ExcelColumnAttribute.ResolveValue);
+                        }
                     }
+
+
                     #endregion Reference Row
                 }
 

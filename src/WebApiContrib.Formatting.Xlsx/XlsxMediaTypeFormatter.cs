@@ -9,6 +9,7 @@ using System.Data;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using SQAD.MTNext.Business.Models.Attributes;
+using SQAD.MTNext.Services.Repositories.Export;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -80,7 +81,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                                       double? headerHeight = null,
                                       Action<ExcelStyle> cellStyle = null,
                                       Action<ExcelStyle> headerStyle = null,
-                                      Func<string, DataTable> staticValuesResolver = null)
+                                      IExportHelpersRepository staticValuesResolver = null)
         {
             SupportedMediaTypes.Clear();
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));

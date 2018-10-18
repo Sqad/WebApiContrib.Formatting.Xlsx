@@ -1,12 +1,8 @@
 ﻿using OfficeOpenXml;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Resources = SQAD.MTNext.Resources.Properties.Resources;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -45,7 +41,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
         public void AppendColumnHeaderRow(ExcelColumnInfoCollection columns)
         {
-            _currentTable.Columns.AddRange(columns.Select(s => new DataColumn(s.PropertyName, typeof(ExcelCell))).ToArray());
+            _currentTable.Columns.AddRange(columns.Select(s =>
+            {
+                string headerName = s.IsExcelHeaderDefined ? s.Header : s.PropertyName;
+                return new DataColumn(headerName, typeof(ExcelCell));
+            }).ToArray());
         }
 
         public void AppendColumnHeaderRow(DataColumnCollection columns)
@@ -194,7 +194,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                     if ((col.Ordinal + 1) % 2 == 0)
                     {
                         int maxRows = rowCount + table.Rows.Count;
-                        worksheet.Cells[rowCount,col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        worksheet.Cells[rowCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
                         worksheet.Cells[rowCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(242, 242, 242));
 
                         worksheet.Cells[rowCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Right.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;

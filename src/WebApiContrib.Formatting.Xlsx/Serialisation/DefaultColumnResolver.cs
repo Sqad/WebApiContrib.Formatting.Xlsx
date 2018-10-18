@@ -76,6 +76,10 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                     else
                     {
                         string propertyName = isComplexColumn ? $"{namePrefix}:{field}" : field;
+                        string displayName = propertyName;
+
+                        if (attribute.DoNotUsePropertyName)
+                            attribute.Header = namePrefix;
 
                         bool columnAlreadyadded = fieldInfo.Any(a => a.PropertyName == propertyName);
                         if (!columnAlreadyadded)
@@ -115,7 +119,7 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
         {
             return (from p in itemType.GetProperties()
                     where p.CanRead
-                    where p.GetGetMethod()==null || p.GetGetMethod().IsPublic & p.GetGetMethod().GetParameters().Length == 0
+                    where p.GetGetMethod() == null || p.GetGetMethod().IsPublic & p.GetGetMethod().GetParameters().Length == 0
                     select p).ToList();
         }
 

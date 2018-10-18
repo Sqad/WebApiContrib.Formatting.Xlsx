@@ -387,8 +387,9 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                 else if (!string.IsNullOrWhiteSpace(info.FormatString) & string.IsNullOrEmpty(info.ExcelNumberFormat))
                     return string.Format(info.FormatString, cellValue);
 
-                else if (cellValue.GetType() == typeof(DateTime))
-                    return string.Format("{0:MM/dd/yyyy}", cellValue);
+                else if (cellValue.GetType() == typeof(DateTime) || DateTime.TryParse(cellValue.ToString(), out var test))
+                    return string.Format("{0:MM/dd/yyyy}", DateTime.Parse( cellValue.ToString()));
+
             }
 
             return cellValue;

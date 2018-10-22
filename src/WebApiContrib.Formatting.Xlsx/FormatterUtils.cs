@@ -54,7 +54,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             if (dataMember != null)
                 return dataMember.Order;
 
-            return -1;
+            return 1000;
         }
 
         /// <summary>

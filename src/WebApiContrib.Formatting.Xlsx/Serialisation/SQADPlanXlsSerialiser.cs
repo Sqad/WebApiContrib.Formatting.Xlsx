@@ -131,14 +131,14 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                     {
                         DataTable columntResolveTable = null;
 
-                        if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false)
-                        {
-                            columntResolveTable = _staticValuesResolver.GetRecordsByTableName(info.ExcelColumnAttribute.ResolveFromTable); ;
-                        }
-                        else if (info.PropertyType.BaseType == typeof(Enum))
+                        if (info.PropertyType.BaseType == typeof(Enum))
                         {
                             columntResolveTable = _staticValuesResolver.GetRecordsFromEnum(info.PropertyType);
                             info.ExcelColumnAttribute.ResolveFromTable = columnName;
+                        }
+                        else if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false)
+                        {
+                            columntResolveTable = _staticValuesResolver.GetRecordsByTableName(info.ExcelColumnAttribute.ResolveFromTable); ;
                         }
                         
                         if (columntResolveTable != null)

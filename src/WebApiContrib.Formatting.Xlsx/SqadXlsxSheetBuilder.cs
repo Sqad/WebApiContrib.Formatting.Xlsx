@@ -41,11 +41,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
         public void AppendColumnHeaderRow(ExcelColumnInfoCollection columns)
         {
-            _currentTable.Columns.AddRange(columns.Select(s =>
+            foreach (var col in columns)
             {
-                string headerName = s.IsExcelHeaderDefined ? s.Header : s.PropertyName;
-                return new DataColumn(headerName, typeof(ExcelCell));
-            }).ToArray());
+                string headerName = col.IsExcelHeaderDefined ? col.Header : col.PropertyName;
+                var dc = new DataColumn(headerName, typeof(ExcelCell));
+
+                if (col.IsHidden)
+                    dc.ColumnMapping = MappingType.Hidden;
+
+                _currentTable.Columns.Add(dc);
+            }
         }
 
         public void AppendColumnHeaderRow(DataColumnCollection columns)
@@ -194,6 +199,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                     if ((col.Ordinal + 1) % 2 == 0)
                     {
                         int maxRows = rowCount + table.Rows.Count;
+
                         worksheet.Cells[rowCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
                         worksheet.Cells[rowCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(242, 242, 242));
 
@@ -201,6 +207,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                         worksheet.Cells[rowCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Left.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
                         worksheet.Cells[rowCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
                         worksheet.Cells[rowCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
+                    }
+
+                    if (col.ColumnMapping == MappingType.Hidden)
+                    {
+                        worksheet.Column(col.Ordinal + 1).Hidden = true;
                     }
                 }
 
@@ -221,6 +232,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                             ExcelCell cell = colObject as ExcelCell;
 
                             worksheet.Cells[rowCount, excelColumnIndex].Value = cell.CellValue;
+
+
 
                             if (!string.IsNullOrEmpty(cell.DataValidationSheet))
                             {
@@ -254,23 +267,35 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
                 rowCount += __ROWS_BETWEEN_REFERENCE_SHEETS__;
 
+                if (worksheet.Dimension != null && ShouldAutoFit)
+                {
+                    worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+
+                    foreach (DataColumn col in table.Columns)
+                    {
+                        if (worksheet.Name.Equals("Reference")) break;
+
+                        if (col.ColumnMapping == MappingType.Hidden)
+                        {
+                            worksheet.Column(col.Ordinal + 1).Hidden = true;
+                        }
+                    }
+
+                }
             }
 
+            //if (worksheet.Dimension != null && ShouldAutoFit)
+            //{
+            //worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
 
+            worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+            worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(242, 242, 242));
 
+            worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+            worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thick;
+            worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Border.Bottom.Color.SetColor(System.Drawing.Color.Black);
 
-
-            if (worksheet.Dimension != null && ShouldAutoFit)
-            {
-                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
-
-                worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.FromArgb(242, 242, 242));
-
-                worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Border.Top.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-                worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Border.Bottom.Style = OfficeOpenXml.Style.ExcelBorderStyle.Thick;
-                worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Border.Bottom.Color.SetColor(System.Drawing.Color.Black);
-            }
+            //  }
 
             #region sheet code to resolve reference column
             if (sheetCodeColumnStatements.Count() > 0)
@@ -293,6 +318,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                 worksheet.CodeModule.Code = worksheetOnChangeCode;
             }
             #endregion sheet code to resolve reference column
+
 
         }
     }

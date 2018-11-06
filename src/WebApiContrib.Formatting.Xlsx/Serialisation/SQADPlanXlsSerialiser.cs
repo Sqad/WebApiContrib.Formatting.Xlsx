@@ -182,9 +182,12 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                 if (cellValue != null)
                     cell.CellValue = FormatCellValue(cellValue, info);
 
-                if (info!=null && info.IsExcelHeaderDefined)
-                    cell.CellHeader = info.Header;
-
+                if (info != null)
+                {
+                    if (info.IsExcelHeaderDefined)
+                        cell.CellHeader = info.Header;
+                } 
+                    
                 row.Add(cell);
             }
 

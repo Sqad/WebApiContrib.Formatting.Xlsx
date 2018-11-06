@@ -162,6 +162,7 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 
                     if (attribute != null && attribute.UseDisplayFormatString)
                         field.FormatString = modelProp.DisplayFormatString;
+                   
                 }
             }
         }

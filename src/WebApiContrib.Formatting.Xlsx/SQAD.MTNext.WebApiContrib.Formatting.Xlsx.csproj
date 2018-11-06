@@ -85,6 +85,7 @@
     <Compile Include="Serialisation\KeyedCollectionBase.cs" />
     <Compile Include="Serialisation\PerRequestColumnResolver.cs" />
     <Compile Include="Serialisation\SQADActualsXlsSerialiser.cs" />
+    <Compile Include="Serialisation\SQADDataTableXlsxSerialiser.cs" />
     <Compile Include="Serialisation\SQADPlanXlsSerialiser.cs" />
     <Compile Include="SqadXlsxDocumentBuilder.cs" />
     <Compile Include="SqadXlsxSheetBuilder.cs" />

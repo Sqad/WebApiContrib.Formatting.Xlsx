@@ -10,6 +10,7 @@ using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using SQAD.MTNext.Business.Models.Attributes;
 using SQAD.MTNext.Services.Repositories.Export;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -95,7 +96,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             HeaderStyle = headerStyle;
 
             // Initialise serialisers.
-            Serialisers = new List<IXlsxSerialiser> { new SQADPlanXlsSerialiser(staticValuesResolver) };
+            Serialisers = new List<IXlsxSerialiser>
+                          {
+                              new SQADPlanXlsSerialiser(staticValuesResolver),
+                              new SQADDataTableXlsxSerialiser()
+                          };
 
             //DefaultSerializer = new SqadXlsxSerialiser(staticValuesResolver); //new DefaultXlsxSerialiser();
         }

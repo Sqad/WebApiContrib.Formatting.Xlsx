@@ -1,16 +1,16 @@
-﻿using OfficeOpenXml.Style;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Security.Permissions;
 using System.Threading.Tasks;
-using System.Data;
+using OfficeOpenXml.Style;
+using SQAD.MTNext.Business.Models.Attributes;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
-using SQAD.MTNext.Business.Models.Attributes;
 using SQAD.MTNext.Services.Repositories.Export;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -99,7 +99,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             Serialisers = new List<IXlsxSerialiser>
                           {
                               new SQADPlanXlsSerialiser(staticValuesResolver),
-                              new SQADDataTableXlsxSerialiser()
+                              new SqadFormattedViewXlsxSerializer()
                           };
 
             //DefaultSerializer = new SqadXlsxSerialiser(staticValuesResolver); //new DefaultXlsxSerialiser();

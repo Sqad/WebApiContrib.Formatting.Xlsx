@@ -97,7 +97,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
                 }
 
                 worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
-                    
+
                 foreach (DataColumn col in table.Columns)
                 {
                     if (worksheet.Name.Equals("Reference")) break;

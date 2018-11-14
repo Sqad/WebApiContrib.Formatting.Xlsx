@@ -8,11 +8,14 @@ using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using SQAD.MTNext.Services.Repositories.Export;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 {
     public class SQADPlanXlsSerialiser : IXlsxSerialiser
     {
+        public SerializerType SerializerType => SerializerType.Default;
+
         private IColumnResolver _columnResolver { get; set; }
         private ISheetResolver _sheetResolver { get; set; }
         private IExportHelpersRepository _staticValuesResolver { get; set; }

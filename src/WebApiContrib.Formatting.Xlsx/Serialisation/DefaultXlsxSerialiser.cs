@@ -3,6 +3,7 @@ using SQAD.MTNext.WebApiContrib.Formatting.Xlsx;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using util = SQAD.MTNext.WebApiContrib.Formatting.Xlsx.FormatterUtils;
 
 namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
@@ -12,6 +13,8 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
     /// </summary>
     public class DefaultXlsxSerialiser : IXlsxSerialiser
     {
+        public SerializerType SerializerType => SerializerType.Default;
+
         /// <summary>
         /// Default resolver determining which columns are generated from a type and how they are formatted.
         /// </summary>

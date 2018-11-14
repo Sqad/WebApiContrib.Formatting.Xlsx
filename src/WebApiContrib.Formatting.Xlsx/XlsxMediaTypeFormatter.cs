@@ -9,8 +9,10 @@ using SQAD.MTNext.Business.Models.Attributes;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using SQAD.MTNext.Services.Repositories.Export;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -20,6 +22,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
     /// </summary>
     public class XlsxMediaTypeFormatter : MediaTypeFormatter
     {
+        private readonly SerializerType _serializerType;
 
         #region Properties
 
@@ -82,7 +85,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                                       double? headerHeight = null,
                                       Action<ExcelStyle> cellStyle = null,
                                       Action<ExcelStyle> headerStyle = null,
-                                      IExportHelpersRepository staticValuesResolver = null)
+                                      IExportHelpersRepository staticValuesResolver = null,
+                                      SerializerType serializerType = SerializerType.Default)
         {
             SupportedMediaTypes.Clear();
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
@@ -95,11 +99,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             CellStyle = cellStyle;
             HeaderStyle = headerStyle;
 
+            _serializerType = serializerType;
+
             // Initialise serialisers.
             Serialisers = new List<IXlsxSerialiser>
                           {
                               new SQADPlanXlsSerialiser(staticValuesResolver),
-                              new SqadFormattedViewXlsxSerializer()
+                              new SqadFormattedViewXlsxSerializer(),
+                              new SqadUnformattedViewXlsxSerializer()
                           };
 
             //DefaultSerializer = new SqadXlsxSerialiser(staticValuesResolver); //new DefaultXlsxSerialiser();
@@ -188,11 +195,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             // Determine if a more specific serialiser might apply.
             foreach (var s in Serialisers)
             {
-                if (s.CanSerialiseType(valueType, itemType))
+                if (!s.CanSerialiseType(valueType, itemType) || s.SerializerType != _serializerType)
                 {
-                    serialiser = s;
-                    break;
+                    continue;
                 }
+
+                serialiser = s;
+                break;
             }
 
             serialiser.Serialise(itemType, value, document, null);

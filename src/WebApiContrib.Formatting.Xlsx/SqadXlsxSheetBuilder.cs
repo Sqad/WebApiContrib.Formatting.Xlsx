@@ -39,6 +39,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             _sheetTables.Add(_currentTable);
         }
 
+        public void AppendColumnHeaderRowItem(ExcelColumnInfo column)
+        {
+            string headerName = column.IsExcelHeaderDefined ? column.Header : column.PropertyName;
+            var dc = new DataColumn(headerName, typeof(ExcelCell));
+            _currentTable.Columns.Add(dc);
+        }
+
         public void AppendColumnHeaderRow(ExcelColumnInfoCollection columns)
         {
             foreach (var col in columns)

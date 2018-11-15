@@ -2,7 +2,6 @@
 using System.Drawing;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
-using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted
@@ -21,8 +20,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
         
         private readonly int _headerRowsCount;
 
-        public SqadXlsxFormattedViewSheetBuilder(string sheetName, int headerRowsCount)
-            : base(sheetName)
+        public SqadXlsxFormattedViewSheetBuilder(int headerRowsCount)
+            : base(ExportViewConstants.FormattedViewSheetName)
         {
             _headerRowsCount = headerRowsCount;
         }
@@ -34,7 +33,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                 return;
             }
             
-            FillData(worksheet, table);
+            WorksheetDataHelper.FillData(worksheet, table, false);
 
             FormatHeader(worksheet);
             FormatRows(worksheet);
@@ -200,23 +199,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
         private static void FormatGroupRow(ExcelRange row)
         {
             row.Style.Font.Bold = true;
-        }
-
-        private static void FillData(ExcelWorksheet worksheet, DataTable table)
-        {
-            for (var y = 0; y < table.Rows.Count; y++)
-            {
-                var dataRow = table.Rows[y];
-
-                for (var x = 0; x < table.Columns.Count; x++)
-                {
-                    var column = table.Columns[x];
-                    var value = (ExcelCell) dataRow[column.ColumnName];
-
-                    var cell = worksheet.Cells[y + 1, x + 1];
-                    cell.Value = value.CellValue;
-                }
-            }
         }
 
         private static void SetBordersToCells(ExcelRange cells)

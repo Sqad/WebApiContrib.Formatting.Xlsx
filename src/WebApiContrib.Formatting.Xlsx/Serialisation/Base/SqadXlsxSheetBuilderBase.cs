@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Data;
+using System.IO;
 using System.Linq;
+using System.Xml;
 using OfficeOpenXml;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 
@@ -85,7 +87,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
                 worksheet = package.Workbook.Worksheets.Add(CurrentTable.TableName);
             }
 
-            PreCompileActions(worksheet);
+            PreCompileActions();
 
             foreach (var table in SheetTables)
             {
@@ -100,7 +102,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
 
                 foreach (DataColumn col in table.Columns)
                 {
-                    if (worksheet.Name.Equals("Reference")) break;
+                    if (worksheet.Name.Equals("Reference"))
+                    {
+                        break;
+                    }
 
                     if (col.ColumnMapping == MappingType.Hidden)
                     {
@@ -112,14 +117,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
             PostCompileActions(worksheet);
         }
 
-        protected virtual void PreCompileActions(ExcelWorksheet worksheet)
+        protected virtual void PreCompileActions()
         {
-
         }
 
         protected virtual void PostCompileActions(ExcelWorksheet worksheet)
         {
-
         }
 
         protected abstract void CompileSheet(ExcelWorksheet worksheet, DataTable table);

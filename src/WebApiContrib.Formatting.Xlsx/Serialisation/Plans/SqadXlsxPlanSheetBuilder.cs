@@ -52,7 +52,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             return index;
         }
 
-        protected override void PreCompileActions(ExcelWorksheet worksheet)
+        protected override void PreCompileActions()
         {
             _sheetCodeColumnStatements.Clear();
             _rowsCount = ShouldAddHeaderRow ? 3 : 1;

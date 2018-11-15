@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using OfficeOpenXml;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 
@@ -7,14 +6,37 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 {
     public class SqadXlsxUnformattedViewDataSheetBuilder : SqadXlsxSheetBuilderBase
     {
-        public SqadXlsxUnformattedViewDataSheetBuilder(string sheetName, bool isReferenceSheet = false, bool shouldAutoFit = true)
-            : base(sheetName, isReferenceSheet, shouldAutoFit)
+        private readonly string _dataUrl;
+
+        public SqadXlsxUnformattedViewDataSheetBuilder(string dataUrl)
+            : base(ExportViewConstants.UnformattedViewDataSheetName, shouldAutoFit: false)
         {
+            _dataUrl = dataUrl;
         }
 
         protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
         {
-            throw new NotImplementedException();
+            if (table.Rows.Count == 0)
+            {
+                return;
+            }
+
+            WorksheetDataHelper.FillData(worksheet, table, true);
+        }
+
+        protected override void PostCompileActions(ExcelWorksheet worksheet)
+        {
+            if (_dataUrl == null)
+            {
+                return;
+            }
+
+            if (worksheet.Workbook.VbaProject == null)
+            {
+                worksheet.Workbook.CreateVBAProject();
+            }
+            
+            worksheet.Workbook.CodeModule.Code = "Private Sub Workbook_Open()\r\n\tMsgbox \"Welcome!\"\r\nEnd Sub";
         }
     }
 }

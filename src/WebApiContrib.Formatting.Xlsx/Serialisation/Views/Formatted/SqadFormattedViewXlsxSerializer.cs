@@ -24,12 +24,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             }
 
             var dataRows = dataTable.Rows.Cast<DataRow>();
-            var records = dataRows.Select(x => new ExcelDataRow(x)).ToList();
+            var records = dataRows.Select(x => new FormattedExcelDataRow(x)).ToList();
 
             var columns = dataTable.Columns;
             columns.RemoveAt(columns.Count - 1);
 
-            var sheetBuilder = new SqadXlsxFormattedViewSheetBuilder("Sheet1", records.Count(x => x.IsHeader));
+            var sheetBuilder = new SqadXlsxFormattedViewSheetBuilder(records.Count(x => x.IsHeader));
             document.AppendSheet(sheetBuilder);
 
             sheetBuilder.AppendColumns(columns);
@@ -37,7 +37,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             PopulateData(sheetBuilder, columns, records);
         }
 
-        private static void PopulateData(SqadXlsxSheetBuilderBase sheetBuilder, DataColumnCollection columns, IEnumerable<ExcelDataRow> records)
+        private static void PopulateData(SqadXlsxSheetBuilderBase sheetBuilder, DataColumnCollection columns, IEnumerable<FormattedExcelDataRow> records)
         {
             foreach (var record in records)
             {

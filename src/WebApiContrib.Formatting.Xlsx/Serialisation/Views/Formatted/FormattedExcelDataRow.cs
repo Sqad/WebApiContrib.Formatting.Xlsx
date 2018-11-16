@@ -2,7 +2,7 @@
 using System.Data;
 using System.Globalization;
 
-namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views
+namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted
 {
     internal class FormattedExcelDataRow : ExcelDataRow
     {

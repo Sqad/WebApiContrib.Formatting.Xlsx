@@ -22,6 +22,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             }
 
             WorksheetDataHelper.FillData(worksheet, table, true);
+
+            FormatDateTimeColumn(worksheet, "StartDate");
+            FormatDateTimeColumn(worksheet, "EndDate");
         }
 
         protected override void PostCompileActions(ExcelWorksheet worksheet)
@@ -35,8 +38,42 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             {
                 worksheet.Workbook.CreateVBAProject();
             }
-            
-            worksheet.Workbook.CodeModule.Code = "Private Sub Workbook_Open()\r\n\tMsgbox \"Welcome!\"\r\nEnd Sub";
+
+            var range = worksheet.Dimension.Address;
+
+            var code = $@"
+Private Sub Workbook_Open()
+    If ActiveWorkbook.Connections.Count = 1 Then
+        Exit Sub
+    End If
+
+    Dim sheet As Worksheet
+    Set sheet = Sheets(""Data"")
+
+    With sheet.QueryTables.Add(Connection:=""URL;{_dataUrl}"", Destination:=sheet.Range(""{range}""))
+        .Name = ""nwshp?hl=en&tab=wn""
+        .RefreshOnFileOpen = False
+        .BackgroundQuery = False
+        .RefreshStyle = xlOverwriteCells
+        .SaveData = True
+        .WebPreFormattedTextToColumns = True
+        .EnableRefresh = True
+        .EnableEditing = True
+        .WebFormatting = xlWebFormattingNone
+        .AdjustColumnWidth = False
+        .Refresh BackgroundQuery:=False
+    End With
+End Sub
+";
+
+            worksheet.Workbook.CodeModule.Code = code;
+        }
+
+        private void FormatDateTimeColumn(ExcelWorksheet worksheet, string columnName)
+        {
+            var columnIndex = CurrentTable.Columns.IndexOf(columnName) + 1;
+            var column = worksheet.Cells[2, columnIndex, worksheet.Dimension.Rows, columnIndex];
+            column.Style.Numberformat.Format = "dd-mm-yy";
         }
     }
 }

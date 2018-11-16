@@ -2,7 +2,6 @@
 using System.Linq;
 using OfficeOpenXml;
 using OfficeOpenXml.Table;
-using OfficeOpenXml.Table.PivotTable;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted

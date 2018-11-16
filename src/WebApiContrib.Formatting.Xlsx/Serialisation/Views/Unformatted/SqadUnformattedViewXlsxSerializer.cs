@@ -79,18 +79,42 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
         private static void AppendColumnsAndRows(SqadXlsxSheetBuilderBase sheetBuilder, DataTable dataTable)
         {
-            sheetBuilder.AppendColumns(dataTable.Columns);
+            var columns = FixColumnNames(dataTable);
 
-            var records = dataTable.Rows.Cast<DataRow>().Select(x => new UnformattedExcelDataRow(x));
+            sheetBuilder.AppendColumns(columns);
+
+            var records = dataTable.Rows.Cast<DataRow>().Select(x => new ExcelDataRow(x));
             foreach (var record in records)
             {
-                var row = record.GetExcelCells(dataTable.Columns);
+                var row = record.GetExcelCells(columns);
                 sheetBuilder.AppendRow(row);
             }
         }
 
+        private static DataColumnCollection FixColumnNames(DataTable dataTable)
+        {
+            var columns = dataTable.Columns;
+            foreach (DataColumn column in columns)
+            {
+                if (string.Compare(column.ColumnName, "nep", StringComparison.InvariantCultureIgnoreCase) == 0)
+                {
+                    column.ColumnName = column.ColumnName.ToUpper();
+                    continue;
+                }
+                column.ColumnName = $"{column.ColumnName.First().ToString().ToUpper()}{column.ColumnName.Substring(1)}";
+            }
+
+            return columns;
+        }
+
         private static string GetDataUrl(IEnumerable<DataTable> tables)
         {
+            return
+                "https://alphaweb3.mediatools.com/v33Datasource/v50Xlsx/getData.aspx?e=pnBh1%2bx%2fqqwxgiAvyyhNtZBpi6NCpy%2bT4iPbVvYZr6v18p%2bDvjDyE90E%2f6qBoNnPhsIxdZuBrKJJFomchEw7rt8%2fJmB10yibAVNCR0pKmlsDBWzyJjO6i3TI8NLeSgbWwnTHtvLMmVwkTWLF5qlEHqOK98YLUj%2byhyTxZ0dV2%2fhts%2b2YMunEqLmE2KehVZN4JvDmHZO3nzSrKiDp7gaMJc2iU72Bf8CdnoVVMccjtNw%3d";
+
+            const string keyName = "key";
+            const string valueName = "value";
+
             var settingsDataTable = tables.FirstOrDefault(x => x.TableName == SettingsTableName);
             if (settingsDataTable == null)
             {
@@ -100,10 +124,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             var rows = settingsDataTable.Rows;
             foreach (DataRow dataRow in rows)
             {
-                var key = dataRow.IsNull("key") ? null : (string) dataRow["key"];
+                var key = dataRow.IsNull(keyName) ? null : (string) dataRow[keyName];
                 if (key == "dataUrl")
                 {
-                    return dataRow.IsNull("value") ? null : (string) dataRow["value"];
+                    return dataRow.IsNull(valueName) ? null : (string) dataRow[valueName];
                 }
             }
 

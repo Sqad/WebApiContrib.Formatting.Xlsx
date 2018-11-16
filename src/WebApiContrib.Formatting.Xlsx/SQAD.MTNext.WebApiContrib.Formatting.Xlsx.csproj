@@ -87,12 +87,11 @@
     <Compile Include="Serialisation\KeyedCollectionBase.cs" />
     <Compile Include="Serialisation\PerRequestColumnResolver.cs" />
     <Compile Include="Serialisation\SQADActualsXlsSerialiser.cs" />
-    <Compile Include="Serialisation\Views\FormattedExcelDataRow.cs" />
+    <Compile Include="Serialisation\Views\Formatted\FormattedExcelDataRow.cs" />
     <Compile Include="Serialisation\Views\ExportViewConstants.cs" />
     <Compile Include="Serialisation\Views\ExcelDataRow.cs" />
     <Compile Include="Serialisation\Views\Formatted\SqadFormattedViewXlsxSerializer.cs" />
     <Compile Include="Serialisation\Plans\SQADPlanXlsSerialiser.cs" />
-    <Compile Include="Serialisation\Views\UnformattedExcelDataRow.cs" />
     <Compile Include="Serialisation\Views\WorksheetDataHelper.cs" />
     <Compile Include="Serialisation\Views\Unformatted\SqadUnformattedViewXlsxSerializer.cs" />
     <Compile Include="Serialisation\Views\Formatted\SqadXlsxFormattedViewSheetBuilder.cs" />

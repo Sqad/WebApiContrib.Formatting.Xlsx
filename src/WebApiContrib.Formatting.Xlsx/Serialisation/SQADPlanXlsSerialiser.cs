@@ -61,19 +61,20 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                     {
                         if (col.PropertyName.EndsWith("_Dict_"))
                         {
-                            object objToCheck = value;
+                            //object objToCheck = value;
 
-                            if (value is IEnumerable<object> && (value as IEnumerable<object>).Count() > 0)
-                            {
-                                objToCheck = (value as IEnumerable<object>).First();
-                            }
+                            //if (value is IEnumerable<object> && (value as IEnumerable<object>).Count() > 0)
+                            //{
+                            //    objToCheck = (value as IEnumerable<object>);
+                            //}
+
 
                             string columnName = col.PropertyName.Replace("_Dict_", "");
 
-                            Dictionary<int, double> colValueDict = GetFieldOrPropertyValue(objToCheck, col.PropertyName.Replace("_Dict_", "")) as Dictionary<int, double>;
+                            Dictionary<int, double> colValueDict = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_Dict_", "")) as Dictionary<int, double>;
                             if (columnName.Contains(":") && (colValueDict == null || (colValueDict != null && string.IsNullOrEmpty(colValueDict.ToString()))))
                             {
-                                colValueDict = GetFieldPathValue(objToCheck, columnName) as Dictionary<int, double>;
+                                colValueDict = GetFieldPathValue(value, columnName) as Dictionary<int, double>;
                             }
 
                             if (colValueDict == null)
@@ -314,7 +315,16 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 
             List<object> resultsList = new List<object>();
 
-            List<object> itemsToProcess = new List<object>() { rowObject };
+            List<object> itemsToProcess = null;
+            if (rowObject is IEnumerable<object> && (rowObject as IEnumerable<object>).Count() > 0)
+            {
+                itemsToProcess = (rowObject as IEnumerable<object>).ToList();
+            }
+            else
+            {
+                itemsToProcess = new List<object>() { rowObject };
+            }
+            
 
             bool isResultList = false;
             bool isResultDictionary = false;
@@ -497,9 +507,6 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                 if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveValue) == false)
                     cell.DataValidationValueCellIndex = referenceSheet.GetColumnIndexByColumnName(info.ExcelColumnAttribute.ResolveValue);
             }
-
-
-
             else if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false)
             {
                 columntResolveTable = _staticValuesResolver.GetRecordsByTableName(info.ExcelColumnAttribute.ResolveFromTable); ;

@@ -31,8 +31,7 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
             // Instantiate field names and fieldInfo lists with serialisable members.
             foreach (var field in fields)
             {
-                var propName = field;
-                var prop = properties.FirstOrDefault(p => p.Name == propName);
+                var prop = properties.FirstOrDefault(p => p.Name == field);
 
                 if (prop == null) continue;
 
@@ -62,6 +61,14 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                             foreach (var subcolumn in columnCollection)
                                 fieldInfo.Add(subcolumn);
                         }
+                    }
+                    else if (propertyType.Name.StartsWith("Dictionary"))
+                    {
+                        string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;
+
+                        prefix += "_Dict_";
+
+                        fieldInfo.Add(new ExcelColumnInfo(prefix, null, attribute, null));
                     }
                     else if (!FormatterUtils.IsSimpleType(propertyType))
                     {

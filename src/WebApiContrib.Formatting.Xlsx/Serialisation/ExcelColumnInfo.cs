@@ -6,7 +6,7 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
     /// <summary>
     /// Formatting information for an Excel column based on attribute values specified on a class.
     /// </summary>
-    public class ExcelColumnInfo
+    public class ExcelColumnInfo : ICloneable
     {
         public string PropertyName { get; set; }
         public ExcelColumnAttribute ExcelColumnAttribute { get; set; }
@@ -32,6 +32,11 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
             FormatString = formatString;
             Header = IsExcelHeaderDefined ? ExcelColumnAttribute.Header : propertyName;
             PropertyType = propType;
+        }
+
+        public object Clone()
+        {
+            return this.MemberwiseClone();
         }
     }
 }

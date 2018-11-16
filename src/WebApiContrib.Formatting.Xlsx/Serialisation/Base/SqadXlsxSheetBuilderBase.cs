@@ -69,6 +69,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
             CurrentTable.Rows.Add(dataRow);
         }
 
+        public void AppendColumnHeaderRowItem(ExcelColumnInfo column)
+        {
+            var headerName = column.IsExcelHeaderDefined ? column.Header : column.PropertyName;
+            var dc = new DataColumn(headerName, typeof(ExcelCell));
+            CurrentTable.Columns.Add(dc);
+        }
+
         public bool ContainsTable(string sheetName)
         {
             return SheetTables.Any(x => x.TableName == sheetName);

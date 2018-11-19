@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 
 namespace SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces
 {
@@ -8,6 +8,8 @@ namespace SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces
     /// </summary>
     public interface IXlsxSerialiser
     {
+        SerializerType SerializerType { get; }
+
         /// <summary>
         /// If true, no formatting beyond auto-fitting rows should be applied after serialisation.
         /// </summary>

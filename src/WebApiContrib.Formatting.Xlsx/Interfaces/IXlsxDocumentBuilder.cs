@@ -1,11 +1,5 @@
-﻿using OfficeOpenXml;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 
 namespace SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces
 {
@@ -15,10 +9,10 @@ namespace SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces
 
         bool IsExcelSupportedType(object expression);
 
-        void AppendSheet(SqadXlsxSheetBuilder sheet);
+        void AppendSheet(SqadXlsxSheetBuilderBase sheet);
 
-        SqadXlsxSheetBuilder GetReferenceSheet();
+        SqadXlsxSheetBuilderBase GetReferenceSheet();
 
-        SqadXlsxSheetBuilder GetSheetByName(string name);
+        SqadXlsxSheetBuilderBase GetSheetByName(string name);
     }
 }

@@ -105,7 +105,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         }
                     }
 
-                    sheetBuilder.AppendColumns(columnInfo);
+                    //sheetBuilder.AppendColumns(columnInfo);
 
                     document.AppendSheet(sheetBuilder);
                 }

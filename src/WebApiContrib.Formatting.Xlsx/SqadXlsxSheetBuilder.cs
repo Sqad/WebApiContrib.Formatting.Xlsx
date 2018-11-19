@@ -43,6 +43,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         {
             string headerName = column.IsExcelHeaderDefined ? column.Header : column.PropertyName;
             var dc = new DataColumn(headerName, typeof(ExcelCell));
+
+            if (column.IsHidden)
+                dc.ColumnMapping = MappingType.Hidden;
+
             _currentTable.Columns.Add(dc);
         }
 

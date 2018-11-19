@@ -63,12 +63,6 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                         {
                             //object objToCheck = value;
 
-                            //if (value is IEnumerable<object> && (value as IEnumerable<object>).Count() > 0)
-                            //{
-                            //    objToCheck = (value as IEnumerable<object>);
-                            //}
-
-
                             string columnName = col.PropertyName.Replace("_Dict_", "");
 
                             Dictionary<int, double> colValueDict = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_Dict_", "")) as Dictionary<int, double>;

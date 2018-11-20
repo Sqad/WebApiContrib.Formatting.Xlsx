@@ -9,11 +9,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 {
     public class SqadUnformattedViewXlsxSerializer: IXlsxSerialiser
     {
-        private const string InstructionsDataTableName = "instructions";
-        private const string PivotTableName = "pivot";
-        private const string DataTableName = "data";
-        private const string SettingsTableName = "_settings";
-
         public SerializerType SerializerType => SerializerType.Default;
 
         public bool CanSerialiseType(Type valueType, Type itemType)
@@ -39,7 +34,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
         private static void ProcessInstructionsSheet(IXlsxDocumentBuilder document, IEnumerable<DataTable> tables)
         {
-            var instructionsDataTable = tables.FirstOrDefault(x => x.TableName == InstructionsDataTableName);
+            var instructionsDataTable = tables.FirstOrDefault(x => x.TableName == "instructions");
             if (instructionsDataTable == null)
             {
                 return;
@@ -53,7 +48,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
         private static void ProcessPivotSheet(IXlsxDocumentBuilder document, IEnumerable<DataTable> tables)
         {
-            var pivotDataTable = tables.FirstOrDefault(x => x.TableName == PivotTableName);
+            var pivotDataTable = tables.FirstOrDefault(x => x.TableName == "pivot");
             if (pivotDataTable == null)
             {
                 return;
@@ -65,7 +60,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
         private static void ProcessDataSheet(IXlsxDocumentBuilder document, IEnumerable<DataTable> tables, string dataUrl)
         {
-            var dataTable = tables.FirstOrDefault(x => x.TableName == DataTableName);
+            var dataTable = tables.FirstOrDefault(x => x.TableName == "data");
             if (dataTable == null)
             {
                 return;
@@ -109,29 +104,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
         private static string GetDataUrl(IEnumerable<DataTable> tables)
         {
-            return
-                "https://alphaweb3.mediatools.com/v33Datasource/v50Xlsx/getData.aspx?e=pnBh1%2bx%2fqqwxgiAvyyhNtZBpi6NCpy%2bT4iPbVvYZr6v18p%2bDvjDyE90E%2f6qBoNnPhsIxdZuBrKJJFomchEw7rt8%2fJmB10yibAVNCR0pKmlsDBWzyJjO6i3TI8NLeSgbWwnTHtvLMmVwkTWLF5qlEHqOK98YLUj%2byhyTxZ0dV2%2fhts%2b2YMunEqLmE2KehVZN4JvDmHZO3nzSrKiDp7gaMJc2iU72Bf8CdnoVVMccjtNw%3d";
+            var settingsDataTable = tables.FirstOrDefault(x => x.TableName == "_settings");
 
-            const string keyName = "key";
-            const string valueName = "value";
-
-            var settingsDataTable = tables.FirstOrDefault(x => x.TableName == SettingsTableName);
-            if (settingsDataTable == null)
-            {
-                return null;
-            }
-
-            var rows = settingsDataTable.Rows;
-            foreach (DataRow dataRow in rows)
-            {
-                var key = dataRow.IsNull(keyName) ? null : (string) dataRow[keyName];
-                if (key == "dataUrl")
-                {
-                    return dataRow.IsNull(valueName) ? null : (string) dataRow[valueName];
-                }
-            }
-
-            return null;
+            return (string) settingsDataTable?.Select("key = 'ExcelLink'").FirstOrDefault()?["value"];
         }
     }
 }

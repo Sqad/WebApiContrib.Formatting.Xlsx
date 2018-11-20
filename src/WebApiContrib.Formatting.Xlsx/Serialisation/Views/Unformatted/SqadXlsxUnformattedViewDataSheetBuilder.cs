@@ -29,40 +29,43 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
         protected override void PostCompileActions(ExcelWorksheet worksheet)
         {
-            if (_dataUrl == null)
-            {
-                return;
-            }
-
             if (worksheet.Workbook.VbaProject == null)
             {
                 worksheet.Workbook.CreateVBAProject();
             }
 
-            var range = worksheet.Dimension.Address;
+            if (_dataUrl == null)
+            {
+                return;
+            }
+            
+            const string cellsName = "nwshp?hl_en_tab_wn";
+            var cells = worksheet.Cells[worksheet.Dimension.Address];
+            worksheet.Names.Add(cellsName, cells);
 
             var code = $@"
 Private Sub Workbook_Open()
-    If ActiveWorkbook.Connections.Count = 1 Then
+    Dim sheet As Worksheet
+    Set sheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
+    
+    If sheet.QueryTables.Count <> 0 Then
         Exit Sub
     End If
 
-    Dim sheet As Worksheet
-    Set sheet = Sheets(""Data"")
+    Dim qt As QueryTable
+    Set qt = sheet.QueryTables.Add(Connection:=""URL;{_dataUrl}"", Destination:=sheet.Range(""{cellsName}""))
 
-    With sheet.QueryTables.Add(Connection:=""URL;{_dataUrl}"", Destination:=sheet.Range(""{range}""))
-        .Name = ""nwshp?hl=en&tab=wn""
-        .RefreshOnFileOpen = False
-        .BackgroundQuery = False
-        .RefreshStyle = xlOverwriteCells
-        .SaveData = True
-        .WebPreFormattedTextToColumns = True
-        .EnableRefresh = True
-        .EnableEditing = True
-        .WebFormatting = xlWebFormattingNone
-        .AdjustColumnWidth = False
-        .Refresh BackgroundQuery:=False
-    End With
+    qt.Name=""nwshp?hl=en&tab=wn""
+    qt.BackgroundQuery = False
+    qt.RefreshStyle = xlOverwriteCells
+    qt.WebPreFormattedTextToColumns = True
+    qt.WebFormatting = xlWebFormattingNone
+    qt.AdjustColumnWidth = False
+    qt.WebConsecutiveDelimitersAsOne = True
+    qt.WebDisableRedirections = False
+    qt.WebSingleBlockTextImport = False
+    qt.WebDisableDateRecognition = False
+    qt.WebSelectionType = xlEntirePage
 End Sub
 ";
 

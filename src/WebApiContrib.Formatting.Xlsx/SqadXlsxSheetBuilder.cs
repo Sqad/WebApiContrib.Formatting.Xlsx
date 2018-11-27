@@ -24,6 +24,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
         public List<DataTable> SheetTables => _sheetTables;
 
+        public ExcelColumnInfoCollection SheetColumns { get; private set; }
+
         public SqadXlsxSheetBuilder(string sheetName, bool isReferenceSheet = false)
         {
             _isReferenceSheet = isReferenceSheet;
@@ -31,6 +33,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
             _currentTable = new DataTable(sheetName);
             _sheetTables.Add(_currentTable);
+
+            SheetColumns = new ExcelColumnInfoCollection();
         }
 
         public void AddAndActivateNewTable(string sheetName)
@@ -41,6 +45,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
         public void AppendColumnHeaderRowItem(ExcelColumnInfo column)
         {
+            SheetColumns.Add(column);
+
             string headerName = column.IsExcelHeaderDefined ? column.Header : column.PropertyName;
             var dc = new DataColumn(headerName, typeof(ExcelCell));
 

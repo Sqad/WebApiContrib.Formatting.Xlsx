@@ -97,8 +97,13 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 
                             foreach (var customField in colCustomFields)
                             {
+                                int customFieldId = ((dynamic)customField).ID;
                                 ExcelColumnInfo temlKeyColumn = col.Clone() as ExcelColumnInfo;
-                                temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_", $":{((dynamic)customField).ID}");
+                                temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_", $":{customFieldId}");
+
+                                string customFieldDef = _staticValuesResolver.GetCustomField(customFieldId);
+                                temlKeyColumn.ExcelColumnAttribute.Header = temlKeyColumn.Header= temlKeyColumn.PropertyName + ":" + customFieldDef;
+
                                 sheetBuilder.AppendColumnHeaderRowItem(temlKeyColumn);
                             }
                         }
@@ -222,8 +227,12 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 
                     foreach(var customField in customFields)
                     {
+                        string columnNameCombined = columnName + ":" + ((dynamic)customField).ID;
+
+                        var customFieldColumnInfo = sheetBuilder.SheetColumns.Where(w => w.PropertyName == columnNameCombined).FirstOrDefault();
+
                         ExcelCell customValueHeaderCell = new ExcelCell();
-                        customValueHeaderCell.CellHeader = columnName + ":" + ((dynamic)customField).ID;
+                        customValueHeaderCell.CellHeader = customFieldColumnInfo.Header;
                         customValueHeaderCell.CellValue = ((dynamic)customField).Value;
                         row.Add(customValueHeaderCell);
                     }

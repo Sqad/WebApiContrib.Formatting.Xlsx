@@ -54,6 +54,14 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                             string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;
                             fieldInfo.Add(new ExcelColumnInfo(prefix, typeOfList, attribute, null));
                         }
+                        else if (typeOfList.FullName.EndsWith("CustomFieldModel"))
+                        {
+                            string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;
+
+                            prefix += "_CustomField_";
+
+                            fieldInfo.Add(new ExcelColumnInfo(prefix, null, attribute, null));
+                        }
                         else
                         {
                             string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;

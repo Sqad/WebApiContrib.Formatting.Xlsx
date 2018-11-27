@@ -61,8 +61,6 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                     {
                         if (col.PropertyName.EndsWith("_Dict_"))
                         {
-                            //object objToCheck = value;
-
                             string columnName = col.PropertyName.Replace("_Dict_", "");
 
                             Dictionary<int, double> colValueDict = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_Dict_", "")) as Dictionary<int, double>;
@@ -85,6 +83,23 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                                 ExcelColumnInfo temlValueColumn = col.Clone() as ExcelColumnInfo;
                                 temlValueColumn.PropertyName = temlValueColumn.PropertyName.Replace("_Dict_", $":Value:{i}");
                                 sheetBuilder.AppendColumnHeaderRowItem(temlValueColumn);
+                            }
+                        }
+                        else if (col.PropertyName.EndsWith("_CustomField_"))
+                        {
+                            string columnName = col.PropertyName.Replace("_CustomField_", "");
+
+                            List<object> colCustomFields = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_CustomField_", "")) as List<object>;
+                            if (columnName.Contains(":") && (colCustomFields == null || (colCustomFields != null && string.IsNullOrEmpty(colCustomFields.ToString()))))
+                            {
+                                colCustomFields = GetFieldPathValue(value, columnName) as List<object>;
+                            }
+
+                            foreach (var customField in colCustomFields)
+                            {
+                                ExcelColumnInfo temlKeyColumn = col.Clone() as ExcelColumnInfo;
+                                temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_", $":{((dynamic)customField).ID}");
+                                sheetBuilder.AppendColumnHeaderRowItem(temlKeyColumn);
                             }
                         }
                         else
@@ -186,6 +201,33 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 
                         colCount++;
                     }
+                }
+                else if (columnName.EndsWith("_CustomField_"))
+                {
+                    columnName = columnName.Replace("_CustomField_", "");
+
+                    List<object> customFields = null;
+                    if (columnName.Contains(":"))
+                    {
+                        var valueObject = GetFieldPathValue(value, columnName);
+                        if (valueObject != null && string.IsNullOrEmpty(valueObject.ToString()) == false)
+                        {
+                            customFields = (List<object>)valueObject;
+                        }
+                    }
+                    else
+                    {
+                        customFields = (List<object>)GetFieldOrPropertyValue(value, columnName);
+                    }
+
+                    foreach(var customField in customFields)
+                    {
+                        ExcelCell customValueHeaderCell = new ExcelCell();
+                        customValueHeaderCell.CellHeader = columnName + ":" + ((dynamic)customField).ID;
+                        customValueHeaderCell.CellValue = ((dynamic)customField).Value;
+                        row.Add(customValueHeaderCell);
+                    }
+
                 }
                 else
                 {
@@ -318,10 +360,11 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
             {
                 itemsToProcess = new List<object>() { rowObject };
             }
-            
+
 
             bool isResultList = false;
             bool isResultDictionary = false;
+            bool isResultCustomField = false;
 
             int index = 0;
             foreach (string objName in pathSplit)
@@ -373,45 +416,64 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                             break;
                     }
 
-                    if (index == pathSplit.Count())
+                    if (result != null)
                     {
-                        if (result != null)
-                        {
-                            if (result.GetType().Name.StartsWith("List"))
-                            {
-                                List<object> list = new List<object>();
-                                var enumerator = ((System.Collections.IEnumerable)result).GetEnumerator();
-                                while (enumerator.MoveNext())
-                                {
-                                    resultsList.Add(enumerator.Current);
-                                }
-                                isResultList = true;
-                            }
-                            else if (result.GetType().Name.StartsWith("Dictionary"))
-                            {
-                                resultsList.Add(result);
-                                isResultDictionary = true;
-                            }
-                            else
-                                resultsList.Add(result);
-                        }
-                    }
-                    else
-                    {
-                        if (result != null)
+                        //if (index == pathSplit.Count())
+                        //{
+                        if (index != pathSplit.Count())
                         {
                             if (result.GetType().Name.StartsWith("List"))
                                 itemsToProcess.AddRange(result as IEnumerable<object>);
                             else
                                 itemsToProcess.Add(result);
+
+                            continue;
                         }
+
+                        if (result.GetType().Name.StartsWith("List"))
+                        {
+
+                            if (result.GetType().FullName.Contains("CustomFieldModel"))
+                            {
+                                List<int> ids = resultsList.Select(s => (int)((dynamic)s).ID).ToList();
+                                var filtereCustomFields = (result as IEnumerable<object>).Where(w => ids.Contains(((dynamic)w).ID) == false).ToList();
+                                resultsList.AddRange(filtereCustomFields);
+                                isResultCustomField = true;
+                            }
+                            else
+                            {
+                                resultsList.AddRange(result as IEnumerable<object>);
+                                isResultList = true;
+                            }
+                        }
+                        else if (result.GetType().Name.StartsWith("Dictionary"))
+                        {
+                            resultsList.Add(result);
+                            isResultDictionary = true;
+                        }
+                        else
+                            resultsList.Add(result);
+
+                        //}
+                        //else
+                        //{
+                        //    if (result.GetType().Name.StartsWith("List"))
+                        //        itemsToProcess.AddRange(result as IEnumerable<object>);
+                        //    else
+                        //        itemsToProcess.Add(result);
+                        //}
                     }
                 }
             }
 
             string returnString = string.Empty;
 
-            if (isResultList)
+
+            if (isResultCustomField)
+            {
+                return resultsList;
+            }
+            else if (isResultList)
             {
                 for (int i = 1; i <= resultsList.Count(); i++)
                 {

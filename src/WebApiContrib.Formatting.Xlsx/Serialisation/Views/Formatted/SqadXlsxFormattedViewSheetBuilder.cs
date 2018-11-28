@@ -60,10 +60,15 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             percentsCells.Style.Fill.BackgroundColor.SetColor(_dataTotalsBackgroundColor);
             percentsCells.Style.Numberformat.Format = "0 %";
 
-            var dataCells = sheet.Cells[firstDataRowIndex, LeftPaneWidth + 1, sheet.Dimension.Rows,
-                                        sheet.Dimension.Columns];
-            dataCells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
-            dataCells.Style.Numberformat.Format = "#,###";
+            var beginningCells = sheet.Cells[firstDataRowIndex, LeftPaneWidth, sheet.Dimension.Rows, LeftPaneWidth];
+            FormatNumbers(beginningCells);
+
+            if (sheet.Dimension.Columns > LeftPaneWidth)
+            {
+                var dataCells = sheet.Cells[firstDataRowIndex, LeftPaneWidth + 1, sheet.Dimension.Rows,
+                                            sheet.Dimension.Columns];
+                FormatNumbers(dataCells);
+            }
             
             FormatTotalColumns(sheet, firstDataRowIndex);
             FormatRows(sheet, firstDataRowIndex);
@@ -199,6 +204,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
         private static void FormatGroupRow(ExcelRange row)
         {
             row.Style.Font.Bold = true;
+        }
+
+        private static void FormatNumbers(ExcelRange cells)
+        {
+            cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+            cells.Style.Numberformat.Format = "#,###";
         }
 
         private static void SetBordersToCells(ExcelRange cells)

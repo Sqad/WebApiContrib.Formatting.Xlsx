@@ -31,7 +31,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
             pivotTable.StyleName = "PivotStyleLight16";
             pivotTable.TableStyle = TableStyles.Light16;
-            //pivotTable.ShowHeaders = true;
             pivotTable.GridDropZones = false;
         }
     }

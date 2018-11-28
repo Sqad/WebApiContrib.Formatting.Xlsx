@@ -13,7 +13,7 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
         public string FormatString { get; set; }
         public string Header { get; set; }
         public Type PropertyType { get; set; }
-        public bool IsHidden => ExcelColumnAttribute.IsHidden;
+        public bool IsHidden => false;//ExcelColumnAttribute.IsHidden;
 
         public string ExcelNumberFormat
         {

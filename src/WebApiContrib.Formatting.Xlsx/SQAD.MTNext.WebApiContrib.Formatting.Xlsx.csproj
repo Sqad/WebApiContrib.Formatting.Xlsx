@@ -70,6 +70,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Interfaces\IXlsxDocumentBuilder.cs" />
+    <Compile Include="Serialisation\Base\SerializerType.cs" />
+    <Compile Include="Serialisation\Base\SqadXlsxSheetBuilderBase.cs" />
     <Compile Include="Serialisation\DefaultColumnResolver.cs" />
     <Compile Include="Serialisation\DefaultSheetResolver.cs" />
     <Compile Include="Serialisation\DefaultXlsxSerialiser.cs" />
@@ -85,9 +87,19 @@
     <Compile Include="Serialisation\KeyedCollectionBase.cs" />
     <Compile Include="Serialisation\PerRequestColumnResolver.cs" />
     <Compile Include="Serialisation\SQADActualsXlsSerialiser.cs" />
-    <Compile Include="Serialisation\SQADPlanXlsSerialiser.cs" />
+    <Compile Include="Serialisation\Views\Formatted\FormattedExcelDataRow.cs" />
+    <Compile Include="Serialisation\Views\ExportViewConstants.cs" />
+    <Compile Include="Serialisation\Views\ExcelDataRow.cs" />
+    <Compile Include="Serialisation\Views\Formatted\SqadFormattedViewXlsxSerializer.cs" />
+    <Compile Include="Serialisation\Plans\SQADPlanXlsSerialiser.cs" />
+    <Compile Include="Serialisation\Views\WorksheetDataHelper.cs" />
+    <Compile Include="Serialisation\Views\Unformatted\SqadUnformattedViewXlsxSerializer.cs" />
+    <Compile Include="Serialisation\Views\Formatted\SqadXlsxFormattedViewSheetBuilder.cs" />
+    <Compile Include="Serialisation\Views\Unformatted\SqadXlsxUnformattedViewDataSheetBuilder.cs" />
+    <Compile Include="Serialisation\Views\Unformatted\SqadXlsxUnformattedViewInstructionsSheetBuilder.cs" />
+    <Compile Include="Serialisation\Views\Unformatted\SqadXlsxUnformattedViewPivotSheetBuilder.cs" />
     <Compile Include="SqadXlsxDocumentBuilder.cs" />
-    <Compile Include="SqadXlsxSheetBuilder.cs" />
+    <Compile Include="Serialisation\Plans\SqadXlsxPlanSheetBuilder.cs" />
     <Compile Include="Utils\HttpContextFactory.cs" />
     <Compile Include="XlsxDocumentBuilder.cs" />
     <Compile Include="XlsxMediaTypeFormatter.cs" />

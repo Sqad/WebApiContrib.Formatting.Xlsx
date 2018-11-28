@@ -1,29 +1,35 @@
-﻿using SQAD.MTNext.Business.Models.Attributes;
-using SQAD.MTNext.Business.Models.FlowChart.DataModels;
-using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
-using SQAD.MTNext.Services.Repositories.Export;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using SQAD.MTNext.Business.Models.Attributes;
+using SQAD.MTNext.Business.Models.FlowChart.DataModels;
+using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
+using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
+using SQAD.MTNext.Services.Repositories.Export;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 
-namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
+namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 {
     public class SQADPlanXlsSerialiser : IXlsxSerialiser
     {
+        public SerializerType SerializerType => SerializerType.Default;
+
         private IColumnResolver _columnResolver { get; set; }
         private ISheetResolver _sheetResolver { get; set; }
         private IExportHelpersRepository _staticValuesResolver { get; set; }
         public bool IgnoreFormatting => false;
 
-        public SQADPlanXlsSerialiser(IExportHelpersRepository staticValuesResolver) : this(new DefaultSheetResolver(), new DefaultColumnResolver(), staticValuesResolver)
+        public SQADPlanXlsSerialiser(IExportHelpersRepository staticValuesResolver)
+            : this(new DefaultSheetResolver(), new DefaultColumnResolver(), staticValuesResolver)
         {
 
         }
 
-        public SQADPlanXlsSerialiser(ISheetResolver sheetResolver, IColumnResolver columnResolver, IExportHelpersRepository StaticValuesResolver)
+        public SQADPlanXlsSerialiser(ISheetResolver sheetResolver,
+                                     IColumnResolver columnResolver,
+                                     IExportHelpersRepository StaticValuesResolver)
         {
             _sheetResolver = sheetResolver;
             _columnResolver = columnResolver;
@@ -32,7 +38,7 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 
         public bool CanSerialiseType(Type valueType, Type itemType)
         {
-
+            
             return valueType == typeof(ChartData);
         }
 
@@ -40,7 +46,7 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
         {
             ExcelColumnInfoCollection columnInfo = _columnResolver.GetExcelColumnInfo(itemType, value, sheetName);
 
-            SqadXlsxSheetBuilder sheetBuilder = null;
+            SqadXlsxPlanSheetBuilder sheetBuilder = null;
 
             if (sheetName == null)
             {
@@ -48,13 +54,13 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                 sheetName = sheetAttribute != null ? (sheetAttribute as ExcelSheetAttribute).SheetName : itemType.Name;
             }
 
-            if (columnInfo.Count() > 0)
+            if (columnInfo.Any())
             {
-                sheetBuilder = document.GetSheetByName(sheetName);
+                sheetBuilder = document.GetSheetByName(sheetName) as SqadXlsxPlanSheetBuilder;
 
                 if (sheetBuilder == null)
                 {
-                    sheetBuilder = new SqadXlsxSheetBuilder(sheetName);
+                    sheetBuilder = new SqadXlsxPlanSheetBuilder(sheetName);
 
                     //Convert Dictionary Column
                     foreach (var col in columnInfo)
@@ -113,13 +119,15 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                         }
                     }
 
+                    //sheetBuilder.AppendColumns(columnInfo);
+
                     document.AppendSheet(sheetBuilder);
                 }
             }
 
             if (sheetName != null && sheetBuilder == null)
             {
-                sheetBuilder = document.GetSheetByName(sheetName);
+                sheetBuilder = (SqadXlsxPlanSheetBuilder)document.GetSheetByName(sheetName);
             }
 
             //adding rows data
@@ -146,13 +154,12 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 
             if (sheetBuilder != null)
             {
-                sheetBuilder.ShouldAutoFit = true;
                 sheetBuilder.ShouldAddHeaderRow = true;
             }
-
+            
         }
 
-        private void PopulateRows(List<string> columns, object value, SqadXlsxSheetBuilder sheetBuilder, ExcelColumnInfoCollection columnInfo = null, IXlsxDocumentBuilder document = null)
+        private void PopulateRows(List<string> columns, object value, SqadXlsxPlanSheetBuilder sheetBuilder, ExcelColumnInfoCollection columnInfo = null, IXlsxDocumentBuilder document = null)
         {
 
             if (sheetBuilder == null)
@@ -276,12 +283,10 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                 sheetBuilder.AppendRow(row.ToList());
         }
 
-
-        private void PopulateReferenceSheet(SqadXlsxSheetBuilder referenceSheet, DataTable ReferenceSheet)
+        private void PopulateReferenceSheet(SqadXlsxPlanSheetBuilder referenceSheet, DataTable ReferenceSheet)
         {
             //SqadXlsxSheetBuilder sb = new SqadXlsxSheetBuilder(ReferenceSheet.TableName, true);
-            referenceSheet.AppendColumnHeaderRow(ReferenceSheet.Columns);
-            referenceSheet.ShouldAutoFit = true;
+            referenceSheet.AppendColumns(ReferenceSheet.Columns);
 
 
             foreach (DataRow r in ReferenceSheet.Rows)
@@ -298,10 +303,10 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                     }
                     else if (c.DataType == typeof(DateTime))
                     {
-                        if (r[c] is System.DBNull)
+                        if(r[c] is System.DBNull)
                             resolveRow.Add(c.Caption, string.Empty);
                         else
-                            resolveRow.Add(c.Caption, Convert.ToDateTime(r[c]));
+                           resolveRow.Add(c.Caption, Convert.ToDateTime(r[c]));
                     }
                     else
                         resolveRow.Add(c.Caption, r[c].ToString());
@@ -515,7 +520,7 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                     return string.Format(info.FormatString, cellValue);
 
                 else if (cellValue.GetType() == typeof(DateTime) || DateTime.TryParse(cellValue.ToString(), out var test))
-                    return string.Format("{0:MM/dd/yyyy}", DateTime.Parse(cellValue.ToString()));
+                    return string.Format("{0:MM/dd/yyyy}", DateTime.Parse( cellValue.ToString()));
 
             }
 
@@ -548,11 +553,11 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 
                 cell.DataValidationSheet = columntResolveTable.TableName;
 
-                var referenceSheet = document.GetReferenceSheet();
+                var referenceSheet = document.GetReferenceSheet() as SqadXlsxPlanSheetBuilder;
 
                 if (referenceSheet == null)
                 {
-                    referenceSheet = new SqadXlsxSheetBuilder(cell.DataValidationSheet, true);
+                    referenceSheet = new SqadXlsxPlanSheetBuilder(cell.DataValidationSheet, true);
                     document.AppendSheet(referenceSheet);
                 }
                 else
@@ -560,7 +565,7 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                     referenceSheet.AddAndActivateNewTable(cell.DataValidationSheet);
                 }
 
-                cell.DataValidationBeginRow = referenceSheet.GetNextAvailalbleRow();
+                cell.DataValidationBeginRow = referenceSheet.GetNextAvailableRow();
 
                 this.PopulateReferenceSheet(referenceSheet, columntResolveTable);
 
@@ -585,11 +590,11 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 
                 cell.DataValidationSheet = columntResolveTable.TableName;
 
-                var referenceSheet = document.GetReferenceSheet();
+                var referenceSheet = document.GetReferenceSheet() as SqadXlsxPlanSheetBuilder;
 
                 if (referenceSheet == null)
                 {
-                    referenceSheet = new SqadXlsxSheetBuilder(cell.DataValidationSheet, true);
+                    referenceSheet = new SqadXlsxPlanSheetBuilder(cell.DataValidationSheet, true);
                     document.AppendSheet(referenceSheet);
                 }
                 else
@@ -597,7 +602,7 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                     referenceSheet.AddAndActivateNewTable(cell.DataValidationSheet);
                 }
 
-                cell.DataValidationBeginRow = referenceSheet.GetNextAvailalbleRow();
+                cell.DataValidationBeginRow = referenceSheet.GetNextAvailableRow();
 
                 this.PopulateReferenceSheet(referenceSheet, columntResolveTable);
 
@@ -610,7 +615,5 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                     cell.DataValidationValueCellIndex = referenceSheet.GetColumnIndexByColumnName(info.ExcelColumnAttribute.ResolveValue);
             }
         }
-
     }
 }
-

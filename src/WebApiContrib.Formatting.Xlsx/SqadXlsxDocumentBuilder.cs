@@ -1,11 +1,11 @@
-﻿using OfficeOpenXml;
-using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
+using OfficeOpenXml;
+using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -17,23 +17,26 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
 
         //New Stuff
-        private List<SqadXlsxSheetBuilder> _sheets { get; set; }
+        private List<SqadXlsxSheetBuilderBase> _sheets { get; set; }
 
         public SqadXlsxDocumentBuilder(Stream stream)
         {
             _stream = stream;
-            _sheets = new List<SqadXlsxSheetBuilder>();
+            _sheets = new List<SqadXlsxSheetBuilderBase>();
         }
 
 
-        public void AppendSheet(SqadXlsxSheetBuilder sheet)
+        public void AppendSheet(SqadXlsxSheetBuilderBase sheet)
         {
             _sheets.Add(sheet);
         }
 
-        public SqadXlsxSheetBuilder GetReferenceSheet() => _sheets.Where(w=>w.IsReferenceSheet).FirstOrDefault();
+        public SqadXlsxSheetBuilderBase GetReferenceSheet() => _sheets.FirstOrDefault(w => w.IsReferenceSheet);
 
-        public SqadXlsxSheetBuilder GetSheetByName(string name) => _sheets.Where(w => w.SheetTables.Select(s => s.TableName).Contains(name)).FirstOrDefault();
+        public SqadXlsxSheetBuilderBase GetSheetByName(string name)
+        {
+            return _sheets.FirstOrDefault(w => w.ContainsTable(name));
+        }
 
         public bool IsVBA => _sheets.Any(a => a.IsReferenceSheet);
 
@@ -46,8 +49,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         private ExcelPackage Compile()
         {
             ExcelPackage package = new ExcelPackage();
-           
-            foreach (var sheet in _sheets.OrderBy(o=>o.IsReferenceSheet))
+
+            foreach (var sheet in _sheets.OrderBy(o => o.IsReferenceSheet))
             {
                 sheet.CompileSheet(package);
             }

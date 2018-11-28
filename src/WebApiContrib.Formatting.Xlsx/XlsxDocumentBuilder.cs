@@ -1,12 +1,11 @@
-﻿using OfficeOpenXml;
-using OfficeOpenXml.Style;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Data;
+using System.IO;
+using System.Threading.Tasks;
+using OfficeOpenXml;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -68,7 +67,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             return FormatterUtils.IsExcelSupportedType(expression);
         }
 
-        public SqadXlsxSheetBuilder GetReferenceSheet()
+        public SqadXlsxSheetBuilderBase GetReferenceSheet()
         {
             throw new NotImplementedException();
         }
@@ -78,12 +77,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             throw new NotImplementedException();
         }
 
-        public void AppendSheet(SqadXlsxSheetBuilder sheet)
+        public void AppendSheet(SqadXlsxSheetBuilderBase sheet)
         {
             throw new NotImplementedException();
         }
 
-        public SqadXlsxSheetBuilder GetSheetByName(string name)
+        public SqadXlsxSheetBuilderBase GetSheetByName(string name)
         {
             throw new NotImplementedException();
         }

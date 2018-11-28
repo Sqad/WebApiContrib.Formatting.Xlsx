@@ -14,6 +14,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         private readonly List<string> _sheetCodeColumnStatements;
         private int _rowsCount;
 
+        
+
         public bool ShouldAddHeaderRow { private get; set; }
 
         public SqadXlsxPlanSheetBuilder(string sheetName, bool isReferenceSheet = false)

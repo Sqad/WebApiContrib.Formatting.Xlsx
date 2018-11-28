@@ -15,6 +15,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
         protected readonly List<DataTable> SheetTables;
         protected DataTable CurrentTable;
 
+        public ExcelColumnInfoCollection SheetColumns { get; private set; }
+
         protected SqadXlsxSheetBuilderBase(string sheetName, bool isReferenceSheet = false, bool shouldAutoFit = true)
         {
             IsReferenceSheet = isReferenceSheet;
@@ -24,6 +26,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
 
             CurrentTable = new DataTable(sheetName);
             SheetTables.Add(CurrentTable);
+
+            SheetColumns = new ExcelColumnInfoCollection();
         }
 
         public bool IsReferenceSheet { get; }
@@ -71,8 +75,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
 
         public void AppendColumnHeaderRowItem(ExcelColumnInfo column)
         {
+            SheetColumns.Add(column);
             var headerName = column.IsExcelHeaderDefined ? column.Header : column.PropertyName;
             var dc = new DataColumn(headerName, typeof(ExcelCell));
+
+            if (column.IsHidden)
+                dc.ColumnMapping = MappingType.Hidden;
+
             CurrentTable.Columns.Add(dc);
         }
 

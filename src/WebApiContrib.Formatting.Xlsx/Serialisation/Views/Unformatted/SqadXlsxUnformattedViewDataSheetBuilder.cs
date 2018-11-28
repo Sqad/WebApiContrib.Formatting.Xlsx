@@ -1,5 +1,7 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
 using OfficeOpenXml;
+using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted
@@ -23,8 +25,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
             WorksheetDataHelper.FillData(worksheet, table, true);
 
-            FormatDateTimeColumn(worksheet, "StartDate");
-            FormatDateTimeColumn(worksheet, "EndDate");
+            FormatDateTimeColumns(worksheet);
         }
 
         protected override void PostCompileActions(ExcelWorksheet worksheet)
@@ -71,12 +72,19 @@ End Sub
 
             worksheet.Workbook.CodeModule.Code = code;
         }
-
-        private void FormatDateTimeColumn(ExcelWorksheet worksheet, string columnName)
+        
+        private void FormatDateTimeColumns(ExcelWorksheet worksheet)
         {
-            var columnIndex = CurrentTable.Columns.IndexOf(columnName) + 1;
-            var column = worksheet.Cells[2, columnIndex, worksheet.Dimension.Rows, columnIndex];
-            column.Style.Numberformat.Format = "dd-mm-yy";
+            for (var i = 0; i < CurrentTable.Columns.Count; i++)
+            {
+                if (!(((ExcelCell) CurrentTable.Rows[0][i]).CellValue is DateTime))
+                {
+                    continue;
+                }
+
+                var column = worksheet.Cells[2, i + 1, worksheet.Dimension.Rows, i + 1];
+                column.Style.Numberformat.Format = "dd-mm-yy";
+            }
         }
     }
 }

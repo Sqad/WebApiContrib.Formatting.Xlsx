@@ -40,22 +40,21 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
         public bool IsVBA => _sheets.Any(a => a.IsReferenceSheet);
 
-        public Task WriteToStream()
+        public async  Task WriteToStream()
         {
-            ExcelPackage package = Compile();
-            return Task.Factory.StartNew(() => package.SaveAs(_stream));
-        }
-
-        private ExcelPackage Compile()
-        {
-            ExcelPackage package = new ExcelPackage();
-
-            foreach (var sheet in _sheets.OrderBy(o => o.IsReferenceSheet))
+            ExcelPackage package = await Task.Run(() =>
             {
-                sheet.CompileSheet(package);
-            }
+                ExcelPackage excelPackage = new ExcelPackage();
 
-            return package;
+                foreach (var sheet in _sheets.OrderBy(o => o.IsReferenceSheet))
+                {
+                    sheet.CompileSheet(excelPackage);
+                }
+
+                excelPackage.SaveAs(_stream);
+
+                return excelPackage;
+            });
         }
 
         public bool IsExcelSupportedType(object expression)

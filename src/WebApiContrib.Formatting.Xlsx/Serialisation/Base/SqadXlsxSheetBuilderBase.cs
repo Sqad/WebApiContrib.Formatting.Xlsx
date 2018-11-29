@@ -38,22 +38,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
             SheetTables.Add(CurrentTable);
         }
 
-        public void AppendColumns(ExcelColumnInfoCollection columns)
-        {
-            foreach (var col in columns)
-            {
-                var headerName = col.IsExcelHeaderDefined ? col.Header : col.PropertyName;
-                var dataColumn = new DataColumn(headerName, typeof(ExcelCell));
-
-                if (col.IsHidden)
-                {
-                    dataColumn.ColumnMapping = MappingType.Hidden;
-                }
-
-                CurrentTable.Columns.Add(dataColumn);
-            }
-        }
-
         public void AppendColumns(DataColumnCollection columns)
         {
             foreach (DataColumn c in columns)
@@ -114,7 +98,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
                     continue;
                 }
 
-                worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
+                //worksheet.Cells[worksheet.Dimension.Address].AutoFitColumns();
 
                 foreach (DataColumn col in table.Columns)
                 {

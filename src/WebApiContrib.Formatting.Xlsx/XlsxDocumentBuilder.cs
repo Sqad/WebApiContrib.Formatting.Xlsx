@@ -36,7 +36,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
         public Task WriteToStream()
         {
-            return Task.Factory.StartNew(() => Package.SaveAs(_stream));
+            return Task.Run(() => Package.SaveAs(_stream));
         }
 
         /// <summary>

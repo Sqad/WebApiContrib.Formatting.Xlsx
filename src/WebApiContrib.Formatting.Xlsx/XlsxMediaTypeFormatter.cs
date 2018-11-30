@@ -61,8 +61,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         /// </summary>
         public List<IXlsxSerialiser> Serialisers { get; set; }
 
-        public DefaultXlsxSerialiser DefaultSerializer { get; set; }
-
         #endregion
 
         #region Constructor
@@ -214,29 +212,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             return document.WriteToStream();
         }
 
-        /// <summary>
-        /// Applies custom formatting to a document. (Used if matched serialiser supports formatting.)
-        /// </summary>
-        /// <param name="document">The <c>XlsxDocumentBuilder</c> wrapping the document to format.</param>
-        private void FormatDocument(XlsxDocumentBuilder document)
-        {
-            // Header cell styles
-            if (HeaderStyle != null) HeaderStyle(document.Worksheet.Row(1).Style);
-            if (FreezeHeader) document.Worksheet.View.FreezePanes(2, 1);
-
-            var cells = document.Worksheet.Cells[document.Worksheet.Dimension.Address];
-
-            // Add autofilter and fit to max column width (if requested).
-            if (AutoFilter) cells.AutoFilter = AutoFilter;
-            if (AutoFit) cells.AutoFitColumns();
-
-            // Set header row where specified.
-            if (HeaderHeight.HasValue)
-            {
-                document.Worksheet.Row(1).Height = HeaderHeight.Value;
-                document.Worksheet.Row(1).CustomHeight = true;
-            }
-        }
 
         public override bool CanWriteType(Type type)
         {

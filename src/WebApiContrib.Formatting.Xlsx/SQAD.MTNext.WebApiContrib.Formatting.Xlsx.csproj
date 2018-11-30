@@ -74,11 +74,9 @@
     <Compile Include="Serialisation\Base\SqadXlsxSheetBuilderBase.cs" />
     <Compile Include="Serialisation\DefaultColumnResolver.cs" />
     <Compile Include="Serialisation\DefaultSheetResolver.cs" />
-    <Compile Include="Serialisation\DefaultXlsxSerialiser.cs" />
     <Compile Include="Serialisation\ExcelCell.cs" />
     <Compile Include="Serialisation\ExcelSheetInfo.cs" />
     <Compile Include="Serialisation\ExcelSheetInfoCollection.cs" />
-    <Compile Include="Serialisation\ExpandoSerialiser.cs" />
     <Compile Include="Serialisation\ExcelColumnInfo.cs" />
     <Compile Include="Serialisation\ExcelColumnInfoCollection.cs" />
     <Compile Include="Interfaces\IColumnResolver.cs" />
@@ -101,7 +99,6 @@
     <Compile Include="SqadXlsxDocumentBuilder.cs" />
     <Compile Include="Serialisation\Plans\SqadXlsxPlanSheetBuilder.cs" />
     <Compile Include="Utils\HttpContextFactory.cs" />
-    <Compile Include="XlsxDocumentBuilder.cs" />
     <Compile Include="XlsxMediaTypeFormatter.cs" />
     <Compile Include="FormatterUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -8,7 +8,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
 {
     public sealed class SqadXlsxFormattedViewSheetBuilder : SqadXlsxSheetBuilderBase
     {
-        private const int LeftPaneWidth = 3;
         private const int RowNameColumnIndex = 2;
         private const string TotalRowIndicator = "Total";
 
@@ -19,6 +18,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
         private readonly Color _totalsBackgroundColor = Color.FromArgb(227, 236, 248);
         
         private readonly int _headerRowsCount;
+        private int _leftPaneWidth;
 
         public SqadXlsxFormattedViewSheetBuilder(int headerRowsCount)
             : base(ExportViewConstants.FormattedViewSheetName)
@@ -34,14 +34,32 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             }
             
             WorksheetDataHelper.FillData(worksheet, table, false);
-
+            
+            ObtainLeftPaneWidth(worksheet);
+            
             FormatHeader(worksheet);
             FormatRows(worksheet);
         }
 
         protected override void PostCompileActions(ExcelWorksheet worksheet)
         {
-            worksheet.View.FreezePanes(_headerRowsCount + 1, LeftPaneWidth + 1);
+            worksheet.View.FreezePanes(_headerRowsCount + 1, _leftPaneWidth + 1);
+        }
+
+        private void ObtainLeftPaneWidth(ExcelWorksheet worksheet)
+        {
+            _leftPaneWidth = 3;
+            for (var columnIndex = 0; columnIndex < worksheet.Dimension.Columns; columnIndex++)
+            {
+                var cell = worksheet.Cells[_headerRowsCount, columnIndex + 1];
+                if (cell.Value == null)
+                {
+                    continue;
+                }
+
+                _leftPaneWidth = columnIndex;
+                break;
+            }
         }
 
         private void FormatRows(ExcelWorksheet sheet)
@@ -52,7 +70,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             allDataCells.Style.Fill.BackgroundColor.SetColor(Color.White);
             allDataCells.Style.Border.BorderAround(ExcelBorderStyle.None);
 
-            var leftPaneCells = sheet.Cells[firstDataRowIndex, 1, sheet.Dimension.Rows, LeftPaneWidth];
+            var leftPaneCells = sheet.Cells[firstDataRowIndex, 1, sheet.Dimension.Rows, _leftPaneWidth];
             leftPaneCells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 
             var percentsCells = sheet.Cells[firstDataRowIndex, 1, sheet.Dimension.Rows, 1];
@@ -60,12 +78,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             percentsCells.Style.Fill.BackgroundColor.SetColor(_dataTotalsBackgroundColor);
             percentsCells.Style.Numberformat.Format = "0 %";
 
-            var beginningCells = sheet.Cells[firstDataRowIndex, LeftPaneWidth, sheet.Dimension.Rows, LeftPaneWidth];
+            var beginningCells = sheet.Cells[firstDataRowIndex, _leftPaneWidth, sheet.Dimension.Rows, _leftPaneWidth];
             FormatNumbers(beginningCells);
 
-            if (sheet.Dimension.Columns > LeftPaneWidth)
+            if (sheet.Dimension.Columns > _leftPaneWidth)
             {
-                var dataCells = sheet.Cells[firstDataRowIndex, LeftPaneWidth + 1, sheet.Dimension.Rows,
+                var dataCells = sheet.Cells[firstDataRowIndex, _leftPaneWidth + 1, sheet.Dimension.Rows,
                                             sheet.Dimension.Columns];
                 FormatNumbers(dataCells);
             }
@@ -76,7 +94,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
 
         private void FormatTotalColumns(ExcelWorksheet sheet, int firstDataRowIndex)
         {
-            for (var cellIndex = LeftPaneWidth + 1; cellIndex <= sheet.Dimension.Columns; cellIndex++)
+            for (var cellIndex = _leftPaneWidth + 1; cellIndex <= sheet.Dimension.Columns; cellIndex++)
             {
                 var headerCell = sheet.Cells[_headerRowsCount, cellIndex];
                 if (!headerCell.Merge)
@@ -101,13 +119,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
 
             allHeaderCells.Style.Font.Color.SetColor(_headerFontColor);
 
-            var mergedCells = worksheet.Cells[1, 1, _headerRowsCount, LeftPaneWidth];
+            var mergedCells = worksheet.Cells[1, 1, _headerRowsCount, _leftPaneWidth];
             mergedCells.Merge = true;
             SetBordersToCells(mergedCells);
 
             for (var rowIndex = 1; rowIndex <= _headerRowsCount - 1; rowIndex++)
             {
-                var startColumnIndex = LeftPaneWidth + 1;
+                var startColumnIndex = _leftPaneWidth + 1;
                 for (var endColumnIndex = startColumnIndex;
                      endColumnIndex <= worksheet.Dimension.Columns;
                      endColumnIndex++)
@@ -144,7 +162,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                 }
             }
 
-            for (var columnIndex = LeftPaneWidth + 1; columnIndex <= worksheet.Dimension.Columns; columnIndex++)
+            for (var columnIndex = _leftPaneWidth + 1; columnIndex <= worksheet.Dimension.Columns; columnIndex++)
             {
                 SetBordersToCells(worksheet.Cells[_headerRowsCount, columnIndex]);
             }

@@ -40,7 +40,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
                 return;
             }
             
-            const string cellsName = "nwshp?hl_en_tab_wn";
+            const string cellsName = "nwshp_hl_en_tab_wn";
             var cells = worksheet.Cells[worksheet.Dimension.Address];
             worksheet.Names.Add(cellsName, cells);
 
@@ -53,20 +53,39 @@ Private Sub Workbook_Open()
         Exit Sub
     End If
 
-    Dim qt As QueryTable
-    Set qt = sheet.QueryTables.Add(Connection:=""URL;{_dataUrl}"", Destination:=sheet.Range(""{cellsName}""))
+    Dim srcRange As Variant
+    srcRange = sheet.Range(""{worksheet.Dimension.Address}"").Value
 
-    qt.Name=""nwshp?hl=en&tab=wn""
-    qt.BackgroundQuery = False
+    Dim qt As QueryTable
+    Set qt = sheet.QueryTables.Add(Connection:=""URL;{_dataUrl}"", Destination:=sheet.Range(""{worksheet.Dimension.Address}""))
+
+    qt.AdjustColumnWidth = False
     qt.RefreshStyle = xlOverwriteCells
+    qt.BackgroundQuery = False
+
+    Dim urlConnection As Variant
+    urlConnection = qt.Connection
+    
+    Set Rng = sheet.Range(""{worksheet.Dimension.Address}"")
+    Set adoRecordset = CreateObject(""ADODB.Recordset"")
+    Set xlXML = CreateObject(""MSXML2.DOMDocument"")
+    xlXML.LoadXML Rng.Value(xlRangeValueMSPersistXML)
+    adoRecordset.Open xlXML
+
+    Set qt.Recordset = adoRecordset
+    qt.Refresh
+
+    qt.Name = ""nwshp?hl=en&tab=wn""
+    qt.Connection = urlConnection
     qt.WebPreFormattedTextToColumns = True
     qt.WebFormatting = xlWebFormattingNone
-    qt.AdjustColumnWidth = False
     qt.WebConsecutiveDelimitersAsOne = True
     qt.WebDisableRedirections = False
     qt.WebSingleBlockTextImport = False
     qt.WebDisableDateRecognition = False
     qt.WebSelectionType = xlEntirePage
+
+    sheet.Range(""{worksheet.Dimension.Address}"").Font.Bold = False
 End Sub
 ";
 

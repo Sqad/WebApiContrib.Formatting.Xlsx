@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
@@ -7,8 +6,13 @@ using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted
 {
-    public class SqadUnformattedViewXlsxSerializer: IXlsxSerialiser
+    public class SqadUnformattedViewXlsxSerializer : IXlsxSerialiser
     {
+        private const string InstructionsTableName = "Instructions";
+        private const string PivotTableName = "Pivot";
+        private const string DataTableName = "Data";
+        private const string SettingsTableName = "_settings";
+
         public SerializerType SerializerType => SerializerType.Default;
 
         public bool CanSerialiseType(Type valueType, Type itemType)
@@ -23,7 +27,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
                 throw new ArgumentException($"{nameof(value)} has invalid type!");
             }
 
-            var tables = dataSet.Tables.Cast<DataTable>().ToList();
+            var tables = dataSet.Tables;
 
             ProcessInstructionsSheet(document, tables);
 
@@ -32,24 +36,24 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             ProcessPivotSheet(document, tables);
         }
 
-        private static void ProcessInstructionsSheet(IXlsxDocumentBuilder document, IEnumerable<DataTable> tables)
+        private static void ProcessInstructionsSheet(IXlsxDocumentBuilder document, DataTableCollection tables)
         {
-            var instructionsDataTable = tables.FirstOrDefault(x => x.TableName == "instructions");
-            if (instructionsDataTable == null)
+            if (!tables.Contains(InstructionsTableName))
             {
                 return;
             }
 
+            var instructionsDataTable = tables[InstructionsTableName];
+
             var instructionsSheetBuilder = new SqadXlsxUnformattedViewInstructionsSheetBuilder();
             document.AppendSheet(instructionsSheetBuilder);
-            
+
             AppendColumnsAndRows(instructionsSheetBuilder, instructionsDataTable);
         }
 
-        private static void ProcessPivotSheet(IXlsxDocumentBuilder document, IEnumerable<DataTable> tables)
+        private static void ProcessPivotSheet(IXlsxDocumentBuilder document, DataTableCollection tables)
         {
-            var pivotDataTable = tables.FirstOrDefault(x => x.TableName == "pivot");
-            if (pivotDataTable == null)
+            if (!tables.Contains(PivotTableName))
             {
                 return;
             }
@@ -58,23 +62,26 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             document.AppendSheet(pivotSheetBuilder);
         }
 
-        private static void ProcessDataSheet(IXlsxDocumentBuilder document, IEnumerable<DataTable> tables, string dataUrl)
+        private static void ProcessDataSheet(IXlsxDocumentBuilder document,
+                                             DataTableCollection tables,
+                                             string dataUrl)
         {
-            var dataTable = tables.FirstOrDefault(x => x.TableName == "data");
-            if (dataTable == null)
+            if (!tables.Contains(DataTableName))
             {
                 return;
             }
-            
+
+            var dataTable = tables[DataTableName];
+
             var dataSheetBuilder = new SqadXlsxUnformattedViewDataSheetBuilder(dataUrl);
             document.AppendSheet(dataSheetBuilder);
-            
+
             AppendColumnsAndRows(dataSheetBuilder, dataTable);
         }
 
         private static void AppendColumnsAndRows(SqadXlsxSheetBuilderBase sheetBuilder, DataTable dataTable)
         {
-            var columns = FixColumnNames(dataTable);
+            var columns = dataTable.Columns;
 
             sheetBuilder.AppendColumns(columns);
 
@@ -86,27 +93,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             }
         }
 
-        private static DataColumnCollection FixColumnNames(DataTable dataTable)
+        private static string GetDataUrl(DataTableCollection tables)
         {
-            var columns = dataTable.Columns;
-            foreach (DataColumn column in columns)
+            if (!tables.Contains(SettingsTableName))
             {
-                if (string.Compare(column.ColumnName, "nep", StringComparison.InvariantCultureIgnoreCase) == 0)
-                {
-                    column.ColumnName = column.ColumnName.ToUpper();
-                    continue;
-                }
-                column.ColumnName = $"{column.ColumnName.First().ToString().ToUpper()}{column.ColumnName.Substring(1)}";
+                return null;
             }
 
-            return columns;
-        }
+            var settingsDataTable = tables[SettingsTableName];
 
-        private static string GetDataUrl(IEnumerable<DataTable> tables)
-        {
-            var settingsDataTable = tables.FirstOrDefault(x => x.TableName == "_settings");
-
-            return (string) settingsDataTable?.Select("key = 'ExcelLink'").FirstOrDefault()?["value"];
+            return (string) settingsDataTable.Select("key = 'ExcelLink'").FirstOrDefault()?["value"];
         }
     }
 }

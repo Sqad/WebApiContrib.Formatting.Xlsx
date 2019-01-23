@@ -53,9 +53,6 @@ Private Sub Workbook_Open()
         Exit Sub
     End If
 
-    Dim srcRange As Variant
-    srcRange = sheet.Range(""{worksheet.Dimension.Address}"").Value
-
     Dim qt As QueryTable
     Set qt = sheet.QueryTables.Add(Connection:=""URL;{_dataUrl}"", Destination:=sheet.Range(""{worksheet.Dimension.Address}""))
 
@@ -66,10 +63,10 @@ Private Sub Workbook_Open()
     Dim urlConnection As Variant
     urlConnection = qt.Connection
     
-    Set Rng = sheet.Range(""{worksheet.Dimension.Address}"")
+    Set rng = sheet.Range(""{worksheet.Dimension.Address}"")
     Set adoRecordset = CreateObject(""ADODB.Recordset"")
     Set xlXML = CreateObject(""MSXML2.DOMDocument"")
-    xlXML.LoadXML Rng.Value(xlRangeValueMSPersistXML)
+    xlXML.LoadXML rng.Value(xlRangeValueMSPersistXML)
     adoRecordset.Open xlXML
 
     Set qt.Recordset = adoRecordset

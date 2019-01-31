@@ -104,8 +104,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             foreach (var customField in colCustomFields)
                             {
                                 int customFieldId = ((dynamic)customField).ID;
+                                bool isActual = ((dynamic)customField).Actual;
+                                                                                                                                                                                                                                                          
                                 ExcelColumnInfo temlKeyColumn = col.Clone() as ExcelColumnInfo;
-                                temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_", $":{customFieldId}");
+
+                                string propetyActual = isActual ? ":Actual" : string.Empty;
+                                temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_", $"{propetyActual}:{customFieldId}");
 
                                 string customFieldDef = _staticValuesResolver.GetCustomField(customFieldId);
                                 temlKeyColumn.ExcelColumnAttribute.Header = temlKeyColumn.Header= temlKeyColumn.PropertyName + ":" + customFieldDef;
@@ -234,13 +238,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                     foreach(var customField in customFields)
                     {
-                        string columnNameCombined = columnName + ":" + ((dynamic)customField).ID;
+                        int customFieldId = ((dynamic)customField).ID;
+
+                        string isActualText = ((dynamic)customField).Actual ? ":Actual" : string.Empty;
+                        string columnNameCombined = $"{columnName}{isActualText}:{customFieldId}";
 
                         var customFieldColumnInfo = sheetBuilder.SheetColumns.Where(w => w.PropertyName == columnNameCombined).FirstOrDefault();
 
                         ExcelCell customValueHeaderCell = new ExcelCell();
                         customValueHeaderCell.CellHeader = customFieldColumnInfo.Header;
-                        customValueHeaderCell.CellValue = ((dynamic)customField).Value;
+                        customValueHeaderCell.CellValue = ((dynamic)customField).Override!=null ? ((dynamic)customField).Override : ((dynamic)customField).Value;
                         row.Add(customValueHeaderCell);
                     }
 

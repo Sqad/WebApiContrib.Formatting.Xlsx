@@ -588,39 +588,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             {
                 columntResolveTable = _staticValuesResolver.GetRecordsByTableName(info.ExcelColumnAttribute.ResolveFromTable); ;
             }
-
-            if (columntResolveTable != null)
-            {
-                columntResolveTable.TableName = info.ExcelColumnAttribute.ResolveFromTable;
-                if (string.IsNullOrEmpty(info.ExcelColumnAttribute.OverrideResolveTableName) == false)
-                    columntResolveTable.TableName = info.ExcelColumnAttribute.OverrideResolveTableName;
-
-                cell.DataValidationSheet = columntResolveTable.TableName;
-
-                var referenceSheet = document.GetReferenceSheet() as SqadXlsxPlanSheetBuilder;
-
-                if (referenceSheet == null)
-                {
-                    referenceSheet = new SqadXlsxPlanSheetBuilder(cell.DataValidationSheet, true);
-                    document.AppendSheet(referenceSheet);
-                }
-                else
-                {
-                    referenceSheet.AddAndActivateNewTable(cell.DataValidationSheet);
-                }
-
-                cell.DataValidationBeginRow = referenceSheet.GetNextAvailableRow();
-
-                this.PopulateReferenceSheet(referenceSheet, columntResolveTable);
-
-                cell.DataValidationRowsCount = referenceSheet.GetCurrentRowCount;
-
-                if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveName) == false)
-                    cell.DataValidationNameCellIndex = referenceSheet.GetColumnIndexByColumnName(info.ExcelColumnAttribute.ResolveName);
-
-                if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveValue) == false)
-                    cell.DataValidationValueCellIndex = referenceSheet.GetColumnIndexByColumnName(info.ExcelColumnAttribute.ResolveValue);
-            }
         }
     }
 }

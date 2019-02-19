@@ -38,7 +38,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
         public bool CanSerialiseType(Type valueType, Type itemType)
         {
-            
+
             return valueType == typeof(ChartData);
         }
 
@@ -105,14 +105,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             {
                                 int customFieldId = ((dynamic)customField).ID;
                                 bool isActual = ((dynamic)customField).Actual;
-                                                                                                                                                                                                                                                          
+
                                 ExcelColumnInfo temlKeyColumn = col.Clone() as ExcelColumnInfo;
 
                                 string propetyActual = isActual ? ":Actual" : string.Empty;
                                 temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_", $"{propetyActual}:{customFieldId}");
 
                                 string customFieldDef = _staticValuesResolver.GetCustomField(customFieldId);
-                                temlKeyColumn.ExcelColumnAttribute.Header = temlKeyColumn.Header= temlKeyColumn.PropertyName + ":" + customFieldDef;
+                                temlKeyColumn.ExcelColumnAttribute.Header = temlKeyColumn.Header = temlKeyColumn.PropertyName + ":" + customFieldDef;
 
                                 sheetBuilder.AppendColumnHeaderRowItem(temlKeyColumn);
                             }
@@ -160,7 +160,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             {
                 sheetBuilder.ShouldAddHeaderRow = true;
             }
-            
+
         }
 
         private void PopulateRows(List<string> columns, object value, SqadXlsxPlanSheetBuilder sheetBuilder, ExcelColumnInfoCollection columnInfo = null, IXlsxDocumentBuilder document = null)
@@ -236,21 +236,35 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         customFields = (List<object>)GetFieldOrPropertyValue(value, columnName);
                     }
 
-                    foreach(var customField in customFields)
+                    //need to get all custom columns
+
+                    var allCustomColumns = sheetBuilder.SheetColumns.Where(w => w.PropertyName.StartsWith(columnName)).ToList();
+
+                    foreach (var customColumn in allCustomColumns)
                     {
-                        int customFieldId = ((dynamic)customField).ID;
-
-                        string isActualText = ((dynamic)customField).Actual ? ":Actual" : string.Empty;
-                        string columnNameCombined = $"{columnName}{isActualText}:{customFieldId}";
-
-                        var customFieldColumnInfo = sheetBuilder.SheetColumns.Where(w => w.PropertyName == columnNameCombined).FirstOrDefault();
+                        var objectCustomField = customFields.Where(w => customColumn.PropertyName.EndsWith($":{((CustomFieldModel)w).ID}")).FirstOrDefault();
 
                         ExcelCell customValueHeaderCell = new ExcelCell();
-                        customValueHeaderCell.CellHeader = customFieldColumnInfo.Header;
-                        customValueHeaderCell.CellValue = ((dynamic)customField).Override!=null ? ((dynamic)customField).Override : ((dynamic)customField).Value;
+
+                        if (objectCustomField == null)
+                        {
+                            customValueHeaderCell.IsLocked = true;
+                            customValueHeaderCell.CellHeader = customColumn.Header;
+                            customValueHeaderCell.CellValue = "n/a";
+                        }
+                        else
+                        {
+                            CustomFieldModel customFielditem = (CustomFieldModel)objectCustomField;
+
+                            string isActualText = customFielditem.Actual ? ":Actual" : string.Empty;
+                            string isOverrideText = customFielditem.Override != null ? ":Override" : string.Empty;
+                            string columnNameCombined = $"{columnName}{isActualText}{isOverrideText}:{customFielditem.ID}:{customFielditem.Text}";
+
+                            customValueHeaderCell.CellHeader = customColumn.Header;
+                            customValueHeaderCell.CellValue = customFielditem.Override != null ? customFielditem.Override : customFielditem.Value;
+                        }
                         row.Add(customValueHeaderCell);
                     }
-
                 }
                 else
                 {
@@ -310,10 +324,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     }
                     else if (c.DataType == typeof(DateTime))
                     {
-                        if(r[c] is System.DBNull)
+                        if (r[c] is System.DBNull)
                             resolveRow.Add(c.Caption, string.Empty);
                         else
-                           resolveRow.Add(c.Caption, Convert.ToDateTime(r[c]));
+                            resolveRow.Add(c.Caption, Convert.ToDateTime(r[c]));
                     }
                     else
                         resolveRow.Add(c.Caption, r[c].ToString());
@@ -469,7 +483,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         }
                         else if (result.GetType().Name.StartsWith("Dictionary"))
                         {
-                            resultsList.Add(result);
+                            if ((result as IDictionary<int,double>).Count > 0)
+                                resultsList.Add(result);
                             isResultDictionary = true;
                         }
                         else
@@ -527,7 +542,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     return string.Format(info.FormatString, cellValue);
 
                 else if (cellValue.GetType() == typeof(DateTime) || DateTime.TryParse(cellValue.ToString(), out var test))
-                    return string.Format("{0:MM/dd/yyyy}", DateTime.Parse( cellValue.ToString()));
+                    return string.Format("{0:MM/dd/yyyy}", DateTime.Parse(cellValue.ToString()));
 
             }
 

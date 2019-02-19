@@ -51,7 +51,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
             var dataRow = CurrentTable.NewRow();
             foreach (var cell in row)
             {
-                dataRow.SetField(cell.CellHeader, cell);
+                    dataRow.SetField(cell.CellHeader, cell);
             }
 
             CurrentTable.Rows.Add(dataRow);

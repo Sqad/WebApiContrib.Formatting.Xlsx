@@ -232,8 +232,35 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     {
                         var cell = colObject as ExcelCell;
 
-                        worksheet.Cells[_rowsCount, excelColumnIndex].Value = cell.CellValue;
+                        if (cell.IsLocked)
+                        {
+                            worksheet.Cells[_rowsCount, excelColumnIndex].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                            worksheet.Cells[_rowsCount, excelColumnIndex].Style.Fill.BackgroundColor.SetColor(System.Drawing.Color.Gray);
 
+                            var lockedCell = worksheet.Cells[_rowsCount, excelColumnIndex].RichText.Add(cell.CellValue.ToString()); //.te.Fill.BackgroundColor.SetColor(System.Drawing.Color.Gray);
+                            lockedCell.Color = System.Drawing.Color.Gray;
+
+
+                            var lockedDataValication = worksheet.Cells[_rowsCount, excelColumnIndex].DataValidation.AddTextLengthDataValidation();
+
+                            lockedDataValication.Operator = OfficeOpenXml.DataValidation.ExcelDataValidationOperator.equal;
+                            lockedDataValication.Formula.Value = 0;
+                            lockedDataValication.AllowBlank = true;
+
+                            lockedDataValication.ShowErrorMessage = true;
+                            lockedDataValication.ShowInputMessage = true;
+
+                            lockedDataValication.Error = "This option is not available for input";
+                            lockedDataValication.ErrorStyle = OfficeOpenXml.DataValidation.ExcelDataValidationWarningStyle.stop;
+                            lockedDataValication.ErrorTitle = "Input not allowed";
+
+                            lockedDataValication.PromptTitle = $"No data input is allowed";
+                            lockedDataValication.Prompt = "Editing this cell is not allowed";
+
+                            continue;
+                        }
+
+                        worksheet.Cells[_rowsCount, excelColumnIndex].Value = cell.CellValue;
 
                         if (!string.IsNullOrEmpty(cell.DataValidationSheet))
                         {

@@ -489,15 +489,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         }
                         else
                             resultsList.Add(result);
-
-                        //}
-                        //else
-                        //{
-                        //    if (result.GetType().Name.StartsWith("List"))
-                        //        itemsToProcess.AddRange(result as IEnumerable<object>);
-                        //    else
-                        //        itemsToProcess.Add(result);
-                        //}
                     }
                 }
             }
@@ -564,7 +555,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             }
             else if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false)
             {
-                columntResolveTable = _staticValuesResolver.GetRecordsByTableName(info.ExcelColumnAttribute.ResolveFromTable); ;
+                columntResolveTable = _staticValuesResolver.GetRecordsByTableName(info.ExcelColumnAttribute.ResolveFromTable);
             }
 
             if (columntResolveTable != null)
@@ -601,7 +592,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             }
             else if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false)
             {
-                columntResolveTable = _staticValuesResolver.GetRecordsByTableName(info.ExcelColumnAttribute.ResolveFromTable); ;
+                columntResolveTable = _staticValuesResolver.GetRecordsByTableName(info.ExcelColumnAttribute.ResolveFromTable);
             }
         }
     }

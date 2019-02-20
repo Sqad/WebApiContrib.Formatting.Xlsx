@@ -78,6 +78,11 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 
                         fieldInfo.Add(new ExcelColumnInfo(prefix, null, attribute, null));
                     }
+                    //else if (propertyType.Name==nameof(Business.Models.FlowChart.DataModels.NameValue))
+                    //{
+                    //    string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;
+                    //    fieldInfo.Add(new ExcelColumnInfo(prefix, null, attribute, null));
+                    //}
                     else if (!FormatterUtils.IsSimpleType(propertyType))
                     {
                         //getting a complex class columns populates as ComplexName:InnerProperty

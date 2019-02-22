@@ -242,7 +242,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                     foreach (var customColumn in allCustomColumns)
                     {
-                        var objectCustomField = customFields.Where(w => customColumn.PropertyName.EndsWith($":{((CustomFieldModel)w).ID}")).FirstOrDefault();
+                        object objectCustomField = customFields.Where(w => customColumn.PropertyName.EndsWith($":{((dynamic)w).ID}")).FirstOrDefault(); 
 
                         ExcelCell customValueHeaderCell = new ExcelCell();
 
@@ -254,14 +254,35 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         }
                         else
                         {
-                            CustomFieldModel customFielditem = (CustomFieldModel)objectCustomField;
+                            dynamic customFielditem = (dynamic)objectCustomField;
 
                             string isActualText = customFielditem.Actual ? ":Actual" : string.Empty;
-                            string isOverrideText = customFielditem.Override != null ? ":Override" : string.Empty;
+                            string isOverrideText = string.Empty;
+
+                            try
+                            {
+                                isOverrideText = customFielditem.Override != null ? ":Override" : string.Empty;
+                            }
+                            catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
+                            {
+                                //dynamic property does nto exists
+                            }
+                            
                             string columnNameCombined = $"{columnName}{isActualText}{isOverrideText}:{customFielditem.ID}:{customFielditem.Text}";
 
                             customValueHeaderCell.CellHeader = customColumn.Header;
-                            customValueHeaderCell.CellValue = customFielditem.Override != null ? customFielditem.Override : customFielditem.Value;
+                            customValueHeaderCell.CellValue = null;
+
+                            try
+                            {
+                                customValueHeaderCell.CellValue = customFielditem.Override != null ? customFielditem.Override : customFielditem.Value;
+                            }
+                            catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
+                            {
+                                customValueHeaderCell.CellValue = customFielditem.Value;
+                            }
+
+                            
                         }
                         row.Add(customValueHeaderCell);
                     }
@@ -468,7 +489,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         if (result.GetType().Name.StartsWith("List"))
                         {
 
-                            if (result.GetType().FullName.Contains("CustomFieldModel"))
+                            if (result.GetType().FullName.Contains("CustomFieldModel") || result.GetType().FullName.Contains("OverrideProperty"))
                             {
                                 List<int> ids = resultsList.Select(s => (int)((dynamic)s).ID).ToList();
                                 var filtereCustomFields = (result as IEnumerable<object>).Where(w => ids.Contains(((dynamic)w).ID) == false).ToList();

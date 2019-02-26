@@ -173,7 +173,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
             for (int i = 0; i <= columns.Count - 1; i++)
             {
-                string columnName = columns[i];
+                string columnName = columns[i]; 
 
                 if (columnName.EndsWith("_Dict_"))
                 {

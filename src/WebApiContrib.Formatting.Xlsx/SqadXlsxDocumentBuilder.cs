@@ -33,6 +33,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
         public SqadXlsxSheetBuilderBase GetReferenceSheet() => _sheets.FirstOrDefault(w => w.IsReferenceSheet);
 
+        public SqadXlsxSheetBuilderBase GetPreservationSheet() => _sheets.FirstOrDefault(w => w.IsPreservationSheet);
+
         public SqadXlsxSheetBuilderBase GetSheetByName(string name)
         {
             return _sheets.FirstOrDefault(w => w.ContainsTable(name));

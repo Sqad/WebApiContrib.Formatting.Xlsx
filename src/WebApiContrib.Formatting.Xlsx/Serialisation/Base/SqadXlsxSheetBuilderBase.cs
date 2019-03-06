@@ -17,9 +17,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
 
         public ExcelColumnInfoCollection SheetColumns { get; private set; }
 
-        protected SqadXlsxSheetBuilderBase(string sheetName, bool isReferenceSheet = false, bool shouldAutoFit = true)
+        protected SqadXlsxSheetBuilderBase(string sheetName, bool isReferenceSheet = false, bool isPreservationSheet=false, bool shouldAutoFit = true)
         {
             IsReferenceSheet = isReferenceSheet;
+            IsPreservationSheet = isPreservationSheet;
+
             _shouldAutoFit = shouldAutoFit;
 
             SheetTables = new List<DataTable>();
@@ -31,6 +33,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
         }
 
         public bool IsReferenceSheet { get; }
+
+        public bool IsPreservationSheet { get; }
 
         public void AddAndActivateNewTable(string sheetName)
         {

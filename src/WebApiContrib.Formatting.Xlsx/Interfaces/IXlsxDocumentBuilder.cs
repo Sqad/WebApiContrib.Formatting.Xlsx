@@ -13,6 +13,8 @@ namespace SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces
 
         SqadXlsxSheetBuilderBase GetReferenceSheet();
 
+        SqadXlsxSheetBuilderBase GetPreservationSheet();
+
         SqadXlsxSheetBuilderBase GetSheetByName(string name);
     }
 }

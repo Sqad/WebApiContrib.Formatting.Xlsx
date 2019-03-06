@@ -257,30 +257,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             dynamic customFielditem = (dynamic)objectCustomField;
 
                             string isActualText = customFielditem.Actual ? ":Actual" : string.Empty;
-                            string isOverrideText = string.Empty;
 
-                            try
-                            {
-                                isOverrideText = customFielditem.Override != null ? ":Override" : string.Empty;
-                            }
-                            catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
-                            {
-                                //dynamic property does nto exists
-                            }
-                            
-                            string columnNameCombined = $"{columnName}{isActualText}{isOverrideText}:{customFielditem.ID}:{customFielditem.Text}";
+                            string columnNameCombined = $"{columnName}{isActualText}:{customFielditem.ID}:{customFielditem.Text}";
 
                             customValueHeaderCell.CellHeader = customColumn.Header;
-                            customValueHeaderCell.CellValue = null;
+                            customValueHeaderCell.CellValue = customFielditem.Value;
+                            
+                            //add row to to a data preservation sheet
 
-                            try
-                            {
-                                customValueHeaderCell.CellValue = customFielditem.Override != null ? customFielditem.Override : customFielditem.Value;
-                            }
-                            catch (Microsoft.CSharp.RuntimeBinder.RuntimeBinderException)
-                            {
-                                customValueHeaderCell.CellValue = customFielditem.Value;
-                            }
 
                             
                         }
@@ -615,6 +599,25 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             {
                 columntResolveTable = _staticValuesResolver.GetRecordsByTableName(info.ExcelColumnAttribute.ResolveFromTable);
             }
+        }
+
+        public void CreatePreserveCell(string columnName, ExcelCell cell, IXlsxDocumentBuilder document)
+        {
+            string _PreservationSheetName_ = "PreservationSheet";
+
+            var preservationSheet = document.GetPreservationSheet() as SqadXlsxPlanSheetBuilder;
+
+            if (preservationSheet == null)
+            {
+                preservationSheet = new SqadXlsxPlanSheetBuilder(_PreservationSheetName_, isPreservationSheet: true);
+                document.AppendSheet(preservationSheet);
+            }
+            else
+            {
+                preservationSheet.AddAndActivateNewTable(_PreservationSheetName_);
+            }
+
+
         }
     }
 }

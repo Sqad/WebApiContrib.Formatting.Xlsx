@@ -173,7 +173,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
             for (int i = 0; i <= columns.Count - 1; i++)
             {
-                string columnName = columns[i]; 
+                string columnName = columns[i];
 
                 if (columnName.EndsWith("_Dict_"))
                 {
@@ -242,7 +242,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                     foreach (var customColumn in allCustomColumns)
                     {
-                        object objectCustomField = customFields.Where(w => customColumn.PropertyName.EndsWith($":{((dynamic)w).ID}")).FirstOrDefault(); 
+                        object objectCustomField = customFields.Where(w => customColumn.PropertyName.EndsWith($":{((dynamic)w).ID}")).FirstOrDefault();
 
                         ExcelCell customValueHeaderCell = new ExcelCell();
 
@@ -262,11 +262,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                             customValueHeaderCell.CellHeader = customColumn.Header;
                             customValueHeaderCell.CellValue = customFielditem.Value;
-                            
-                            //add row to to a data preservation sheet
 
-
-                            
+                            CreatePreserveCell(customValueHeaderCell, document);
                         }
                         row.Add(customValueHeaderCell);
                     }
@@ -313,7 +310,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         {
             //SqadXlsxSheetBuilder sb = new SqadXlsxSheetBuilder(ReferenceSheet.TableName, true);
             referenceSheet.AppendColumns(ReferenceSheet.Columns);
-
 
             foreach (DataRow r in ReferenceSheet.Rows)
             {
@@ -488,7 +484,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         }
                         else if (result.GetType().Name.StartsWith("Dictionary"))
                         {
-                            if ((result as IDictionary<int,double>).Count > 0)
+                            if ((result as IDictionary<int, double>).Count > 0)
                                 resultsList.Add(result);
                             isResultDictionary = true;
                         }
@@ -601,7 +597,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             }
         }
 
-        public void CreatePreserveCell(string columnName, ExcelCell cell, IXlsxDocumentBuilder document)
+        public void CreatePreserveCell(ExcelCell cell, IXlsxDocumentBuilder document)
         {
             string _PreservationSheetName_ = "PreservationSheet";
 
@@ -617,7 +613,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 preservationSheet.AddAndActivateNewTable(_PreservationSheetName_);
             }
 
+            preservationSheet.AppendColumnHeaderRowItem(cell.CellHeader);
 
+
+            Dictionary<string, object> resolveRow = new Dictionary<string, object>();
+
+            resolveRow.Add(cell.CellHeader, cell.CellValue);
+
+            PopulateRows(resolveRow.Keys.ToList(), resolveRow, preservationSheet);
         }
     }
 }

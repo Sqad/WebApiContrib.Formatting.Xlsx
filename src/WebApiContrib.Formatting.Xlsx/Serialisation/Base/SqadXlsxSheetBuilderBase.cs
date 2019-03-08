@@ -61,6 +61,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
             CurrentTable.Rows.Add(dataRow);
         }
 
+        public void AppendColumnHeaderRowItem(string columnName)
+        {
+            var dc = new DataColumn(columnName, typeof(ExcelCell));
+            CurrentTable.Columns.Add(dc);
+        }
+
         public void AppendColumnHeaderRowItem(ExcelColumnInfo column)
         {
             SheetColumns.Add(column);
@@ -84,7 +90,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
             if (IsReferenceSheet)
             {
                 worksheet = package.Workbook.Worksheets.Add("Reference");
-                worksheet.Hidden = eWorkSheetHidden.VeryHidden;
+                //worksheet.Hidden = eWorkSheetHidden.VeryHidden;
             }
             else
             {

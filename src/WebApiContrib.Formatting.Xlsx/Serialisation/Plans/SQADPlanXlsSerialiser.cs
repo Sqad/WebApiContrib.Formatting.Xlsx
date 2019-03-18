@@ -258,12 +258,17 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                             string isActualText = customFielditem.Actual ? ":Actual" : string.Empty;
 
-                            string columnNameCombined = $"{columnName}{isActualText}:{customFielditem.ID}:{customFielditem.Text}";
-
                             customValueHeaderCell.CellHeader = customColumn.Header;
                             customValueHeaderCell.CellValue = customFielditem.Value;
 
                             CreatePreserveCell(customValueHeaderCell, document);
+
+                            //hidden cell for text
+                            string columnNameCombined = $"{columnName}{isActualText}:{customFielditem.ID}:{customFielditem.Text}";
+                            ExcelCell textPreservationCell = new ExcelCell();
+                            textPreservationCell.CellHeader = columnNameCombined+"Text";
+                            textPreservationCell.CellValue = customFielditem.Text;
+                            CreatePreserveCell(textPreservationCell, document);
                         }
                         row.Add(customValueHeaderCell);
                     }

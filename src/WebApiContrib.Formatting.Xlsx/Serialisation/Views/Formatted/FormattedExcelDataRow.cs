@@ -32,16 +32,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                 newValue = newValue.Replace(" %", "");
             }
 
-            if (int.TryParse(newValue,
+            if (long.TryParse(newValue,
                              NumberStyles.AllowThousands | NumberStyles.AllowCurrencySymbol,
-                             CultureInfo.InvariantCulture, out var intResult))
+                             CultureInfo.InvariantCulture, out var longResult))
             {
                 if (isPercent)
                 {
-                    return intResult / 100;
+                    return longResult / 100;
                 }
 
-                return intResult;
+                return longResult;
             }
 
             if (decimal.TryParse(newValue, NumberStyles.Number | NumberStyles.AllowCurrencySymbol,
@@ -49,7 +49,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             {
                 if (isPercent)
                 {
-                    return intResult / 100;
+                    return decimalResult / 100;
                 }
 
                 return decimalResult;

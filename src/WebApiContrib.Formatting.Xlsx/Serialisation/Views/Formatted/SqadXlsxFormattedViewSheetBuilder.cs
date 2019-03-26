@@ -3,20 +3,12 @@ using System.Drawing;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Helpers;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted
 {
     public sealed class SqadXlsxFormattedViewSheetBuilder : SqadXlsxSheetBuilderBase
     {
-        private const int RowNameColumnIndex = 2;
-        private const string TotalRowIndicator = "Total";
-
-        private readonly Color _headerBackgroundColor = Color.FromArgb(212, 227, 244);
-        private readonly Color _headerTotalsBackgroundColor = Color.FromArgb(198, 217, 241);
-        private readonly Color _headerFontColor = Color.FromArgb(47, 79, 79);
-        private readonly Color _dataTotalsBackgroundColor = Color.FromArgb(244, 244, 244);
-        private readonly Color _totalsBackgroundColor = Color.FromArgb(227, 236, 248);
-        
         private readonly int _headerRowsCount;
         private int _leftPaneWidth;
 
@@ -32,11 +24,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             {
                 return;
             }
-            
+
             WorksheetDataHelper.FillData(worksheet, table, false);
-            
+
             ObtainLeftPaneWidth(worksheet);
-            
+
             FormatHeader(worksheet);
             FormatRows(worksheet);
         }
@@ -75,7 +67,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
 
             var percentsCells = sheet.Cells[firstDataRowIndex, 1, sheet.Dimension.Rows, 1];
             percentsCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            percentsCells.Style.Fill.BackgroundColor.SetColor(_dataTotalsBackgroundColor);
+            percentsCells.Style.Fill.BackgroundColor.SetColor(WorksheetHelpers.DataTotalsBackgroundColor);
             percentsCells.Style.Numberformat.Format = "0 %";
 
             var beginningCells = sheet.Cells[firstDataRowIndex, _leftPaneWidth, sheet.Dimension.Rows, _leftPaneWidth];
@@ -87,7 +79,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                                             sheet.Dimension.Columns];
                 FormatNumbers(dataCells);
             }
-            
+
             FormatTotalColumns(sheet, firstDataRowIndex);
             FormatRows(sheet, firstDataRowIndex);
         }
@@ -104,7 +96,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
 
                 var totalCells = sheet.Cells[firstDataRowIndex, cellIndex, sheet.Dimension.Rows, cellIndex];
                 totalCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-                totalCells.Style.Fill.BackgroundColor.SetColor(_dataTotalsBackgroundColor);
+                totalCells.Style.Fill.BackgroundColor.SetColor(WorksheetHelpers.DataTotalsBackgroundColor);
             }
         }
 
@@ -115,9 +107,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             allHeaderCells.Style.VerticalAlignment = ExcelVerticalAlignment.Distributed;
 
             allHeaderCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            allHeaderCells.Style.Fill.BackgroundColor.SetColor(_headerBackgroundColor);
+            allHeaderCells.Style.Fill.BackgroundColor.SetColor(WorksheetHelpers.HeaderBackgroundColor);
 
-            allHeaderCells.Style.Font.Color.SetColor(_headerFontColor);
+            allHeaderCells.Style.Font.Color.SetColor(WorksheetHelpers.HeaderFontColor);
 
             var mergedCells = worksheet.Cells[1, 1, _headerRowsCount, _leftPaneWidth];
             mergedCells.Merge = true;
@@ -154,7 +146,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                         worksheet.Cells[rowIndex, endColumnIndex + 1, _headerRowsCount, endColumnIndex + 1];
                     verticalCellsToMerge.Value = worksheet.Cells[rowIndex, endColumnIndex + 1].Value;
                     verticalCellsToMerge.Merge = true;
-                    verticalCellsToMerge.Style.Fill.BackgroundColor.SetColor(_headerTotalsBackgroundColor);
+                    verticalCellsToMerge.Style.Fill.BackgroundColor.SetColor(WorksheetHelpers
+                                                                                 .HeaderTotalsBackgroundColor);
                     SetBordersToCells(verticalCellsToMerge);
 
                     endColumnIndex += 2;
@@ -175,8 +168,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             {
                 var row = sheet.Cells[rowIndex, 1, rowIndex, sheet.Dimension.Columns];
 
-                var nameCell = sheet.Cells[rowIndex, RowNameColumnIndex];
-                if (nameCell.Value != null && nameCell.Value is string name && name.Contains(TotalRowIndicator))
+                var nameCell = sheet.Cells[rowIndex, WorksheetHelpers.RowNameColumnIndex];
+                if (nameCell.Value != null && nameCell.Value is string name &&
+                    name.Contains(WorksheetHelpers.TotalRowIndicator))
                 {
                     FormatTotalRow(row);
                     isPreviousRowTotal = true;
@@ -195,7 +189,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                 }
 
                 var isGroupingRow = true;
-                for (var x = RowNameColumnIndex + 1; x <= sheet.Dimension.Columns; x++)
+                for (var x = WorksheetHelpers.RowNameColumnIndex + 1; x <= sheet.Dimension.Columns; x++)
                 {
                     if (sheet.Cells[rowIndex, x].Value == null)
                     {
@@ -216,7 +210,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
         private void FormatTotalRow(ExcelRange row)
         {
             row.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            row.Style.Fill.BackgroundColor.SetColor(_totalsBackgroundColor);
+            row.Style.Fill.BackgroundColor.SetColor(WorksheetHelpers.TotalsBackgroundColor);
         }
 
         private static void FormatGroupRow(ExcelRange row)

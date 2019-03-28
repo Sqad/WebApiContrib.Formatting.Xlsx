@@ -2,6 +2,7 @@
 {
     public enum SerializerType
     {
-        Default
+        Default,
+        SummaryPlan
     }
 }

@@ -125,8 +125,25 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                     var initialCell = worksheet.Cells[rowIndex, startColumnIndex];
                     if (initialCell.Value != null)
                     {
+                        if (!(initialCell.Value is string)
+                            || !((string)initialCell.Value).Contains(WorksheetHelpers.TotalRowIndicator)
+                            || initialCell.Merge)
+                        {
+                            startColumnIndex++;
+                            endColumnIndex = startColumnIndex - 1;
+
+                            continue;
+                        }
+
+                        var verticalCellsToMerge =
+                            worksheet.Cells[rowIndex, endColumnIndex, _headerRowsCount, endColumnIndex];
+                        verticalCellsToMerge.Value = worksheet.Cells[rowIndex, endColumnIndex].Value;
+                        verticalCellsToMerge.Merge = true;
+                        verticalCellsToMerge.Style.Fill.BackgroundColor.SetColor(WorksheetHelpers.HeaderTotalsBackgroundColor);
+                        SetBordersToCells(verticalCellsToMerge);
+
                         startColumnIndex++;
-                        endColumnIndex = startColumnIndex;
+                        endColumnIndex = startColumnIndex - 1;
 
                         continue;
                     }
@@ -137,21 +154,15 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                         continue;
                     }
 
-                    var horizontalCellsToMerge = worksheet.Cells[rowIndex, startColumnIndex, rowIndex, endColumnIndex];
-                    horizontalCellsToMerge.Value = endCell.Value;
-                    horizontalCellsToMerge.Merge = true;
-                    SetBordersToCells(horizontalCellsToMerge);
+                    if (startColumnIndex != endColumnIndex)
+                    {
+                        var horizontalCellsToMerge = worksheet.Cells[rowIndex, startColumnIndex, rowIndex, endColumnIndex];
+                        horizontalCellsToMerge.Value = endCell.Value;
+                        horizontalCellsToMerge.Merge = true;
+                        SetBordersToCells(horizontalCellsToMerge);
+                    }
 
-                    var verticalCellsToMerge =
-                        worksheet.Cells[rowIndex, endColumnIndex + 1, _headerRowsCount, endColumnIndex + 1];
-                    verticalCellsToMerge.Value = worksheet.Cells[rowIndex, endColumnIndex + 1].Value;
-                    verticalCellsToMerge.Merge = true;
-                    verticalCellsToMerge.Style.Fill.BackgroundColor.SetColor(WorksheetHelpers
-                                                                                 .HeaderTotalsBackgroundColor);
-                    SetBordersToCells(verticalCellsToMerge);
-
-                    endColumnIndex += 2;
-                    startColumnIndex = endColumnIndex;
+                    startColumnIndex = endColumnIndex + 1;
                 }
             }
 

@@ -264,16 +264,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             customValueHeaderCell.CellHeader = customColumn.Header;
                             customValueHeaderCell.CellValue = customFielditem.Value;
 
-                            string columnNameCombined = $"{columnName}{isActualText}:{objID}:{customFielditem.ID}";
+                            string columnNameCombined = $"{columnName}{isActualText}:{customFielditem.ID}";
                             ExcelCell valuePreservationCell = new ExcelCell();
-                            valuePreservationCell.CellHeader = columnNameCombined;
+                            valuePreservationCell.CellHeader = $"{columnNameCombined}:{objID}";
                             valuePreservationCell.CellValue = customFielditem.Value;
                             CreatePreserveCell(valuePreservationCell, document);
 
                             //hidden cell for text
 
                             ExcelCell textPreservationCell = new ExcelCell();
-                            textPreservationCell.CellHeader = $"{columnNameCombined}:Text";
+                            textPreservationCell.CellHeader = $"{columnNameCombined}:Text:{objID}";
                             textPreservationCell.CellValue = customFielditem.Text;
                             CreatePreserveCell(textPreservationCell, document);
                         }

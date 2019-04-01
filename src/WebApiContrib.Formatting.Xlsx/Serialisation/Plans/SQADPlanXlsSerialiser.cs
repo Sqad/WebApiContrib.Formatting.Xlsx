@@ -101,18 +101,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                                 colCustomFields = GetFieldPathValue(value, columnName) as List<object>;
                             }
 
-                            var processedObjId = GetFieldPathValue(value, sheetName+":ID");
-
                             foreach (var customField in colCustomFields)
                             {
-                                
+
                                 int customFieldId = ((dynamic)customField).ID;
                                 bool isActual = ((dynamic)customField).Actual;
 
                                 ExcelColumnInfo temlKeyColumn = col.Clone() as ExcelColumnInfo;
 
                                 string propetyActual = isActual ? ":Actual" : string.Empty;
-                                temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_", $"{propetyActual}:{processedObjId}:{customFieldId}");
+                                temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_", $"{propetyActual}:{customFieldId}");
 
                                 string customFieldDef = _staticValuesResolver.GetCustomField(customFieldId);
                                 temlKeyColumn.ExcelColumnAttribute.Header = temlKeyColumn.Header = temlKeyColumn.PropertyName + ":" + customFieldDef;
@@ -247,7 +245,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                     foreach (var customColumn in allCustomColumns)
                     {
-                        object objectCustomField = customFields.Where(w => customColumn.PropertyName.EndsWith($":{((dynamic)w).ID}")).FirstOrDefault();
+                        object objectCustomField = customFields.Where(w => customColumn.PropertyName.EndsWith($":{((dynamic)w).ID}")).Where(w =>  customColumn.PropertyName.Contains("Actual") ? ((dynamic)w).Actual == true : ((dynamic)w).Actual == false).FirstOrDefault();
 
                         ExcelCell customValueHeaderCell = new ExcelCell();
 
@@ -266,12 +264,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             customValueHeaderCell.CellHeader = customColumn.Header;
                             customValueHeaderCell.CellValue = customFielditem.Value;
 
-                            CreatePreserveCell(customValueHeaderCell, document);
+                            string columnNameCombined = $"{columnName}{isActualText}:{objID}:{customFielditem.ID}";
+                            ExcelCell valuePreservationCell = new ExcelCell();
+                            valuePreservationCell.CellHeader = columnNameCombined;
+                            valuePreservationCell.CellValue = customFielditem.Value;
+                            CreatePreserveCell(valuePreservationCell, document);
 
                             //hidden cell for text
-                            string columnNameCombined = $"{columnName}{isActualText}:{objID}:{customFielditem.ID}:{customFielditem.Text}";
+
                             ExcelCell textPreservationCell = new ExcelCell();
-                            textPreservationCell.CellHeader = columnNameCombined+"Text";
+                            textPreservationCell.CellHeader = $"{columnNameCombined}:Text";
                             textPreservationCell.CellValue = customFielditem.Text;
                             CreatePreserveCell(textPreservationCell, document);
                         }

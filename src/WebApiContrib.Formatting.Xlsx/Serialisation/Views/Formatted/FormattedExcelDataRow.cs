@@ -38,7 +38,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             {
                 if (isPercent)
                 {
-                    return longResult / 100;
+                    return (decimal) longResult / 100;
                 }
 
                 return longResult;

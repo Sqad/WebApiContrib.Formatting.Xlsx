@@ -239,7 +239,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             _calculatedTotals.Add(totalColumnName, new Dictionary<string, IDictionary<string, long?>>());
 
             var uniqueRowIdBuilder = new List<string>();
-            for (var rowIndex = _headerRowsCount + 1; rowIndex < sheet.Dimension.Rows; rowIndex++)
+            for (var rowIndex = _headerRowsCount + 1; rowIndex <= sheet.Dimension.Rows; rowIndex++)
             {
                 var nameCellValue = sheet.Cells[rowIndex, WorksheetHelpers.RowNameColumnIndex].Value as string;
                 if (WorksheetHelpers.IsGroupRow(sheet, rowIndex, _totalColumnIndexes) &&
@@ -384,7 +384,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             var result = new Dictionary<string, int>();
 
             var uniqueRowIdBuilder = new List<string>();
-            for (var rowIndex = _headerRowsCount + 1; rowIndex < sheet.Dimension.Rows; rowIndex++)
+            for (var rowIndex = _headerRowsCount + 1; rowIndex <= sheet.Dimension.Rows; rowIndex++)
             {
                 var nameCellValue = sheet.Cells[rowIndex, WorksheetHelpers.RowNameColumnIndex].Value as string;
                 if (WorksheetHelpers.IsGroupRow(sheet, rowIndex, _totalColumnIndexes) &&

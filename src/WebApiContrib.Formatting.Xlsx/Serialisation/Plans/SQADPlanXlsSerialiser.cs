@@ -257,25 +257,48 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         }
                         else
                         {
-                            dynamic customFielditem = (dynamic)objectCustomField;
+                            dynamic customFieldItem = (dynamic)objectCustomField;
 
-                            string isActualText = customFielditem.Actual ? ":Actual" : string.Empty;
+                            string isActualText = customFieldItem.Actual ? ":Actual" : string.Empty;
 
                             customValueHeaderCell.CellHeader = customColumn.Header;
-                            customValueHeaderCell.CellValue = customFielditem.Value;
+                            customValueHeaderCell.CellValue = customFieldItem.Value;
 
-                            string columnNameCombined = $"{columnName}{isActualText}:{customFielditem.ID}";
-                            ExcelCell valuePreservationCell = new ExcelCell();
-                            valuePreservationCell.CellHeader = $"{columnNameCombined}:{objID}";
-                            valuePreservationCell.CellValue = customFielditem.Value;
-                            CreatePreserveCell(valuePreservationCell, document);
+                            string columnNameCombined = $"{columnName}{isActualText}:{customFieldItem.ID}";
 
-                            //hidden cell for text
+                            if (customFieldItem.Value != null)
+                            {
+                                //its an number value, no text
 
-                            ExcelCell textPreservationCell = new ExcelCell();
-                            textPreservationCell.CellHeader = $"{columnNameCombined}:Text:{objID}";
-                            textPreservationCell.CellValue = customFielditem.Text;
-                            CreatePreserveCell(textPreservationCell, document);
+                                ExcelCell valuePreservationCell = new ExcelCell();
+                                valuePreservationCell.CellHeader = $"{columnNameCombined}:{objID}";
+                                valuePreservationCell.CellValue = customFieldItem.Value;
+
+                                try
+                                {
+                                    if (customFieldItem.Override != null)
+                                        valuePreservationCell.CellValue = customFieldItem.Override;
+                                }
+                                catch { }
+
+                                CreatePreserveCell(valuePreservationCell, document);
+                            }
+                            else
+                            {
+                                ExcelCell textPreservationCell = new ExcelCell();
+                                textPreservationCell.CellHeader = $"{columnNameCombined}:Text:{objID}";
+                                textPreservationCell.CellValue = customFieldItem.Text;
+
+                                try
+                                {
+                                    if (customFieldItem.Override != null)
+                                        textPreservationCell.CellValue = customFieldItem.Override;
+                                }
+                                catch { }
+
+                                CreatePreserveCell(textPreservationCell, document);
+                            }
+                           
                         }
                         row.Add(customValueHeaderCell);
                     }

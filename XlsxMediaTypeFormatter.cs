@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Security.Permissions;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.Attributes;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
@@ -22,7 +25,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
     public class XlsxMediaTypeFormatter : MediaTypeFormatter
     {
         private readonly SerializerType _serializerType;
-
+        private readonly IHttpContextAccessor _httpContextAccessor;
         #region Properties
 
         /// <summary>
@@ -76,14 +79,15 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         /// <param name="cellStyle">An action method that modifies the worksheet cell style.</param>
         /// <param name="headerStyle">An action method that modifies the cell style of the first (header) row in the
         /// worksheet.</param>
-        public XlsxMediaTypeFormatter(bool autoFit = true,
+        public XlsxMediaTypeFormatter(IHttpContextAccessor httpContextAccessor,bool autoFit = true,
                                       bool autoFilter = false,
                                       bool freezeHeader = false,
                                       double? headerHeight = null,
                                       Action<ExcelStyle> cellStyle = null,
                                       Action<ExcelStyle> headerStyle = null,
                                       IExportHelpersRepository staticValuesResolver = null,
-                                      SerializerType serializerType = SerializerType.Default)
+                                      SerializerType serializerType = SerializerType.Default
+                                      )
         {
             SupportedMediaTypes.Clear();
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
@@ -107,6 +111,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                               new SqadSummaryPlanXlsxSerializer()
                           };
 
+            _httpContextAccessor = httpContextAccessor;
             //DefaultSerializer = new SqadXlsxSerialiser(staticValuesResolver); //new DefaultXlsxSerialiser();
         }
 
@@ -133,7 +138,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             else
             {
                 // Get the raw request URI.
-                string rawUri = System.Web.HttpContext.Current?.Request?.RawUrl;
+                
+                string rawUri = _httpContextAccessor.HttpContext?.Request?.GetDisplayUrl();
                 if (string.IsNullOrEmpty(rawUri) != false)
                 {
                     // Remove query string if present.
@@ -145,7 +151,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                 }
 
                 // Otherwise, use either the URL file name component or just "data".
-                fileName = System.Web.VirtualPathUtility.GetFileName(rawUri) ?? "data";
+                fileName =  Path.GetFileName(_httpContextAccessor.HttpContext?.Request?.Path) ?? "data";
             }
 
             // Add XLSX extension if not present.

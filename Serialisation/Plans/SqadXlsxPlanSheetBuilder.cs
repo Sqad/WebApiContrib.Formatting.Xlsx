@@ -2,7 +2,10 @@
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
+using System.Reflection;
+using Microsoft.Extensions.FileProviders;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
@@ -124,7 +127,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 logoAndTabTitleCells.Merge = true;
 
                 //Picture
-                var picture = worksheet.Drawings.AddPicture("SQADLogo", Resources.Properties.Resources.SQADLogo);
+                 
+                var embeddedProvider = new EmbeddedFileProvider(Assembly.Load("SQAD.MTNext.Resources"));
+
+                var sqadLogo = Image.FromStream(embeddedProvider.GetFileInfo("Resources/SQADLogo.png").CreateReadStream());
+
+                var picture = worksheet.Drawings.AddPicture("SQADLogo", sqadLogo);
                 picture.SetPosition(0, 2, 0, 5);
 
                 //Tab name text
@@ -169,9 +177,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                 var fullLogoCells = worksheet.Cells[1, 9, 1, 12];
                 fullLogoCells.Merge = true;
-
+                
+               
+                var logoX = Image.FromStream(embeddedProvider.GetFileInfo("Resources/logox.png").CreateReadStream());
                 var fullLogo =
-                    worksheet.Drawings.AddPicture("SQADLogoFull", Resources.Properties.Resources.SQADLogoFull);
+                    worksheet.Drawings.AddPicture("SQADLogoFull", logoX);
                 fullLogo.SetPosition(0, 2, 9, 0);
             }
 

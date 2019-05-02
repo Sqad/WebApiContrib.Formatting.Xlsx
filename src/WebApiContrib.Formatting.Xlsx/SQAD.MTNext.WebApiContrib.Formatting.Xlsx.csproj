@@ -94,6 +94,7 @@
     <Compile Include="Serialisation\Views\Formatted\SqadXlsxSummaryViewSheetBuilder.cs" />
     <Compile Include="Serialisation\Views\Helpers\NeutralColorGenerator.cs" />
     <Compile Include="Serialisation\Views\Helpers\WorksheetHelpers.cs" />
+    <Compile Include="Serialisation\Views\Unformatted\SqadXlsxUnformattedViewScriptSheetBuilder.cs" />
     <Compile Include="Serialisation\Views\WorksheetDataHelper.cs" />
     <Compile Include="Serialisation\Views\Unformatted\SqadUnformattedViewXlsxSerializer.cs" />
     <Compile Include="Serialisation\Views\Formatted\SqadXlsxFormattedViewSheetBuilder.cs" />

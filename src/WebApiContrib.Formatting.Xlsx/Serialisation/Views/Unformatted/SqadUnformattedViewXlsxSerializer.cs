@@ -34,6 +34,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             var dataUrl = GetDataUrl(tables);
             ProcessDataSheet(document, tables, dataUrl);
             ProcessPivotSheet(document, tables);
+
+            var scriptBuilder = new SqadXlsxUnformattedViewScriptSheetBuilder(dataUrl);
+            document.AppendSheet(scriptBuilder);
         }
 
         private static void ProcessInstructionsSheet(IXlsxDocumentBuilder document, DataTableCollection tables)

@@ -17,7 +17,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
 
         public ExcelColumnInfoCollection SheetColumns { get; private set; }
 
-        protected SqadXlsxSheetBuilderBase(string sheetName, bool isReferenceSheet = false, bool isPreservationSheet=false, bool shouldAutoFit = true)
+        protected SqadXlsxSheetBuilderBase(string sheetName, bool isReferenceSheet = false, bool isPreservationSheet = false, bool shouldAutoFit = true)
         {
             IsReferenceSheet = isReferenceSheet;
             IsPreservationSheet = isPreservationSheet;
@@ -50,15 +50,36 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
             }
         }
 
+        public void AppendColumnsWithProperType(DataColumnCollection columns)
+        {
+            foreach (DataColumn c in columns)
+            {
+                CurrentTable.Columns.Add(c.ColumnName, c.DataType);
+            }
+        }
+
         public void AppendRow(IEnumerable<ExcelCell> row)
         {
             var dataRow = CurrentTable.NewRow();
             foreach (var cell in row)
             {
-                    dataRow.SetField(cell.CellHeader, cell);
+                dataRow.SetField(cell.CellHeader, cell);
             }
 
             CurrentTable.Rows.Add(dataRow);
+        }
+
+        public void AppendRow(DataRowCollection rows)
+        {
+            foreach (DataRow row in rows)
+            {
+                var dataRow = CurrentTable.NewRow();
+                for (var i = 0;i<CurrentTable.Columns.Count; i++)
+                {
+                    dataRow.SetField(CurrentTable.Columns[i].ColumnName, row[i]);
+                }
+                CurrentTable.Rows.Add(dataRow);
+            }
         }
 
         public void AppendColumnHeaderRowItem(string columnName)

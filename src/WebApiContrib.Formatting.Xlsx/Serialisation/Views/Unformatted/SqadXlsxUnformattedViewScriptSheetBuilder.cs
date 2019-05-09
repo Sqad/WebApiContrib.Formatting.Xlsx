@@ -35,10 +35,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             var pivotSheet =
                 worksheet.Workbook.Worksheets.FirstOrDefault(x => x.Name == ExportViewConstants
                                                                       .UnformattedViewPivotSheetName);
-            if (pivotSheet != null && pivotSheet.PivotTables.First().Fields.Any(x => x.Name == "Week"))
-            {
-                pivotScript = GetPivotScript();
-            }
+            //if (pivotSheet != null && pivotSheet.PivotTables.First().Fields.Any(x => x.Name == "Week"))
+            //{
+                pivotScript = GetPivotScript(dataSheet.Dimension.ToString());
+            //}
 
             var code = $@"
 Private Sub Workbook_Open()
@@ -47,14 +47,14 @@ Private Sub Workbook_Open()
     If tmpSheet.Visible = xlSheetVeryHidden Then
         Exit Sub
     End If
-
-    {pivotScript}
+    
     {dataScript}
+{pivotScript}
 
     tmpSheet.Visible = xlSheetVeryHidden
 End Sub
 ";
-            worksheet.Workbook.CodeModule.Code = code;
+           worksheet.Workbook.CodeModule.Code = code;
         }
 
         private string GetDataScript(ExcelWorksheet worksheet)
@@ -104,18 +104,31 @@ End Sub
 ";
         }
 
-        private string GetPivotScript()
+        private string GetPivotScript(string dataDimention)
         {
             return $@"
-    Dim pivotSheet As Worksheet
-    Set pivotSheet = Sheets(""{ExportViewConstants.UnformattedViewPivotSheetName}"")
-    
-    Dim pr As PivotTable
-    Set pt = pivotSheet.PivotTables(1)
 
-    For Each pf In pt.ColumnFields
-        pf.Orientation = xlHidden
-    Next pf
+                    On Error Resume Next
+                    Application.DisplayAlerts = False
+                    Sheets.Add After:= ActiveSheet
+                    ActiveSheet.Name = ""{ExportViewConstants.UnformattedViewPivotSheetName}""
+                    Application.DisplayAlerts = True
+
+            Dim pivotSheet As Worksheet
+            Set pivotSheet = Sheets(""{ExportViewConstants.UnformattedViewPivotSheetName}"")
+    
+            Dim dataSheet As Worksheet
+            Set dataSheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
+
+            Set PRange = dataSheet.Range(""{dataDimention}"").CurrentRegion
+
+            Set pvtCache = ActiveWorkbook.PivotCaches.Create(SourceType:= xlDatabase, SourceData:= PRange)
+            Set pTable = pvtCache.CreatePivotTable(TableDestination:= pivotSheet.Cells(3, 1), TableName:= ""PivotTable"")
+
+            'Set pt = pivotSheet.PivotTables(1)
+             '   For Each pf In pt.ColumnFields
+              '      pf.Orientation = xlHidden
+              '  Next pf
 ";
         }
     }

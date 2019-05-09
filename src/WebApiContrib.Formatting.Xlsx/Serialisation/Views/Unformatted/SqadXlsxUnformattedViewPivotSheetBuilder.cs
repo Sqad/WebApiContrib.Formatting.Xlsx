@@ -17,33 +17,34 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
         protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
         {
-            var dataWorksheet = worksheet.Workbook
-                                         .Worksheets
-                                         .FirstOrDefault(x => x.Name == ExportViewConstants
-                                                                  .UnformattedViewDataSheetName);
-            if (dataWorksheet == null)
-            {
-                return;
-            }
+            //var dataWorksheet = worksheet.Workbook
+            //                             .Worksheets
+            //                             .FirstOrDefault(x => x.Name == ExportViewConstants
+            //                                                      .UnformattedViewDataSheetName);
+            //if (dataWorksheet == null)
+            //{
+            //    return;
+            //}
 
-            var dataRange = dataWorksheet.Cells[dataWorksheet.Dimension.Address];
+            //var dataRange = dataWorksheet.Cells[dataWorksheet.Dimension.Address];
 
-            worksheet.Cells[3, 1].Value = string.Empty;
-            var pivotTable = worksheet.PivotTables.Add(worksheet.Cells[3, 1], dataRange, "PivotTable");
+            //worksheet.Cells[3, 1].Value = string.Empty;
 
-            var weekField = pivotTable.Fields.FirstOrDefault(x => x.Name == "Week");
-            if (weekField != null)
-            {
-                pivotTable.ColumnFields.Add(weekField).AddDateGrouping(eDateGroupBy.Days | eDateGroupBy.Months);
-            }
+            //var pivotTable = worksheet.PivotTables.Add(worksheet.Cells[3, 1], dataRange, "PivotTable");
 
-            pivotTable.StyleName = "PivotStyleLight16";
-            pivotTable.TableStyle = TableStyles.Light16;
-            pivotTable.GridDropZones = false;
-            pivotTable.Outline = true;
-            pivotTable.OutlineData = true;
-            pivotTable.MultipleFieldFilters = false;
-            pivotTable.DataCaption = "Values";
+            //var weekField = pivotTable.Fields.FirstOrDefault(x => x.Name == "Week");
+            //if (weekField != null)
+            //{
+            //    pivotTable.ColumnFields.Add(weekField).AddDateGrouping(eDateGroupBy.Days | eDateGroupBy.Months);
+            //}
+
+            //pivotTable.StyleName = "PivotStyleLight16";
+            //pivotTable.TableStyle = TableStyles.Light16;
+            //pivotTable.GridDropZones = false;
+            //pivotTable.Outline = true;
+            //pivotTable.OutlineData = true;
+            //pivotTable.MultipleFieldFilters = false;
+            //pivotTable.DataCaption = "Values";
         }
     }
 }

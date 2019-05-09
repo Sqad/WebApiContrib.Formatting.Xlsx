@@ -61,8 +61,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
                 return;
             }
 
-            var pivotSheetBuilder = new SqadXlsxUnformattedViewPivotSheetBuilder();
-            document.AppendSheet(pivotSheetBuilder);
+            //var pivotSheetBuilder = new SqadXlsxUnformattedViewPivotSheetBuilder();
+            //document.AppendSheet(pivotSheetBuilder);
         }
 
         private static void ProcessDataSheet(IXlsxDocumentBuilder document,

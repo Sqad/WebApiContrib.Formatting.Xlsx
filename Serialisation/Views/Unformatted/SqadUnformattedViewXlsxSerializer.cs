@@ -34,6 +34,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             var dataUrl = GetDataUrl(tables);
             ProcessDataSheet(document, tables, dataUrl);
             ProcessPivotSheet(document, tables);
+
+            var scriptBuilder = new SqadXlsxUnformattedViewScriptSheetBuilder(dataUrl);
+            document.AppendSheet(scriptBuilder);
         }
 
         private static void ProcessInstructionsSheet(IXlsxDocumentBuilder document, DataTableCollection tables)
@@ -58,8 +61,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
                 return;
             }
 
-            var pivotSheetBuilder = new SqadXlsxUnformattedViewPivotSheetBuilder();
-            document.AppendSheet(pivotSheetBuilder);
+            //var pivotSheetBuilder = new SqadXlsxUnformattedViewPivotSheetBuilder();
+            //document.AppendSheet(pivotSheetBuilder);
         }
 
         private static void ProcessDataSheet(IXlsxDocumentBuilder document,
@@ -83,14 +86,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
         {
             var columns = dataTable.Columns;
 
-            sheetBuilder.AppendColumns(columns);
-
-            var records = dataTable.Rows.Cast<DataRow>().Select(x => new ExcelDataRow(x));
-            foreach (var record in records)
-            {
-                var row = record.GetExcelCells(columns);
-                sheetBuilder.AppendRow(row);
-            }
+            sheetBuilder.AppendColumnsWithProperType(columns);
+            sheetBuilder.AppendRow(dataTable.Rows);
         }
 
         private static string GetDataUrl(DataTableCollection tables)
@@ -102,7 +99,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
             var settingsDataTable = tables[SettingsTableName];
 
-            return (string) settingsDataTable.Select("key = 'ExcelLink'").FirstOrDefault()?["value"];
+            return (string)settingsDataTable.Select("key = 'ExcelLink'").FirstOrDefault()?["value"];
         }
     }
 }

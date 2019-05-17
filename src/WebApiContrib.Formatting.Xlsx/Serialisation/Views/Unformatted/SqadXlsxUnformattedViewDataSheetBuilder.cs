@@ -33,13 +33,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
         {
             for (var i = 0; i < CurrentTable.Columns.Count; i++)
             {
-                if (!(( CurrentTable.Rows[0][i]) is DateTime))
+                if (!(((ExcelCell)CurrentTable.Rows[0][i]).CellValue is DateTime))
                 {
                     continue;
                 }
 
-                var column = worksheet.Cells[1, i + 1, worksheet.Dimension.Rows, i + 1];
-                column.Style.Numberformat.Format = "mm/dd/yy";
+                var column = worksheet.Cells[2, i + 1, worksheet.Dimension.Rows, i + 1];
+                column.Style.Numberformat.Format = "mm-dd-yy";
             }
         }
     }

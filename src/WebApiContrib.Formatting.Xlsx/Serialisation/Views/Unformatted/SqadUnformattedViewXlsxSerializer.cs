@@ -86,8 +86,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
         {
             var columns = dataTable.Columns;
 
-            sheetBuilder.AppendColumnsWithProperType(columns);
-            sheetBuilder.AppendRow(dataTable.Rows);
+            sheetBuilder.AppendColumns(columns);
+
+            var records = dataTable.Rows.Cast<DataRow>().Select(x => new ExcelDataRow(x));
+            foreach (var record in records)
+            {
+                var row = record.GetExcelCells(columns);
+                sheetBuilder.AppendRow(row);
+            }
         }
 
         private static string GetDataUrl(DataTableCollection tables)

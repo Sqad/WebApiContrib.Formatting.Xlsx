@@ -26,10 +26,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views
                 for (var x = 0; x < table.Columns.Count; x++)
                 {
                     var column = table.Columns[x];
-                    var value =  dataRow[column.ColumnName];
+                    var value = dataRow[column.ColumnName];
 
                     var cell = worksheet.Cells[y + (includeColumnsRow ? 2 : 1), x + 1];
-                    cell.Value = value;
+
+                    cell.Value = ((ExcelCell)value).CellValue;
                 }
             }
         }

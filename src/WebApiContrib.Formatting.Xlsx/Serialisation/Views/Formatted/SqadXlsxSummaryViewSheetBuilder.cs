@@ -557,7 +557,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                 }
 
                 var startGroupRowIndex = rowIndex;
-                var groupName = ((string) sheet.Cells[rowIndex, WorksheetHelpers.RowNameColumnIndex].Value).TrimStart();
+                var groupName = (sheet.Cells[rowIndex, WorksheetHelpers.RowNameColumnIndex].Value.ToString()).Trim();
 
                 var endGroupRowIndex = startGroupRowIndex;
                 var isEndGroupFound = false;

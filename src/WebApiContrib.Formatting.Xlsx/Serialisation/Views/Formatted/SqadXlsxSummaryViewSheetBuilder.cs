@@ -580,7 +580,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                         continue;
                     }
 
-                    var totalName = ((string) sheet.Cells[i, WorksheetHelpers.RowNameColumnIndex].Value).TrimStart();
+                    var totalName = ( sheet.Cells[i, WorksheetHelpers.RowNameColumnIndex].Value.ToString()).Trim();
                     if (totalName != $"{WorksheetHelpers.TotalRowIndicator} {groupName}")
                     {
                         continue;

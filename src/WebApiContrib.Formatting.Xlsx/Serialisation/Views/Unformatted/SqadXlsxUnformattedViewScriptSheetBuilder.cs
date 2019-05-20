@@ -8,11 +8,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
     public class SqadXlsxUnformattedViewScriptSheetBuilder : SqadXlsxSheetBuilderBase
     {
         private readonly string _dataUrl;
+        private readonly bool _needCreatePivotSheet;
 
-        public SqadXlsxUnformattedViewScriptSheetBuilder(string dataUrl)
+        public SqadXlsxUnformattedViewScriptSheetBuilder(string dataUrl, bool needCreatePivotSheet)
             :base(ExportViewConstants.UnformattedViewScriptSheetName, shouldAutoFit: false)
         {
             _dataUrl = dataUrl;
+            _needCreatePivotSheet = needCreatePivotSheet;
         }
 
         protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
@@ -23,22 +25,20 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             }
 
             var dataScript = string.Empty;
-            var dataSheet =
-                worksheet.Workbook.Worksheets.FirstOrDefault(x => x.Name == ExportViewConstants
-                                                                      .UnformattedViewDataSheetName);
+            var dataSheet = worksheet.Workbook
+                                     .Worksheets
+                                     .First(x => x.Name == ExportViewConstants.UnformattedViewDataSheetName);
+
             if (_dataUrl != null)
             {
                 dataScript = GetDataScript(dataSheet);
             }
 
             var pivotScript = string.Empty;
-            var pivotSheet =
-                worksheet.Workbook.Worksheets.FirstOrDefault(x => x.Name == ExportViewConstants
-                                                                      .UnformattedViewPivotSheetName);
-            //if (pivotSheet != null && pivotSheet.PivotTables.First().Fields.Any(x => x.Name == "Week"))
-            //{
+            if (_needCreatePivotSheet)
+            {
                 pivotScript = GetPivotScript(dataSheet.Dimension.ToString());
-            //}
+            }
 
             var code = $@"
 Private Sub Workbook_Open()
@@ -49,7 +49,7 @@ Private Sub Workbook_Open()
     End If
     
     {dataScript}
-{pivotScript}
+    {pivotScript}
 
     tmpSheet.Visible = xlSheetVeryHidden
 End Sub
@@ -104,7 +104,7 @@ End Sub
 ";
         }
 
-        private string GetPivotScript(string dataDimention)
+        private static string GetPivotScript(string dataDimension)
         {
             return $@"
 
@@ -120,7 +120,7 @@ End Sub
             Dim dataSheet As Worksheet
             Set dataSheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
 
-            Set PRange = dataSheet.Range(""{dataDimention}"").CurrentRegion
+            Set PRange = dataSheet.Range(""{dataDimension}"").CurrentRegion
 
             Set pvtCache = ActiveWorkbook.PivotCaches.Create(SourceType:= xlDatabase, SourceData:= PRange)
             Set pTable = pvtCache.CreatePivotTable(TableDestination:= pivotSheet.Cells(3, 1), TableName:= ""PivotTable"")

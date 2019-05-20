@@ -1,20 +1,16 @@
-﻿using System;
-using System.Data;
-using System.Xml;
-using OfficeOpenXml;
+﻿using OfficeOpenXml;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
+using System;
+using System.Data;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted
 {
     public class SqadXlsxUnformattedViewDataSheetBuilder : SqadXlsxSheetBuilderBase
     {
-        private readonly string _dataUrl;
-
-        public SqadXlsxUnformattedViewDataSheetBuilder(string dataUrl)
+        public SqadXlsxUnformattedViewDataSheetBuilder()
             : base(ExportViewConstants.UnformattedViewDataSheetName, shouldAutoFit: false)
         {
-            _dataUrl = dataUrl;
         }
 
         protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)

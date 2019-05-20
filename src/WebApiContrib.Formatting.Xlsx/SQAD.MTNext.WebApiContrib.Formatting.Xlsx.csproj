@@ -100,7 +100,6 @@
     <Compile Include="Serialisation\Views\Formatted\SqadXlsxFormattedViewSheetBuilder.cs" />
     <Compile Include="Serialisation\Views\Unformatted\SqadXlsxUnformattedViewDataSheetBuilder.cs" />
     <Compile Include="Serialisation\Views\Unformatted\SqadXlsxUnformattedViewInstructionsSheetBuilder.cs" />
-    <Compile Include="Serialisation\Views\Unformatted\SqadXlsxUnformattedViewPivotSheetBuilder.cs" />
     <Compile Include="SqadXlsxDocumentBuilder.cs" />
     <Compile Include="Serialisation\Plans\SqadXlsxPlanSheetBuilder.cs" />
     <Compile Include="Utils\HttpContextFactory.cs" />

@@ -32,10 +32,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             ProcessInstructionsSheet(document, tables);
 
             var dataUrl = GetDataUrl(tables);
-            ProcessDataSheet(document, tables, dataUrl);
-            ProcessPivotSheet(document, tables);
+            ProcessDataSheet(document, tables);
 
-            var scriptBuilder = new SqadXlsxUnformattedViewScriptSheetBuilder(dataUrl);
+            var needCreatePivotSheet = tables.Contains(PivotTableName);
+            var scriptBuilder = new SqadXlsxUnformattedViewScriptSheetBuilder(dataUrl, needCreatePivotSheet);
             document.AppendSheet(scriptBuilder);
         }
 
@@ -54,20 +54,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             AppendColumnsAndRows(instructionsSheetBuilder, instructionsDataTable);
         }
 
-        private static void ProcessPivotSheet(IXlsxDocumentBuilder document, DataTableCollection tables)
-        {
-            if (!tables.Contains(PivotTableName))
-            {
-                return;
-            }
-
-            //var pivotSheetBuilder = new SqadXlsxUnformattedViewPivotSheetBuilder();
-            //document.AppendSheet(pivotSheetBuilder);
-        }
-
         private static void ProcessDataSheet(IXlsxDocumentBuilder document,
-                                             DataTableCollection tables,
-                                             string dataUrl)
+                                             DataTableCollection tables)
         {
             if (!tables.Contains(DataTableName))
             {
@@ -76,7 +64,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
             var dataTable = tables[DataTableName];
 
-            var dataSheetBuilder = new SqadXlsxUnformattedViewDataSheetBuilder(dataUrl);
+            var dataSheetBuilder = new SqadXlsxUnformattedViewDataSheetBuilder();
             document.AppendSheet(dataSheetBuilder);
 
             AppendColumnsAndRows(dataSheetBuilder, dataTable);
@@ -86,8 +74,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
         {
             var columns = dataTable.Columns;
 
-            sheetBuilder.AppendColumnsWithProperType(columns);
-            sheetBuilder.AppendRow(dataTable.Rows);
+            sheetBuilder.AppendColumns(columns);
+
+            var records = dataTable.Rows.Cast<DataRow>().Select(x => new ExcelDataRow(x));
+            foreach (var record in records)
+            {
+                var row = record.GetExcelCells(columns);
+                sheetBuilder.AppendRow(row);
+            }
         }
 
         private static string GetDataUrl(DataTableCollection tables)

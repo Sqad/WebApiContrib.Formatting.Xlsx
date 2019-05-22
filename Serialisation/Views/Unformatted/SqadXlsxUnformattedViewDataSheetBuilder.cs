@@ -1,20 +1,16 @@
-﻿using System;
-using System.Data;
-using System.Xml;
-using OfficeOpenXml;
+﻿using OfficeOpenXml;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
+using System;
+using System.Data;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted
 {
     public class SqadXlsxUnformattedViewDataSheetBuilder : SqadXlsxSheetBuilderBase
     {
-        private readonly string _dataUrl;
-
-        public SqadXlsxUnformattedViewDataSheetBuilder(string dataUrl)
+        public SqadXlsxUnformattedViewDataSheetBuilder()
             : base(ExportViewConstants.UnformattedViewDataSheetName, shouldAutoFit: false)
         {
-            _dataUrl = dataUrl;
         }
 
         protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
@@ -33,13 +29,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
         {
             for (var i = 0; i < CurrentTable.Columns.Count; i++)
             {
-                if (!(( CurrentTable.Rows[0][i]) is DateTime))
+                if (!(((ExcelCell)CurrentTable.Rows[0][i]).CellValue is DateTime))
                 {
                     continue;
                 }
 
-                var column = worksheet.Cells[1, i + 1, worksheet.Dimension.Rows, i + 1];
-                column.Style.Numberformat.Format = "mm/dd/yy";
+                var column = worksheet.Cells[2, i + 1, worksheet.Dimension.Rows, i + 1];
+                column.Style.Numberformat.Format = "mm-dd-yy";
             }
         }
     }

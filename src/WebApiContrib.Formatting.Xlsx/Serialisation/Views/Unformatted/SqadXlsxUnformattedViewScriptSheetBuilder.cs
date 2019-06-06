@@ -25,6 +25,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             }
 
             var dataScript = string.Empty;
+            var refreshDataScript = string.Empty;
             var dataSheet = worksheet.Workbook
                                      .Worksheets
                                      .First(x => x.Name == ExportViewConstants.UnformattedViewDataSheetName);
@@ -32,6 +33,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             if (_dataUrl != null)
             {
                 dataScript = GetDataScript(dataSheet);
+                refreshDataScript = GetRefreshDataScript();
             }
 
             var pivotScript = string.Empty;
@@ -53,6 +55,8 @@ Private Sub Workbook_Open()
 
     tmpSheet.Visible = xlSheetVeryHidden
 End Sub
+
+{refreshDataScript}
 ";
            worksheet.Workbook.CodeModule.Code = code;
         }
@@ -64,12 +68,22 @@ End Sub
             worksheet.Names.Add(cellsName, cells);
 
             return $@"
+    Dim instrSheet As Worksheet
+    Set instrSheet = Sheets(""{ExportViewConstants.UnformattedViewInstructionsSheetName}"")
+
+    Dim position As Range
+    Set position = instrSheet.Range(Cells(5, 2), Cells(5, 3))
+    
+    Dim btn As Button
+    Set btn = instrSheet.Buttons.Add(position.Left, position.Top, position.Width, position.Height)
+    With btn
+        .Name = ""RefreshDataButton""
+        .Caption = ""Refresh Data""
+        .OnAction = ""ThisWorkbook.RefreshButtonClick""
+    End With
+
     Dim sheet As Worksheet
     Set sheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
-    
-'    If sheet.QueryTables.Count <> 0 Then
-'        Exit Sub
-'    End If
 
     Dim qt As QueryTable
     Set qt = sheet.QueryTables.Add(Connection:=""URL;{_dataUrl}"", Destination:=sheet.Range(""{worksheet.Dimension.Address}""))
@@ -78,20 +92,7 @@ End Sub
     qt.RefreshStyle = xlOverwriteCells
     qt.BackgroundQuery = False
 
-    Dim urlConnection As Variant
-    urlConnection = qt.Connection
-    
-    Set rng = sheet.Range(""{worksheet.Dimension.Address}"")
-    Set adoRecordset = CreateObject(""ADODB.Recordset"")
-    Set xlXML = CreateObject(""MSXML2.DOMDocument"")
-    xlXML.LoadXML rng.Value(xlRangeValueMSPersistXML)
-    adoRecordset.Open xlXML
-
-    Set qt.Recordset = adoRecordset
-    qt.Refresh
-
     qt.Name = ""nwshp?hl=en&tab=wn""
-    qt.Connection = urlConnection
     qt.WebPreFormattedTextToColumns = True
     qt.WebFormatting = xlWebFormattingNone
     qt.WebConsecutiveDelimitersAsOne = True
@@ -104,31 +105,47 @@ End Sub
 ";
         }
 
+        private static string GetRefreshDataScript()
+        {
+            return $@"
+Sub RefreshButtonClick()
+    Dim sheet As Worksheet
+    Set sheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
+
+    Dim qt As QueryTable
+    Set qt = sheet.QueryTables(1)
+    qt.Refresh
+
+    MsgBox ""Data was updated""
+    sheet.Activate
+End Sub
+";
+        }
+
         private static string GetPivotScript(string dataDimension)
         {
             return $@"
+    On Error Resume Next
+    Application.DisplayAlerts = False
+    Sheets.Add After:= ActiveSheet
+    ActiveSheet.Name = ""{ExportViewConstants.UnformattedViewPivotSheetName}""
+    Application.DisplayAlerts = True
 
-                    On Error Resume Next
-                    Application.DisplayAlerts = False
-                    Sheets.Add After:= ActiveSheet
-                    ActiveSheet.Name = ""{ExportViewConstants.UnformattedViewPivotSheetName}""
-                    Application.DisplayAlerts = True
-
-            Dim pivotSheet As Worksheet
-            Set pivotSheet = Sheets(""{ExportViewConstants.UnformattedViewPivotSheetName}"")
+    Dim pivotSheet As Worksheet
+    Set pivotSheet = Sheets(""{ExportViewConstants.UnformattedViewPivotSheetName}"")
     
-            Dim dataSheet As Worksheet
-            Set dataSheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
+    Dim dataSheet As Worksheet
+    Set dataSheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
 
-            Set PRange = dataSheet.Range(""{dataDimension}"").CurrentRegion
+    Set PRange = dataSheet.Range(""{dataDimension}"").CurrentRegion
 
-            Set pvtCache = ActiveWorkbook.PivotCaches.Create(SourceType:= xlDatabase, SourceData:= PRange)
-            Set pTable = pvtCache.CreatePivotTable(TableDestination:= pivotSheet.Cells(3, 1), TableName:= ""PivotTable"")
+    Set pvtCache = ActiveWorkbook.PivotCaches.Create(SourceType:= xlDatabase, SourceData:= PRange)
+    Set pTable = pvtCache.CreatePivotTable(TableDestination:= pivotSheet.Cells(3, 1), TableName:= ""PivotTable"")
 
-            'Set pt = pivotSheet.PivotTables(1)
-             '   For Each pf In pt.ColumnFields
-              '      pf.Orientation = xlHidden
-              '  Next pf
+    'Set pt = pivotSheet.PivotTables(1)
+    'For Each pf In pt.ColumnFields
+    '    pf.Orientation = xlHidden
+    'Next pf
 ";
         }
     }

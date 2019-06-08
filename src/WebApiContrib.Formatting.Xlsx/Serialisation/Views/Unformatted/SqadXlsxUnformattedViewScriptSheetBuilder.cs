@@ -72,7 +72,7 @@ End Sub
     Set instrSheet = Sheets(""{ExportViewConstants.UnformattedViewInstructionsSheetName}"")
 
     Dim position As Range
-    Set position = instrSheet.Range(Cells(5, 2), Cells(5, 3))
+    Set position = instrSheet.Range(instrSheet.Cells(5, 2), instrSheet.Cells(5, 3))
     
     Dim btn As Button
     Set btn = instrSheet.Buttons.Add(position.Left, position.Top, position.Width, position.Height)

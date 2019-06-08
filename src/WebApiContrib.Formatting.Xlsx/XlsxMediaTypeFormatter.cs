@@ -202,7 +202,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                 break;
             }
 
-            serialiser.Serialise(itemType, value, document, null);
+            serialiser.Serialise(itemType, value, document, null, null,null);
 
             if (!document.IsVBA)
             {

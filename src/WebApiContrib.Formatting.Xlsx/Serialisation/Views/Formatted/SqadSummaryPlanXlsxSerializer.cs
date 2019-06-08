@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted
 {
@@ -16,7 +17,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             return valueType == typeof(DataTable);
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName)
+        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, SqadXlsxPlanSheetBuilder sheetBuilderOverride)
         {
             if (!(value is DataTable dataTable))
             {

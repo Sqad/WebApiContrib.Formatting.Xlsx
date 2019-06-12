@@ -43,6 +43,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         }
 
         public int GetCurrentRowCount => CurrentTable.Rows.Count;
+        public string GetCurrentTableName => CurrentTable.TableName;
 
         public int GetColumnIndexByColumnName(string columnName)
         {

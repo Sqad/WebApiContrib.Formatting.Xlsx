@@ -22,6 +22,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             var subHeaderRow = worksheet.Cells[2, 1, 2, worksheet.Dimension.Columns];
             subHeaderRow.Style.Font.Size = 14;
             subHeaderRow.Style.Font.Bold = true;
+
+            worksheet.Column(1).Width = 20;
         }
     }
 }

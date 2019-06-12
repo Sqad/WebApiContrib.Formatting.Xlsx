@@ -1,5 +1,6 @@
 ﻿using System;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
 
 namespace SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces
 {
@@ -30,7 +31,7 @@ namespace SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces
         /// <param name="itemType">Type of item being serialised.</param>
         /// <param name="value">Value passed for serialisation, cast to an <c>IEnumerable</c> if necessary.</param>
         /// <param name="document">Document builder utility class.</param>
-        void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName);// SqadXlsxSheetBuilder sheetBuilder);
+        void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, SqadXlsxPlanSheetBuilder sheetbuilderOverride);
 
 
     }

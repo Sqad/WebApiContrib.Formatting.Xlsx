@@ -46,45 +46,38 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                 ExcelColumnAttribute attribute = FormatterUtils.GetAttribute<ExcelColumnAttribute>(prop);
                 if (attribute != null)
                 {
+                    string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;
+
                     if (propertyType.Name.StartsWith("List"))
                     {
                         Type typeOfList = FormatterUtils.GetEnumerableItemType(propertyType);
 
                         if (FormatterUtils.IsSimpleType(typeOfList))
                         {
-                            string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;
                             fieldInfo.Add(new ExcelColumnInfo(prefix, typeOfList, attribute, null));
                         }
                         else if (typeOfList.FullName.EndsWith("CustomFieldModel") || typeOfList.Name.StartsWith("OverrideProperty"))
                         {
-                            string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;
-
                             prefix += "_CustomField_";
-
                             fieldInfo.Add(new ExcelColumnInfo(prefix, null, attribute, null));
                         }
                         else
                         {
-                            string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;
-                            ExcelColumnInfoCollection columnCollection = GetExcelColumnInfo(typeOfList, null, prefix, true);
-                            foreach (var subcolumn in columnCollection)
-                                fieldInfo.Add(subcolumn);
+                            prefix += "_List_";
+                            fieldInfo.Add(new ExcelColumnInfo(prefix, null, attribute, null));
+
+                            //ExcelColumnInfoCollection columnCollection = GetExcelColumnInfo(typeOfList, null, prefix, true);
+                            //foreach (var subcolumn in columnCollection)
+                            //    fieldInfo.Add(subcolumn);
                         }
                     }
                     else if (propertyType.Name.StartsWith("Dictionary"))
                     {
-                        string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;
-
                         prefix += "_Dict_";
-
                         fieldInfo.Add(new ExcelColumnInfo(prefix, null, attribute, null));
                     }
                     else if (!FormatterUtils.IsSimpleType(propertyType))
                     {
-                        //getting a complex class columns populates as ComplexName:InnerProperty
-
-                        string prefix = string.IsNullOrEmpty(namePrefix) == false ? $"{namePrefix}:{prop.Name}" : prop.Name;
-
                         ExcelColumnInfoCollection columnCollection = GetExcelColumnInfo(propertyType, null, prefix, true);
                         foreach (var subcolumn in columnCollection)
                             fieldInfo.Add(subcolumn);

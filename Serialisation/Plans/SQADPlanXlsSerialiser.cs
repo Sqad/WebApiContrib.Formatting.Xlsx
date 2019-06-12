@@ -42,7 +42,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             return valueType == typeof(ChartData);
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName = null)//, SqadXlsxSheetBuilder sheetBuilder)
+        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName = null, string columnPrefix = null, SqadXlsxPlanSheetBuilder sheetBuilderOverride=null)
         {
             ExcelColumnInfoCollection columnInfo = _columnResolver.GetExcelColumnInfo(itemType, value, sheetName);
 
@@ -56,79 +56,124 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
             if (columnInfo.Any())
             {
-                sheetBuilder = document.GetSheetByName(sheetName) as SqadXlsxPlanSheetBuilder;
+                if (sheetBuilderOverride == null)
+                    sheetBuilder = document.GetSheetByName(sheetName) as SqadXlsxPlanSheetBuilder;
+                else
+                    sheetBuilder = sheetBuilderOverride;
 
                 if (sheetBuilder == null)
                 {
                     sheetBuilder = new SqadXlsxPlanSheetBuilder(sheetName);
+                    document.AppendSheet(sheetBuilder);
+                }
 
-                    //Convert Dictionary Column
-                    foreach (var col in columnInfo)
+                //Convert Dictionary Column
+                foreach (var col in columnInfo)
+                {
+                    if (col.PropertyName.EndsWith("_Dict_"))
                     {
-                        if (col.PropertyName.EndsWith("_Dict_"))
+                        string columnName = col.PropertyName.Replace("_Dict_", "");
+
+                        Dictionary<int, double> colValueDict = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_Dict_", "")) as Dictionary<int, double>;
+                        if (columnName.Contains(":") && (colValueDict == null || (colValueDict != null && string.IsNullOrEmpty(colValueDict.ToString()))))
                         {
-                            string columnName = col.PropertyName.Replace("_Dict_", "");
-
-                            Dictionary<int, double> colValueDict = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_Dict_", "")) as Dictionary<int, double>;
-                            if (columnName.Contains(":") && (colValueDict == null || (colValueDict != null && string.IsNullOrEmpty(colValueDict.ToString()))))
-                            {
-                                colValueDict = GetFieldPathValue(value, columnName) as Dictionary<int, double>;
-                            }
-
-                            if (colValueDict == null)
-                                continue;
-
-                            int dictColumnCount = colValueDict.Count();
-
-                            for (int i = 1; i <= dictColumnCount; i++)
-                            {
-                                ExcelColumnInfo temlKeyColumn = col.Clone() as ExcelColumnInfo;
-                                temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_Dict_", $":Key:{i}");
-                                sheetBuilder.AppendColumnHeaderRowItem(temlKeyColumn);
-
-                                ExcelColumnInfo temlValueColumn = col.Clone() as ExcelColumnInfo;
-                                temlValueColumn.PropertyName = temlValueColumn.PropertyName.Replace("_Dict_", $":Value:{i}");
-                                sheetBuilder.AppendColumnHeaderRowItem(temlValueColumn);
-                            }
+                            colValueDict = GetFieldPathValue(value, columnName) as Dictionary<int, double>;
                         }
-                        else if (col.PropertyName.EndsWith("_CustomField_"))
+
+                        if (colValueDict == null)
+                            continue;
+
+                        int dictColumnCount = colValueDict.Count();
+
+                        for (int i = 1; i <= dictColumnCount; i++)
                         {
-                            string columnName = col.PropertyName.Replace("_CustomField_", "");
+                            ExcelColumnInfo temlKeyColumn = col.Clone() as ExcelColumnInfo;
+                            temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_Dict_", $":Key:{i}");
+                            sheetBuilder.AppendColumnHeaderRowItem(temlKeyColumn);
 
-                            List<object> colCustomFields = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_CustomField_", "")) as List<object>;
-                            if (columnName.Contains(":") && (colCustomFields == null || (colCustomFields != null && string.IsNullOrEmpty(colCustomFields.ToString()))))
+                            ExcelColumnInfo temlValueColumn = col.Clone() as ExcelColumnInfo;
+                            temlValueColumn.PropertyName = temlValueColumn.PropertyName.Replace("_Dict_", $":Value:{i}");
+                            sheetBuilder.AppendColumnHeaderRowItem(temlValueColumn);
+                        }
+                    }
+                    else if (col.PropertyName.EndsWith("_List_"))
+                    {
+                        string columnName = col.PropertyName.Replace("_List_", "");
+
+                        List<object> colListValue = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_List_", "")) as List<object>;
+                        if (columnName.Contains(":") && (colListValue == null || (colListValue != null && string.IsNullOrEmpty(colListValue.ToString()))))
+                        {
+                            colListValue = GetFieldPathValue(value, columnName) as List<object>;
+                        }
+
+                        if (colListValue == null)
+                            continue;
+
+                        int dictColumnCount = colListValue.Count();
+
+                        for (int i = 0; i < dictColumnCount; i++)
+                        {
+                            string listColumnPrefix = col.PropertyName.Replace("_List_", $":{i}");
+                            if (FormatterUtils.IsSimpleType(colListValue[i].GetType()))
                             {
-                                colCustomFields = GetFieldPathValue(value, columnName) as List<object>;
+                                col.PropertyName = listColumnPrefix;
+                                sheetBuilder.AppendColumnHeaderRowItem(col);
+                            }
+                            else
+                            {
+                                this.Serialise(colListValue[i].GetType(), colListValue[i], document, null, listColumnPrefix, sheetBuilder);
                             }
 
-                            foreach (var customField in colCustomFields)
-                            {
+                        }
+                    }
+                    else if (col.PropertyName.EndsWith("_CustomField_"))
+                    {
+                        string columnName = col.PropertyName.Replace("_CustomField_", "");
 
-                                int customFieldId = ((dynamic)customField).ID;
-                                bool isActual = ((dynamic)customField).Actual;
+                        List<object> colCustomFields = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_CustomField_", "")) as List<object>;
+                        if (columnName.Contains(":") && (colCustomFields == null || (colCustomFields != null && string.IsNullOrEmpty(colCustomFields.ToString()))))
+                        {
+                            colCustomFields = GetFieldPathValue(value, columnName) as List<object>;
+                        }
 
-                                ExcelColumnInfo temlKeyColumn = col.Clone() as ExcelColumnInfo;
+                        foreach (var customField in colCustomFields)
+                        {
 
-                                string propetyActual = isActual ? ":Actual" : string.Empty;
-                                temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_", $"{propetyActual}:{customFieldId}");
+                            int customFieldId = ((dynamic)customField).ID;
+                            bool isActual = ((dynamic)customField).Actual;
 
-                                string customFieldDef = _staticValuesResolver.GetCustomField(customFieldId);
-                                temlKeyColumn.ExcelColumnAttribute.Header = temlKeyColumn.Header = temlKeyColumn.PropertyName + ":" + customFieldDef;
+                            ExcelColumnInfo temlKeyColumn = col.Clone() as ExcelColumnInfo;
 
-                                sheetBuilder.AppendColumnHeaderRowItem(temlKeyColumn);
-                            }
+                            string propetyActual = isActual ? ":Actual" : string.Empty;
+                            temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_", $"{propetyActual}:{customFieldId}");
+
+                            string customFieldDef = _staticValuesResolver.GetCustomField(customFieldId);
+                            temlKeyColumn.ExcelColumnAttribute.Header = temlKeyColumn.Header = temlKeyColumn.PropertyName + ":" + customFieldDef;
+
+                            sheetBuilder.AppendColumnHeaderRowItem(temlKeyColumn);
+                        }
+                    }
+                    else
+                    {
+                        if (columnPrefix != null)
+                        {
+                            ExcelColumnInfo temlKeyColumn = col.Clone() as ExcelColumnInfo;
+                            temlKeyColumn.PropertyName = $"{columnPrefix}:{temlKeyColumn.PropertyName}";
+                            sheetBuilder.AppendColumnHeaderRowItem(temlKeyColumn);
                         }
                         else
                         {
                             sheetBuilder.AppendColumnHeaderRowItem(col);
                         }
                     }
-
-                    //sheetBuilder.AppendColumns(columnInfo);
-
-                    document.AppendSheet(sheetBuilder);
                 }
+
             }
+
+            //if its recursive do not populate rows and return to parent
+            if (columnPrefix != null)
+                return;
+
 
             if (sheetName != null && sheetBuilder == null)
             {
@@ -164,13 +209,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
         }
 
-        private void PopulateRows(List<string> columns, object value, SqadXlsxPlanSheetBuilder sheetBuilder, ExcelColumnInfoCollection columnInfo = null, IXlsxDocumentBuilder document = null)
+        private void PopulateRows(List<string> columns, object value, SqadXlsxPlanSheetBuilder sheetBuilder, ExcelColumnInfoCollection columnInfo = null, IXlsxDocumentBuilder document = null, List<ExcelCell> rowOverride = null)
         {
 
             if (sheetBuilder == null)
                 return;
 
-            var row = new List<ExcelCell>();
+            List<ExcelCell> row = new List<ExcelCell>();
+
+            if (rowOverride != null)
+                row = rowOverride;
 
             for (int i = 0; i <= columns.Count - 1; i++)
             {
@@ -210,7 +258,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         row.Add(keyCell);
 
 
-
                         ExcelCell valueCell = new ExcelCell();
                         valueCell.CellHeader = columnName + $":Value:{colCount}";
                         valueCell.CellValue = kv.Value;
@@ -218,6 +265,44 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                         colCount++;
                     }
+                }
+                else if (columnName.EndsWith("_List_"))
+                {
+                    columnName = columnName.Replace("_List_", "");
+
+                    List<object> listValue = new List<object>();
+
+                    if (columnName.Contains(":"))
+                    {
+                        var valueObject = GetFieldPathValue(value, columnName);
+                        if (valueObject != null && string.IsNullOrEmpty(valueObject.ToString()) == false)
+                        {
+                            listValue = (List<object>)valueObject;
+                        }
+                    }
+                    else
+                    {
+                        listValue = (List<object>)GetFieldOrPropertyValue(value, columnName);
+                    }
+
+                    int colCount = 0;
+                    foreach (var kv in listValue)
+                    {
+                        string listColumnPrefix = columnName + $":{colCount}";
+
+                        if (FormatterUtils.IsSimpleType(kv.GetType()))
+                        {
+
+                        }
+                        else
+                        {
+                            ExcelColumnInfoCollection listInnerObjectColumnInfo = _columnResolver.GetExcelColumnInfo(kv.GetType(), kv, listColumnPrefix, true);
+                            PopulateRows(listInnerObjectColumnInfo.Keys.ToList(), kv, sheetBuilder, listInnerObjectColumnInfo, document, row);
+                        }
+
+                        colCount++;
+                    }
+
                 }
                 else if (columnName.EndsWith("_CustomField_"))
                 {
@@ -245,7 +330,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                     foreach (var customColumn in allCustomColumns)
                     {
-                        object objectCustomField = customFields.Where(w => customColumn.PropertyName.EndsWith($":{((dynamic)w).ID}")).Where(w =>  customColumn.PropertyName.Contains("Actual") ? ((dynamic)w).Actual == true : ((dynamic)w).Actual == false).FirstOrDefault();
+                        object objectCustomField = customFields.Where(w => customColumn.PropertyName.EndsWith($":{((dynamic)w).ID}")).Where(w => customColumn.PropertyName.Contains("Actual") ? ((dynamic)w).Actual == true : ((dynamic)w).Actual == false).FirstOrDefault();
 
                         ExcelCell customValueHeaderCell = new ExcelCell();
 
@@ -298,7 +383,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                                 CreatePreserveCell(textPreservationCell, document);
                             }
-                           
+
                         }
                         row.Add(customValueHeaderCell);
                     }
@@ -337,7 +422,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 }
             }
 
-            if (row.Count() > 0)
+            if (row.Count() > 0 && rowOverride==null)
                 sheetBuilder.AppendRow(row.ToList());
         }
 
@@ -442,6 +527,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             {
                 index++;
 
+                int tempValue = 0;
+                if (int.TryParse(objName, out tempValue))
+                    continue;
+
                 var tempItemsToProcess = itemsToProcess.ToList();
                 itemsToProcess.Clear();
 
@@ -470,7 +559,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     }
                     if (member == null)
                     {
-                        return null;
+                        itemsToProcess = new List<object>() { rowObject };
+                        continue;
                     }
                     var result = new object();
 
@@ -519,9 +609,17 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         }
                         else if (result.GetType().Name.StartsWith("Dictionary"))
                         {
-                            if ((result as IDictionary<int, double>).Count > 0)
-                                resultsList.Add(result);
-                            isResultDictionary = true;
+                            try
+                            {
+                                //if dictionary with outher values it will failure
+                                if ((result as IDictionary<int, double>).Count > 0)
+                                    resultsList.Add(result);
+                                isResultDictionary = true;
+                            }
+                            catch
+                            {
+
+                            }
                         }
                         else
                             resultsList.Add(result);
@@ -538,10 +636,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             }
             else if (isResultList)
             {
-                for (int i = 1; i <= resultsList.Count(); i++)
-                {
-                    returnString += $"{i}->{resultsList[i - 1]}, ";
-                }
+                return resultsList;
             }
             else if (isResultDictionary)
             {

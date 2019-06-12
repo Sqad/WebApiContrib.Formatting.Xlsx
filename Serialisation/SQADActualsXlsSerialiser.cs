@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation
 {
@@ -17,7 +18,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation
             throw new NotImplementedException();
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName)
+        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName,string columnPrefix, SqadXlsxPlanSheetBuilder sheetOveride)
         {
             throw new NotImplementedException();
         }

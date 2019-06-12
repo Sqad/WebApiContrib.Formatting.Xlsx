@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Web.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
@@ -16,6 +16,11 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
     /// </summary>
     public class DefaultColumnResolver : IColumnResolver
     {
+        private readonly IModelMetadataProvider _modelMetaDataProvider;
+        public DefaultColumnResolver(IModelMetadataProvider modelMetaDataProvider)
+        {
+            _modelMetaDataProvider = modelMetaDataProvider;
+        }
         /// <summary>
         /// Get the <c>ExcelColumnInfo</c> for all members of a class.
         /// </summary>
@@ -144,7 +149,7 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                                                              object data)
         {
             // Populate missing attribute information from metadata.
-            var metadata = ModelMetadataProviders.Current.GetMetadataForType(null, itemType);
+            var metadata = _modelMetaDataProvider.GetMetadataForType(itemType);
 
             if (metadata != null && metadata.Properties != null)
             {

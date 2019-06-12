@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Reflection;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using SQAD.MTNext.Business.Models.Attributes;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
@@ -21,8 +22,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         private IExportHelpersRepository _staticValuesResolver { get; set; }
         public bool IgnoreFormatting => false;
 
-        public SQADPlanXlsSerialiser(IExportHelpersRepository staticValuesResolver)
-            : this(new DefaultSheetResolver(), new DefaultColumnResolver(), staticValuesResolver)
+        public SQADPlanXlsSerialiser(IExportHelpersRepository staticValuesResolver,IModelMetadataProvider modelMetadataProvider)
+            : this(new DefaultSheetResolver(), new DefaultColumnResolver(modelMetadataProvider), staticValuesResolver)
         {
 
         }

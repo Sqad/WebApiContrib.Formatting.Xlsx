@@ -7,6 +7,7 @@ using System.Security.Permissions;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.Attributes;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
@@ -18,7 +19,6 @@ using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
-
     /// <summary>
     /// Class used to send an Excel file to the response.
     /// </summary>
@@ -26,6 +26,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
     {
         private readonly SerializerType _serializerType;
         private readonly IHttpContextAccessor _httpContextAccessor;
+
         #region Properties
 
         /// <summary>
@@ -79,18 +80,21 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         /// <param name="cellStyle">An action method that modifies the worksheet cell style.</param>
         /// <param name="headerStyle">An action method that modifies the cell style of the first (header) row in the
         /// worksheet.</param>
-        public XlsxMediaTypeFormatter(IHttpContextAccessor httpContextAccessor,bool autoFit = true,
-                                      bool autoFilter = false,
-                                      bool freezeHeader = false,
-                                      double? headerHeight = null,
-                                      Action<ExcelStyle> cellStyle = null,
-                                      Action<ExcelStyle> headerStyle = null,
-                                      IExportHelpersRepository staticValuesResolver = null,
-                                      SerializerType serializerType = SerializerType.Default
-                                      )
+        public XlsxMediaTypeFormatter(IHttpContextAccessor httpContextAccessor,
+            IModelMetadataProvider modelMetadataProvider,
+            bool autoFit = true,
+            bool autoFilter = false,
+            bool freezeHeader = false,
+            double? headerHeight = null,
+            Action<ExcelStyle> cellStyle = null,
+            Action<ExcelStyle> headerStyle = null,
+            IExportHelpersRepository staticValuesResolver = null,
+            SerializerType serializerType = SerializerType.Default
+        )
         {
             SupportedMediaTypes.Clear();
-            SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            SupportedMediaTypes.Add(
+                new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/vnd.ms-excel"));
 
             AutoFit = autoFit;
@@ -104,12 +108,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
             // Initialise serialisers.
             Serialisers = new List<IXlsxSerialiser>
-                          {
-                              new SQADPlanXlsSerialiser(staticValuesResolver),
-                              new SqadFormattedViewXlsxSerializer(),
-                              new SqadUnformattedViewXlsxSerializer(),
-                              new SqadSummaryPlanXlsxSerializer()
-                          };
+            {
+                new SQADPlanXlsSerialiser(staticValuesResolver, modelMetadataProvider),
+                new SqadFormattedViewXlsxSerializer(),
+                new SqadUnformattedViewXlsxSerializer(),
+                new SqadSummaryPlanXlsxSerializer()
+            };
 
             _httpContextAccessor = httpContextAccessor;
             //DefaultSerializer = new SqadXlsxSerialiser(staticValuesResolver); //new DefaultXlsxSerialiser();
@@ -120,10 +124,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         #region Methods
 
         public override void SetDefaultContentHeaders(Type type,
-                                                      HttpContentHeaders headers,
-                                                      MediaTypeHeaderValue mediaType)
+            HttpContentHeaders headers,
+            MediaTypeHeaderValue mediaType)
         {
-
             string fileName = "data";
 
             // Look for ExcelDocumentAttribute on class.
@@ -138,7 +141,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             else
             {
                 // Get the raw request URI.
-                
+
                 string rawUri = _httpContextAccessor.HttpContext?.Request?.GetDisplayUrl();
                 if (string.IsNullOrEmpty(rawUri) != false)
                 {
@@ -151,7 +154,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                 }
 
                 // Otherwise, use either the URL file name component or just "data".
-                fileName =  Path.GetFileName(_httpContextAccessor.HttpContext?.Request?.Path) ?? "data";
+                fileName = Path.GetFileName(_httpContextAccessor.HttpContext?.Request?.Path) ?? "data";
             }
 
             // Add XLSX extension if not present.
@@ -159,17 +162,17 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
             // Set content disposition to use this file name.
             headers.ContentDisposition = new ContentDispositionHeaderValue("inline")
-            { FileName = fileName };
+                {FileName = fileName};
 
             base.SetDefaultContentHeaders(type, headers, mediaType);
         }
 
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override Task WriteToStreamAsync(Type type,
-                                                object value,
-                                                System.IO.Stream writeStream,
-                                                System.Net.Http.HttpContent content,
-                                                System.Net.TransportContext transportContext)
+            object value,
+            System.IO.Stream writeStream,
+            System.Net.Http.HttpContent content,
+            System.Net.TransportContext transportContext)
         {
             // Create a document builder.
             var document = new SqadXlsxDocumentBuilder(writeStream);
@@ -178,7 +181,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                 return document.WriteToStream();
 
             var valueType = value.GetType();
-
 
 
             // Get the item type.
@@ -194,7 +196,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             }
 
             // Used if no other matching serialiser can be found.
-            IXlsxSerialiser serialiser = null;// new SqadXlsxSerialiser(_staticValuesResolver); //DefaultSerializer;
+            IXlsxSerialiser serialiser = null; // new SqadXlsxSerialiser(_staticValuesResolver); //DefaultSerializer;
 
             // Determine if a more specific serialiser might apply.
             foreach (var s in Serialisers)
@@ -208,11 +210,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                 break;
             }
 
-            serialiser.Serialise(itemType, value, document, null, null,null);
+            serialiser.Serialise(itemType, value, document, null, null, null);
 
             if (!document.IsVBA)
             {
-                content.Headers.ContentDisposition.FileName = content.Headers.ContentDisposition.FileName.Replace("xlsm", "xlsx");
+                content.Headers.ContentDisposition.FileName =
+                    content.Headers.ContentDisposition.FileName.Replace("xlsm", "xlsx");
             }
 
             return document.WriteToStream();
@@ -233,6 +236,5 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         }
 
         #endregion
-
     }
 }

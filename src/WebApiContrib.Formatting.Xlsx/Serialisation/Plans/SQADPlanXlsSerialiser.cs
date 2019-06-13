@@ -352,6 +352,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         customFields = (List<object>)GetFieldOrPropertyValue(value, columnName);
                     }
 
+                    if (customFields == null)
+                        continue;
+
                     //need to get all custom columns
 
                     var allCustomColumns = sheetBuilder.SheetColumns.Where(w => w.PropertyName.StartsWith(columnName)).ToList();

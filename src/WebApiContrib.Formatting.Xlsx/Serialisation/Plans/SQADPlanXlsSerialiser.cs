@@ -641,7 +641,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             }
                             else
                             {
-                                resultsList.AddRange(result as IEnumerable<object>);
+                                foreach(var resultItem in (System.Collections.IList)result)
+                                {
+                                    resultsList.Add(resultItem);
+                                }
+                                
                                 isResultList = true;
                             }
                         }

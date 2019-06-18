@@ -80,14 +80,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             colValueDict = GetFieldPathValue(value, columnName);
                         }
 
-                        if (colValueDict == null  || string.IsNullOrEmpty(colValueDict.ToString()))
+                        if (colValueDict == null || string.IsNullOrEmpty(colValueDict.ToString()))
                             continue;
 
 
                         object dictionaryKeys = colValueDict.GetType().GetProperty("Keys").GetValue(colValueDict);
 
                         int count = 0;
-                        foreach (var key in (System.Collections.IEnumerable) dictionaryKeys)
+                        foreach (var key in (System.Collections.IEnumerable)dictionaryKeys)
                         {
                             ExcelColumnInfo temlKeyColumn = col.Clone() as ExcelColumnInfo;
                             temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_Dict_", $":Key:{count}");
@@ -291,7 +291,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             PopulateRows(listInnerObjectColumnInfo.Keys.ToList(), currentItem, sheetBuilder, listInnerObjectColumnInfo, document, row);
                         }
 
-                       
+
 
                         colCount++;
                     }
@@ -378,44 +378,36 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             dynamic customFieldItem = (dynamic)objectCustomField;
 
                             string isActualText = customFieldItem.Actual ? ":Actual" : string.Empty;
+                            string columnNameCombined = $"{columnName}{isActualText}:{customFieldItem.ID}";
 
                             customValueHeaderCell.CellHeader = customColumn.Header;
                             customValueHeaderCell.CellValue = customFieldItem.Value;
 
-                            string columnNameCombined = $"{columnName}{isActualText}:{customFieldItem.ID}";
 
-                            if (customFieldItem.Value != null)
+
+                            ExcelCell valuePreservationCell = new ExcelCell();
+                            valuePreservationCell.CellHeader = $"{columnNameCombined}:Value:{objID}";
+                            if (objectCustomField.GetType().GetProperty("ComputedValue") == null)
                             {
-                                //its an number value, no text
-
-                                ExcelCell valuePreservationCell = new ExcelCell();
-                                valuePreservationCell.CellHeader = $"{columnNameCombined}:{objID}";
                                 valuePreservationCell.CellValue = customFieldItem.Value;
-
-                                try
-                                {
-                                    if (customFieldItem.Override != null)
-                                        valuePreservationCell.CellValue = customFieldItem.Override;
-                                }
-                                catch { }
-
-                                CreatePreserveCell(valuePreservationCell, document);
                             }
                             else
                             {
-                                ExcelCell textPreservationCell = new ExcelCell();
-                                textPreservationCell.CellHeader = $"{columnNameCombined}:Text:{objID}";
-                                textPreservationCell.CellValue = customFieldItem.Text;
-
-                                try
-                                {
-                                    if (customFieldItem.Override != null)
-                                        textPreservationCell.CellValue = customFieldItem.Override;
-                                }
-                                catch { }
-
-                                CreatePreserveCell(textPreservationCell, document);
+                                valuePreservationCell.CellValue = customFieldItem.ComputedValue;
                             }
+
+                            CreatePreserveCell(valuePreservationCell, document);
+
+
+                            ExcelCell overridePreservationCell = new ExcelCell();
+                            overridePreservationCell.CellHeader = $"{columnNameCombined}:Override:{objID}";
+                            overridePreservationCell.CellValue = customFieldItem.Override;
+                            CreatePreserveCell(overridePreservationCell, document);
+
+                            ExcelCell textPreservationCell = new ExcelCell();
+                            textPreservationCell.CellHeader = $"{columnNameCombined}:Text:{objID}";
+                            textPreservationCell.CellValue = customFieldItem.Override;
+                            CreatePreserveCell(textPreservationCell, document);
 
                         }
                         row.Add(customValueHeaderCell);
@@ -627,7 +619,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         if (result.GetType().Name.StartsWith("List"))
                         {
 
-                            int count= (int)result.GetType().GetProperty("Count").GetValue(result, null);
+                            int count = (int)result.GetType().GetProperty("Count").GetValue(result, null);
 
                             if (count == 0)
                                 continue;
@@ -641,11 +633,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             }
                             else
                             {
-                                foreach(var resultItem in (System.Collections.IList)result)
+                                foreach (var resultItem in (System.Collections.IList)result)
                                 {
                                     resultsList.Add(resultItem);
                                 }
-                                
+
                                 isResultList = true;
                             }
                         }

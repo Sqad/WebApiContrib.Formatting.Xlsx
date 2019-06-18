@@ -43,7 +43,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             return valueType == typeof(ChartData);
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName = null, string columnPrefix = null, SqadXlsxPlanSheetBuilder sheetBuilderOverride=null)
+        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName = null, string columnPrefix = null, SqadXlsxPlanSheetBuilder sheetBuilderOverride = null)
         {
             ExcelColumnInfoCollection columnInfo = _columnResolver.GetExcelColumnInfo(itemType, value, sheetName);
 
@@ -75,26 +75,40 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     {
                         string columnName = col.PropertyName.Replace("_Dict_", "");
 
-                        Dictionary<int, double> colValueDict = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_Dict_", "")) as Dictionary<int, double>;
+                        object colValueDict = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_Dict_", ""));
                         if (columnName.Contains(":") && (colValueDict == null || (colValueDict != null && string.IsNullOrEmpty(colValueDict.ToString()))))
                         {
-                            colValueDict = GetFieldPathValue(value, columnName) as Dictionary<int, double>;
+                            colValueDict = GetFieldPathValue(value, columnName);
                         }
 
-                        if (colValueDict == null)
+                        if (colValueDict == null  || string.IsNullOrEmpty(colValueDict.ToString()))
                             continue;
 
-                        int dictColumnCount = colValueDict.Count();
 
-                        for (int i = 1; i <= dictColumnCount; i++)
+                        object dictionaryKeys = colValueDict.GetType().GetProperty("Keys").GetValue(colValueDict);
+
+                        int count = 0;
+                        foreach (var key in (System.Collections.IEnumerable) dictionaryKeys)
                         {
                             ExcelColumnInfo temlKeyColumn = col.Clone() as ExcelColumnInfo;
-                            temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_Dict_", $":Key:{i}");
+                            temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_Dict_", $":Key:{count}");
                             sheetBuilder.AppendColumnHeaderRowItem(temlKeyColumn);
 
-                            ExcelColumnInfo temlValueColumn = col.Clone() as ExcelColumnInfo;
-                            temlValueColumn.PropertyName = temlValueColumn.PropertyName.Replace("_Dict_", $":Value:{i}");
-                            sheetBuilder.AppendColumnHeaderRowItem(temlValueColumn);
+                            var currentItem = colValueDict.GetType().GetProperty("Item").GetValue(colValueDict, new object[] { key });
+
+                            if (FormatterUtils.IsSimpleType(currentItem.GetType()))
+                            {
+                                ExcelColumnInfo temlValueColumn = col.Clone() as ExcelColumnInfo;
+                                temlValueColumn.PropertyName = temlValueColumn.PropertyName.Replace("_Dict_", $":Value:{count}");
+                                sheetBuilder.AppendColumnHeaderRowItem(temlValueColumn);
+                            }
+                            else
+                            {
+                                string path = col.PropertyName.Replace("_Dict_", $":Value:{count}");
+                                this.Serialise(currentItem.GetType(), value, document, sheetName, path, sheetBuilderOverride);
+                            }
+
+                            count++;
                         }
                     }
                     else if (col.PropertyName.EndsWith("_List_"))
@@ -136,6 +150,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         {
                             colCustomFields = GetFieldPathValue(value, columnName) as List<object>;
                         }
+
+                        if (colCustomFields == null)
+                            continue;
 
                         foreach (var customField in colCustomFields)
                         {
@@ -229,27 +246,28 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 {
                     columnName = columnName.Replace("_Dict_", "");
 
-                    Dictionary<int, double> dictValue = new Dictionary<int, double>();
+                    object dictionaryObj = null;
 
                     if (columnName.Contains(":"))
                     {
-                        var valueObject = GetFieldPathValue(value, columnName);
-                        if (valueObject != null && string.IsNullOrEmpty(valueObject.ToString()) == false)
-                        {
-                            dictValue = (Dictionary<int, double>)valueObject;
-                        }
+                        dictionaryObj = GetFieldPathValue(value, columnName);
                     }
                     else
                     {
-                        dictValue = (Dictionary<int, double>)GetFieldOrPropertyValue(value, columnName);
+                        dictionaryObj = (Dictionary<int, double>)GetFieldOrPropertyValue(value, columnName);
                     }
 
-                    int colCount = 1;
-                    foreach (var kv in dictValue)
+                    if (dictionaryObj == null || string.IsNullOrEmpty(dictionaryObj.ToString()))
+                        continue;
+
+                    object dictionaryKeys = dictionaryObj.GetType().GetProperty("Keys").GetValue(dictionaryObj);
+
+                    int colCount = 0;
+                    foreach (var key in (System.Collections.IEnumerable)dictionaryKeys)
                     {
                         ExcelCell keyCell = new ExcelCell();
                         keyCell.CellHeader = columnName + $":Key:{colCount}";
-                        keyCell.CellValue = kv.Key;
+                        keyCell.CellValue = key;
                         ExcelColumnInfo info = null;
                         if (columnInfo != null)
                         {
@@ -258,11 +276,23 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         }
                         row.Add(keyCell);
 
+                        var currentItem = dictionaryObj.GetType().GetProperty("Item").GetValue(dictionaryObj, new object[] { key });
 
-                        ExcelCell valueCell = new ExcelCell();
-                        valueCell.CellHeader = columnName + $":Value:{colCount}";
-                        valueCell.CellValue = kv.Value;
-                        row.Add(valueCell);
+                        if (FormatterUtils.IsSimpleType(currentItem.GetType()))
+                        {
+                            ExcelCell valueCell = new ExcelCell();
+                            valueCell.CellHeader = columnName + $":Value:{colCount}";
+                            valueCell.CellValue = currentItem;
+                            row.Add(valueCell);
+                        }
+                        else
+                        {
+                            string path = columnName + $":Value:{colCount}";
+                            ExcelColumnInfoCollection listInnerObjectColumnInfo = _columnResolver.GetExcelColumnInfo(currentItem.GetType(), currentItem, path, true);
+                            PopulateRows(listInnerObjectColumnInfo.Keys.ToList(), currentItem, sheetBuilder, listInnerObjectColumnInfo, document, row);
+                        }
+
+                       
 
                         colCount++;
                     }
@@ -322,6 +352,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     {
                         customFields = (List<object>)GetFieldOrPropertyValue(value, columnName);
                     }
+
+                    if (customFields == null)
+                        continue;
 
                     //need to get all custom columns
 
@@ -423,7 +456,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 }
             }
 
-            if (row.Count() > 0 && rowOverride==null)
+            if (row.Count() > 0 && rowOverride == null)
                 sheetBuilder.AppendRow(row.ToList());
         }
 
@@ -595,6 +628,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         if (result.GetType().Name.StartsWith("List"))
                         {
 
+                            int count= (int)result.GetType().GetProperty("Count").GetValue(result, null);
+
+                            if (count == 0)
+                                continue;
+
                             if (result.GetType().FullName.Contains("CustomFieldModel") || result.GetType().FullName.Contains("OverrideProperty"))
                             {
                                 List<int> ids = resultsList.Select(s => (int)((dynamic)s).ID).ToList();
@@ -604,7 +642,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             }
                             else
                             {
-                                resultsList.AddRange(result as IEnumerable<object>);
+                                foreach(var resultItem in (System.Collections.IList)result)
+                                {
+                                    resultsList.Add(resultItem);
+                                }
+                                
                                 isResultList = true;
                             }
                         }
@@ -613,8 +655,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             try
                             {
                                 //if dictionary with outher values it will failure
-                                if ((result as IDictionary<int, double>).Count > 0)
-                                    resultsList.Add(result);
+                                resultsList.Add(result);
                                 isResultDictionary = true;
                             }
                             catch

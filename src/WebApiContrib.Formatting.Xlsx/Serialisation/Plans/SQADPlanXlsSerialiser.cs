@@ -381,23 +381,29 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             string columnNameCombined = $"{columnName}{isActualText}:{customFieldItem.ID}";
 
                             customValueHeaderCell.CellHeader = customColumn.Header;
-                            customValueHeaderCell.CellValue = customFieldItem.Value;
-
-
+                           
 
                             ExcelCell valuePreservationCell = new ExcelCell();
                             valuePreservationCell.CellHeader = $"{columnNameCombined}:Value:{objID}";
                             if (objectCustomField.GetType().GetProperty("ComputedValue") == null)
                             {
                                 valuePreservationCell.CellValue = customFieldItem.Value;
+                                customValueHeaderCell.CellValue = customFieldItem.Value;
+
+                                if (customFieldItem.Override != null)
+                                {
+                                    customValueHeaderCell.CellValue = customFieldItem.Override;
+                                }
                             }
                             else
                             {
                                 valuePreservationCell.CellValue = customFieldItem.ComputedValue;
+                                customValueHeaderCell.CellValue = customFieldItem.ComputedValue;
                             }
 
                             CreatePreserveCell(valuePreservationCell, document);
 
+                            
 
                             ExcelCell overridePreservationCell = new ExcelCell();
                             overridePreservationCell.CellHeader = $"{columnNameCombined}:Override:{objID}";

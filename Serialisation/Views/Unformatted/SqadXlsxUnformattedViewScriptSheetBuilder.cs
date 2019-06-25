@@ -2,18 +2,21 @@
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using System.Data;
 using System.Linq;
+using WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted.Models;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted
 {
-    public class SqadXlsxUnformattedViewScriptSheetBuilder : SqadXlsxSheetBuilderBase
+    internal class SqadXlsxUnformattedViewScriptSheetBuilder : SqadXlsxSheetBuilderBase
     {
-        private readonly string _dataUrl;
+        private const string RefreshDataQueryTableName = "RefreshDataQueryTable";
+
+        private readonly UnformattedExportSettings _settings;
         private readonly bool _needCreatePivotSheet;
 
-        public SqadXlsxUnformattedViewScriptSheetBuilder(string dataUrl, bool needCreatePivotSheet)
-            :base(ExportViewConstants.UnformattedViewScriptSheetName, shouldAutoFit: false)
+        public SqadXlsxUnformattedViewScriptSheetBuilder(UnformattedExportSettings settings, bool needCreatePivotSheet)
+            : base(ExportViewConstants.UnformattedViewScriptSheetName, shouldAutoFit: false)
         {
-            _dataUrl = dataUrl;
+            _settings = settings;
             _needCreatePivotSheet = needCreatePivotSheet;
         }
 
@@ -24,16 +27,19 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
                 worksheet.Workbook.CreateVBAProject();
             }
 
+            var dataConstantsScript = string.Empty;
             var dataScript = string.Empty;
             var refreshDataScript = string.Empty;
+
             var dataSheet = worksheet.Workbook
                                      .Worksheets
                                      .First(x => x.Name == ExportViewConstants.UnformattedViewDataSheetName);
 
-            if (_dataUrl != null)
+            if (_settings != null)
             {
+                dataConstantsScript = GetDataConstantsScript();
                 dataScript = GetDataScript(dataSheet);
-                refreshDataScript = GetRefreshDataScript();
+                refreshDataScript = _settings.UseNewVersion ? GetNewRefreshDataScript() : GetOldRefreshDataScript();
             }
 
             var pivotScript = string.Empty;
@@ -43,6 +49,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             }
 
             var code = $@"
+{dataConstantsScript}
+
 Private Sub Workbook_Open()
     Dim tmpSheet As Worksheet
     Set tmpSheet = Sheets(""{ExportViewConstants.UnformattedViewScriptSheetName}"")
@@ -58,7 +66,25 @@ End Sub
 
 {refreshDataScript}
 ";
-           worksheet.Workbook.CodeModule.Code = code;
+            worksheet.Workbook.CodeModule.Code = code;
+        }
+
+        private string GetDataConstantsScript()
+        {
+            var constants = $@"
+    Private Const ExportUrl = ""{_settings.ExcelLink}""
+";
+
+            if (!_settings.UseEmbeddedLogin)
+            {
+                constants = $@"
+{constants}
+    Private Const TokenPageLink = ""{_settings.TokenPageLink}""
+    Private Const LoginPageLink = ""{_settings.LoginPageLink}""
+";
+            }
+
+            return constants;
         }
 
         private string GetDataScript(ExcelWorksheet worksheet)
@@ -86,13 +112,13 @@ End Sub
     Set sheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
 
     Dim qt As QueryTable
-    Set qt = sheet.QueryTables.Add(Connection:=""URL;{_dataUrl}"", Destination:=sheet.Range(""{worksheet.Dimension.Address}""))
+    Set qt = sheet.QueryTables.Add(Connection:=""URL;"" & ExportUrl, Destination:=sheet.Range(""{worksheet.Dimension.Address}""))
 
     qt.AdjustColumnWidth = False
     qt.RefreshStyle = xlOverwriteCells
     qt.BackgroundQuery = False
 
-    qt.Name = ""nwshp?hl=en&tab=wn""
+    qt.Name = ""{RefreshDataQueryTableName}""
     qt.WebPreFormattedTextToColumns = True
     qt.WebFormatting = xlWebFormattingNone
     qt.WebConsecutiveDelimitersAsOne = True
@@ -105,7 +131,7 @@ End Sub
 ";
         }
 
-        private static string GetRefreshDataScript()
+        private static string GetOldRefreshDataScript()
         {
             return $@"
 Sub RefreshButtonClick()
@@ -119,6 +145,69 @@ Sub RefreshButtonClick()
     MsgBox ""Data was updated""
     sheet.Activate
 End Sub
+";
+        }
+
+        private string GetNewRefreshDataScript()
+        {
+            return $@"
+Sub RefreshButtonClick()
+    On Error GoTo error_handler
+
+    Dim ieObject As Object
+    Set ieObject = CreateObject(""InternetExplorer.Application"")
+    
+    ieObject.Visible = True
+    ieObject.Navigate ""{_settings.TokenPageLink}""
+
+    Dim shell As Object
+    Dim eachIE As Object
+    Do
+        Set shell = CreateObject(""Shell.Application"")
+        For Each eachIE In shell.Windows
+            If InStr(1, eachIE.locationurl, ""{_settings.LoginPageLink}"") Or InStr(1, eachIE.locationurl, ""{_settings.TokenPageLink}"") Then
+                Set ieObject = eachIE
+                Set eachIE = Nothing
+                Set shell = Nothing
+            Exit Do
+            End If
+        Next eachIE
+    Loop
+    
+    Do Until ieObject.ReadyState = 4 And ieObject.LocationName = ""Excel Data Exports"": DoEvents: Loop
+    
+    Dim token As String
+    token = ieObject.Document.getElementById(""token"").Value
+    
+    ieObject.Quit
+    Set ieObject = Nothing
+    
+
+    Dim sheet As Worksheet
+    Set sheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
+    
+    Dim qt As QueryTable
+    Set qt = sheet.QueryTables(""{RefreshDataQueryTableName}"")
+    
+    qt.Connection = ""URL;"" & ExportUrl & ""&userToken="" & token
+    qt.Refresh
+    
+    Exit Sub
+error_handler:
+    MsgBox (""Error while data exports"")
+    
+    If Not ieObject Is Nothing Then
+        ieObject.Quit
+        Set ieObject = Nothing
+    End If
+    If Not shell Is Nothing Then
+        Set shell = Nothing
+    End If
+    If Not eachIE Is Nothing Then
+        Set eachIE = Nothing
+    End If
+End Sub
+
 ";
         }
 

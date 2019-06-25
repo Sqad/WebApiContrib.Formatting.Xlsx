@@ -4,6 +4,7 @@ using System.Linq;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
+using WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted.Models;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted
 {
@@ -21,7 +22,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             return valueType == typeof(DataSet);
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, SqadXlsxPlanSheetBuilder sheetBuilderOverride)
+        public void Serialise(Type itemType,
+                              object value,
+                              IXlsxDocumentBuilder document,
+                              string sheetName,
+                              string columnPrefix,
+                              SqadXlsxPlanSheetBuilder sheetBuilderOverride)
         {
             if (!(value is DataSet dataSet))
             {
@@ -32,11 +38,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
             ProcessInstructionsSheet(document, tables);
 
-            var dataUrl = GetDataUrl(tables);
+            var settings = GetSettings(tables);
             ProcessDataSheet(document, tables);
 
             var needCreatePivotSheet = tables.Contains(PivotTableName);
-            var scriptBuilder = new SqadXlsxUnformattedViewScriptSheetBuilder(dataUrl, needCreatePivotSheet);
+            var scriptBuilder = new SqadXlsxUnformattedViewScriptSheetBuilder(settings, needCreatePivotSheet);
             document.AppendSheet(scriptBuilder);
         }
 
@@ -85,7 +91,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             }
         }
 
-        private static string GetDataUrl(DataTableCollection tables)
+        private static UnformattedExportSettings GetSettings(DataTableCollection tables)
         {
             if (!tables.Contains(SettingsTableName))
             {
@@ -94,7 +100,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
             var settingsDataTable = tables[SettingsTableName];
 
-            return (string)settingsDataTable.Select("key = 'ExcelLink'").FirstOrDefault()?["value"];
+            return new UnformattedExportSettings(settingsDataTable);
         }
     }
 }

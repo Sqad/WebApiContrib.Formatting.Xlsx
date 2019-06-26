@@ -61,11 +61,12 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                     {
                         Type typeOfList = FormatterUtils.GetEnumerableItemType(propertyType);
 
-                        if (FormatterUtils.IsSimpleType(typeOfList))
-                        {
-                            fieldInfo.Add(new ExcelColumnInfo(prefix, typeOfList, attribute, null));
-                        }
-                        else if (typeOfList.FullName.EndsWith("CustomFieldModel") || typeOfList.Name.StartsWith("OverrideProperty"))
+                        //if (FormatterUtils.IsSimpleType(typeOfList))
+                        //{
+                        //    fieldInfo.Add(new ExcelColumnInfo(prefix, typeOfList, attribute, null));
+                        //}
+                        //else 
+                        if (typeOfList.FullName.EndsWith("CustomFieldModel") || typeOfList.Name.StartsWith("OverrideProperty"))
                         {
                             prefix += "_CustomField_";
                             fieldInfo.Add(new ExcelColumnInfo(prefix, null, attribute, null));

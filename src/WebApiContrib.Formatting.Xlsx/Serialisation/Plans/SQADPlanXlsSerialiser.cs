@@ -334,7 +334,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                         if (FormatterUtils.IsSimpleType(kv.GetType()))
                         {
-
+                            ExcelCell listValueCell = new ExcelCell();
+                            listValueCell.CellHeader = listColumnPrefix;
+                            listValueCell.CellValue = kv;
+                            row.Add(listValueCell);
                         }
                         else
                         {

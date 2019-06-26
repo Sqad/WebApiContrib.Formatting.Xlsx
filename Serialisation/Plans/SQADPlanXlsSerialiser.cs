@@ -75,7 +75,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     {
                         string columnName = col.PropertyName.Replace("_Dict_", "");
 
-                        object colValueDict = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_Dict_", ""));
+                        object colValueDict = null;
+                        if (sheetName == col.PropertyName.Replace("_Dict_", ""))
+                        {
+                            colValueDict = value;
+                        }
+                        else
+                        {
+                            colValueDict = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_Dict_", ""));
+                        }
+
                         if (columnName.Contains(":") && (colValueDict == null || (colValueDict != null && string.IsNullOrEmpty(colValueDict.ToString()))))
                         {
                             colValueDict = GetFieldPathValue(value, columnName);
@@ -248,7 +257,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                     object dictionaryObj = null;
 
-                    if (columnName.Contains(":"))
+                    if (sheetBuilder.GetCurrentTableName == columnName) {
+                        dictionaryObj = value;
+                    }
+                    else if (columnName.Contains(":"))
                     {
                         dictionaryObj = GetFieldPathValue(value, columnName);
                     }
@@ -382,7 +394,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             string columnNameCombined = $"{columnName}{isActualText}:{customFieldItem.ID}";
 
                             customValueHeaderCell.CellHeader = customColumn.Header;
-                           
+
 
                             ExcelCell valuePreservationCell = new ExcelCell();
                             valuePreservationCell.CellHeader = $"{columnNameCombined}:Value:{objID}";
@@ -404,7 +416,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                             CreatePreserveCell(valuePreservationCell, document);
 
-                            
+
 
                             ExcelCell overridePreservationCell = new ExcelCell();
                             overridePreservationCell.CellHeader = $"{columnNameCombined}:Override:{objID}";
@@ -494,6 +506,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
         private void PopulateInnerObjectSheets(ExcelSheetInfoCollection sheetsInfo, IXlsxDocumentBuilder document, Type itemType)
         {
+            if (sheetsInfo == null)
+                return; 
+
             foreach (var sheet in sheetsInfo)
             {
                 if (!(sheet.ExcelSheetAttribute is ExcelSheetAttribute))

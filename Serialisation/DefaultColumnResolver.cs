@@ -29,10 +29,20 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
         /// types.)</param>
         public virtual ExcelColumnInfoCollection GetExcelColumnInfo(Type itemType, object data, string namePrefix = "", bool isComplexColumn = false)
         {
+
+            var fieldInfo = new ExcelColumnInfoCollection();
+
+            if (itemType.Name.StartsWith("Dictionary"))
+            {
+                var prefix = namePrefix+ "_Dict_";
+                fieldInfo.Add(new ExcelColumnInfo(prefix, null, new ExcelColumnAttribute(), null));
+                return fieldInfo;
+            }
+
+
             var fields = GetSerialisableMemberNames(itemType, data);
             var properties = GetSerialisablePropertyInfo(itemType, data);
 
-            var fieldInfo = new ExcelColumnInfoCollection();
 
             // Instantiate field names and fieldInfo lists with serialisable members.
             foreach (var field in fields)

@@ -10,14 +10,17 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Helpers
         public const int RowNameColumnIndex = 2;
         public const int RowMeasureColumnIndex = RowNameColumnIndex + 1;
         public const string TotalRowIndicator = "Total";
-        
+
         public static readonly Color TotalsBackgroundColor = Color.FromArgb(227, 236, 248);
         public static readonly Color DataTotalsBackgroundColor = Color.FromArgb(244, 244, 244);
         public static readonly Color HeaderTotalsBackgroundColor = Color.FromArgb(198, 217, 241);
         public static readonly Color HeaderFontColor = Color.FromArgb(47, 79, 79);
         public static readonly Color HeaderBackgroundColor = Color.FromArgb(212, 227, 244);
 
-        public static void FormatDataRows(ExcelWorksheet sheet, int firstDataRowIndex, ICollection<int> totalColumnIndexes)
+        public static void FormatDataRows(ExcelWorksheet sheet,
+                                          int firstDataRowIndex,
+                                          ICollection<int> totalColumnIndexes,
+                                          int valueColumnIndex)
         {
             var isPreviousRowTotal = false;
             for (var rowIndex = firstDataRowIndex; rowIndex <= sheet.Dimension.Rows; rowIndex++)
@@ -25,7 +28,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Helpers
                 var row = sheet.Cells[rowIndex, 1, rowIndex, sheet.Dimension.Columns];
 
                 var nameCell = sheet.Cells[rowIndex, RowNameColumnIndex];
-                if (IsTotalRow(sheet, rowIndex))
+                if (IsTotalRow(sheet, rowIndex, valueColumnIndex))
                 {
                     FormatTotalRow(row);
                     isPreviousRowTotal = true;
@@ -136,14 +139,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Helpers
                    || cell.Value as string == "-";
         }
 
-        public static bool IsTotalRow(ExcelWorksheet sheet, int rowIndex)
+        public static bool IsTotalRow(ExcelWorksheet sheet, int rowIndex, int valueColumnIndex)
         {
             var nameCell = sheet.Cells[rowIndex, RowNameColumnIndex];
             var percentsCell = sheet.Cells[rowIndex, 1];
+            var valueCell = sheet.Cells[rowIndex, valueColumnIndex];
             if (nameCell.Value != null
                 && nameCell.Value is string name
                 && name.Contains(TotalRowIndicator)
-                && percentsCell.Value == null)
+                && percentsCell.Value == null
+                && valueCell.Value != null)
             {
                 return true;
             }

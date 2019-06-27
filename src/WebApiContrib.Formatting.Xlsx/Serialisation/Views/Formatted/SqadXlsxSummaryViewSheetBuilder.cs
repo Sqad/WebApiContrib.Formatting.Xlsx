@@ -45,7 +45,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             AppendCalculatedTotalColumns(worksheet);
 
             WorksheetHelpers.FormatRows(worksheet, _headerRowsCount + 1, _leftPaneWidth);
-            WorksheetHelpers.FormatDataRows(worksheet, _headerRowsCount + 1, _totalColumnIndexes);
+            WorksheetHelpers.FormatDataRows(worksheet, _headerRowsCount + 1, _totalColumnIndexes, _leftPaneWidth + 1);
             WorksheetHelpers.FormatHeader(worksheet, _headerRowsCount, _totalColumnIndexes);
 
             FormatSummaryRows(worksheet);
@@ -86,7 +86,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
 
         protected override void PostCompileActions(ExcelWorksheet worksheet)
         {
-            ProcessGroups(worksheet, _headerRowsCount + 1, worksheet.Dimension.Rows, 0, true);
+            ProcessGroups(worksheet, _headerRowsCount + 1, worksheet.Dimension.Rows, 0);
         }
 
         private void ObtainLeftPaneWidth(ExcelWorksheet worksheet)
@@ -125,7 +125,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
 
                 if (WorksheetHelpers.IsDataRow(worksheet, rowIndex)
                     || WorksheetHelpers.IsGroupRow(worksheet, rowIndex, _totalColumnIndexes)
-                    || WorksheetHelpers.IsTotalRow(worksheet, rowIndex))
+                    || WorksheetHelpers.IsTotalRow(worksheet, rowIndex, _leftPaneWidth + 1))
                 {
                     _measuresCount = measuresCount;
                     break;
@@ -243,14 +243,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             {
                 var nameCellValue = sheet.Cells[rowIndex, WorksheetHelpers.RowNameColumnIndex].Value as string;
                 if (WorksheetHelpers.IsGroupRow(sheet, rowIndex, _totalColumnIndexes) &&
-                    !WorksheetHelpers.IsTotalRow(sheet, rowIndex))
+                    !WorksheetHelpers.IsTotalRow(sheet, rowIndex, _leftPaneWidth + 1))
                 {
                     uniqueRowIdBuilder.Add(nameCellValue);
 
                     continue;
                 }
 
-                if (WorksheetHelpers.IsTotalRow(sheet, rowIndex))
+                if (WorksheetHelpers.IsTotalRow(sheet, rowIndex, _leftPaneWidth + 1))
                 {
                     var groupRowKey = string.Join("-", uniqueRowIdBuilder);
 
@@ -388,7 +388,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             {
                 var nameCellValue = sheet.Cells[rowIndex, WorksheetHelpers.RowNameColumnIndex].Value as string;
                 if (WorksheetHelpers.IsGroupRow(sheet, rowIndex, _totalColumnIndexes) &&
-                    !WorksheetHelpers.IsTotalRow(sheet, rowIndex))
+                    !WorksheetHelpers.IsTotalRow(sheet, rowIndex, _leftPaneWidth + 1))
                 {
                     uniqueRowIdBuilder.Add(nameCellValue);
 
@@ -397,7 +397,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                     continue;
                 }
 
-                if (WorksheetHelpers.IsTotalRow(sheet, rowIndex))
+                if (WorksheetHelpers.IsTotalRow(sheet, rowIndex, _leftPaneWidth + 1))
                 {
                     var rowKeyPrefix = string.Join("-", uniqueRowIdBuilder);
                     var uniqueMeasures = new Dictionary<string, int>();
@@ -450,7 +450,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             var isPreviousRowTotal = false;
             for (var rowIndex = firstDataRowIndex; rowIndex <= sheet.Dimension.Rows; rowIndex++)
             {
-                if (WorksheetHelpers.IsTotalRow(sheet, rowIndex))
+                if (WorksheetHelpers.IsTotalRow(sheet, rowIndex, _leftPaneWidth + 1))
                 {
                     isPreviousRowTotal = true;
                     continue;
@@ -537,10 +537,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
         private void ProcessGroups(ExcelWorksheet sheet,
                                    int startRowIndex,
                                    int endRowIndex,
-                                   int outlineLevel,
-                                   bool isRoot = false)
+                                   int outlineLevel)
         {
-            if (!isRoot)
+            if (outlineLevel > 0 && outlineLevel <= 7)
             {
                 for (var i = startRowIndex; i <= endRowIndex; i++)
                 {
@@ -557,10 +556,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                 }
 
                 var startGroupRowIndex = rowIndex;
-                var groupName = (sheet.Cells[rowIndex, WorksheetHelpers.RowNameColumnIndex].Value.ToString()).Trim();
+                var groupName = sheet.Cells[rowIndex, WorksheetHelpers.RowNameColumnIndex].Value.ToString().Trim();
 
                 var endGroupRowIndex = startGroupRowIndex;
                 var isEndGroupFound = false;
+                var duplicatesCount = 0;
                 for (var i = startGroupRowIndex + 1; i <= sheet.Dimension.Rows; i++)
                 {
                     if (isEndGroupFound)
@@ -575,20 +575,33 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                         continue;
                     }
 
-                    if (!WorksheetHelpers.IsTotalRow(sheet, i) || WorksheetHelpers.IsDataRow(sheet, i))
+                    if (nameCell.Value.ToString().Trim() == groupName && !WorksheetHelpers.IsDataRow(sheet, i))
+                    {
+                        duplicatesCount++;
+                    }
+
+                    if (!WorksheetHelpers.IsTotalRow(sheet, i, _leftPaneWidth + 1) ||
+                        WorksheetHelpers.IsDataRow(sheet, i))
                     {
                         continue;
                     }
 
-                    var totalName = ( sheet.Cells[i, WorksheetHelpers.RowNameColumnIndex].Value.ToString()).Trim();
+                    var totalName = sheet.Cells[i, WorksheetHelpers.RowNameColumnIndex].Value.ToString().Trim();
                     if (totalName != $"{WorksheetHelpers.TotalRowIndicator} {groupName}")
                     {
                         continue;
                     }
 
-                    isEndGroupFound = true;
+                    if (duplicatesCount == 0)
+                    {
+                        isEndGroupFound = true;
+                    }
+                    else
+                    {
+                        duplicatesCount--;
+                    }
                 }
-
+                
                 ProcessGroups(sheet, startGroupRowIndex + 1, endGroupRowIndex - 1, outlineLevel + 1);
                 rowIndex = endGroupRowIndex;
 

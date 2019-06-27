@@ -126,7 +126,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                     if (initialCell.Value != null)
                     {
                         if (!(initialCell.Value is string)
-                            || !((string)initialCell.Value).Contains(WorksheetHelpers.TotalRowIndicator)
+                            || !((string) initialCell.Value).Contains(WorksheetHelpers.TotalRowIndicator)
                             || initialCell.Merge)
                         {
                             startColumnIndex++;
@@ -139,7 +139,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                             worksheet.Cells[rowIndex, endColumnIndex, _headerRowsCount, endColumnIndex];
                         verticalCellsToMerge.Value = worksheet.Cells[rowIndex, endColumnIndex].Value;
                         verticalCellsToMerge.Merge = true;
-                        verticalCellsToMerge.Style.Fill.BackgroundColor.SetColor(WorksheetHelpers.HeaderTotalsBackgroundColor);
+                        verticalCellsToMerge.Style.Fill.BackgroundColor.SetColor(WorksheetHelpers
+                                                                                     .HeaderTotalsBackgroundColor);
                         SetBordersToCells(verticalCellsToMerge);
 
                         startColumnIndex++;
@@ -156,7 +157,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
 
                     if (startColumnIndex != endColumnIndex)
                     {
-                        var horizontalCellsToMerge = worksheet.Cells[rowIndex, startColumnIndex, rowIndex, endColumnIndex];
+                        var horizontalCellsToMerge =
+                            worksheet.Cells[rowIndex, startColumnIndex, rowIndex, endColumnIndex];
                         horizontalCellsToMerge.Value = endCell.Value;
                         horizontalCellsToMerge.Merge = true;
                         SetBordersToCells(horizontalCellsToMerge);
@@ -180,8 +182,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                 var row = sheet.Cells[rowIndex, 1, rowIndex, sheet.Dimension.Columns];
 
                 var nameCell = sheet.Cells[rowIndex, WorksheetHelpers.RowNameColumnIndex];
-                if (nameCell.Value != null && nameCell.Value is string name &&
-                    name.Contains(WorksheetHelpers.TotalRowIndicator))
+                var valueCell = sheet.Cells[rowIndex, _leftPaneWidth + 1];
+                if (nameCell.Value != null
+                    && nameCell.Value is string name
+                    && name.Contains(WorksheetHelpers.TotalRowIndicator)
+                    && valueCell.Value != null)
                 {
                     FormatTotalRow(row);
                     isPreviousRowTotal = true;

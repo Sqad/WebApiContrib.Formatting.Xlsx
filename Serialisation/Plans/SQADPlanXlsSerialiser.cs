@@ -419,8 +419,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                             CreatePreserveCell(valuePreservationCell, document);
 
-
-
                             ExcelCell overridePreservationCell = new ExcelCell();
                             overridePreservationCell.CellHeader = $"{columnNameCombined}:Override:{objID}";
                             overridePreservationCell.CellValue = customFieldItem.Override;
@@ -430,6 +428,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             textPreservationCell.CellHeader = $"{columnNameCombined}:Text:{objID}";
                             textPreservationCell.CellValue = customFieldItem.Override;
                             CreatePreserveCell(textPreservationCell, document);
+
+                            ExcelCell hiddenTextPreservationCell = new ExcelCell();
+                            hiddenTextPreservationCell.CellHeader = $"{columnNameCombined}:HiddenText:{objID}";
+                            hiddenTextPreservationCell.CellValue = $"\"{customFieldItem.HiddenText}\"";
+                            CreatePreserveCell(hiddenTextPreservationCell, document);
 
                         }
                         row.Add(customValueHeaderCell);

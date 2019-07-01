@@ -14,6 +14,12 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
     {
         public ExcelSheetInfoCollection GetExcelSheetInfo(Type itemType, object data)
         {
+
+            if (itemType.Name.StartsWith("Dictionary"))
+            {
+                return null;
+            }
+
             var sheets = FormatterUtils.GetMemberNames(itemType);
             var properties = GetSerialisablePropertyInfo(itemType);
 

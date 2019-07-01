@@ -34,12 +34,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             var dataSheet = worksheet.Workbook
                                      .Worksheets
                                      .First(x => x.Name == ExportViewConstants.UnformattedViewDataSheetName);
-
+            
             if (_settings != null)
             {
                 dataConstantsScript = GetDataConstantsScript();
                 dataScript = GetDataScript(dataSheet);
-                refreshDataScript = _settings.UseNewVersion ? GetNewRefreshDataScript() : GetOldRefreshDataScript();
+                refreshDataScript = _settings.UseNewVersion && !_settings.UseEmbeddedLogin
+                    ? GetBrowserRefreshDataScript()
+                    : GetQueryTableRefreshDataScript();
             }
 
             var pivotScript = string.Empty;
@@ -131,7 +133,7 @@ End Sub
 ";
         }
 
-        private static string GetOldRefreshDataScript()
+        private static string GetQueryTableRefreshDataScript()
         {
             return $@"
 Sub RefreshButtonClick()
@@ -148,7 +150,7 @@ End Sub
 ";
         }
 
-        private string GetNewRefreshDataScript()
+        private string GetBrowserRefreshDataScript()
         {
             return $@"
 Sub RefreshButtonClick()
@@ -191,6 +193,9 @@ Sub RefreshButtonClick()
     
     qt.Connection = ""URL;"" & ExportUrl & ""&userToken="" & token
     qt.Refresh
+
+    MsgBox ""Data was updated""
+    sheet.Activate
     
     Exit Sub
 error_handler:

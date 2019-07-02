@@ -81,6 +81,11 @@ namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
                             //    fieldInfo.Add(subcolumn);
                         }
                     }
+                    else if (propertyType.Name.EndsWith("CustomFieldModel") || propertyType.Name.StartsWith("OverrideProperty"))
+                    {
+                        prefix += "_CustomField_Single_";
+                        fieldInfo.Add(new ExcelColumnInfo(prefix, null, attribute, null));
+                    }
                     else if (propertyType.Name.StartsWith("Dictionary"))
                     {
                         prefix += "_Dict_";

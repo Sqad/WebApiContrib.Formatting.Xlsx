@@ -150,11 +150,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                         }
                     }
-                    else if (col.PropertyName.EndsWith("_CustomField_"))
+                    else if (col.PropertyName.EndsWith("_CustomField_") || col.PropertyName.EndsWith("_CustomField_Single_"))
                     {
-                        string columnName = col.PropertyName.Replace("_CustomField_", "");
+                        string columnName = col.PropertyName.Replace("_CustomField_", "").Replace("Single_", "");
 
-                        List<object> colCustomFields = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_CustomField_", "")) as List<object>;
+                        List<object> colCustomFields = GetFieldOrPropertyValue(value, columnName) as List<object>;
                         if (columnName.Contains(":") && (colCustomFields == null || (colCustomFields != null && string.IsNullOrEmpty(colCustomFields.ToString()))))
                         {
                             colCustomFields = GetFieldPathValue(value, columnName) as List<object>;
@@ -172,13 +172,28 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             ExcelColumnInfo temlKeyColumn = col.Clone() as ExcelColumnInfo;
 
                             string propetyActual = isActual ? ":Actual" : string.Empty;
-                            temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_", $"{propetyActual}:{customFieldId}");
 
                             string customFieldDef = _staticValuesResolver.GetCustomField(customFieldId);
-                            temlKeyColumn.ExcelColumnAttribute.Header = temlKeyColumn.Header = temlKeyColumn.PropertyName + ":" + customFieldDef;
+
+                            if (col.PropertyName.EndsWith("_CustomField_Single_"))
+                            {
+                                customFieldDef = string.Empty;
+                                temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_Single_", $"{propetyActual}");
+                                temlKeyColumn.ExcelColumnAttribute.Header = temlKeyColumn.Header = temlKeyColumn.PropertyName;
+
+                            }
+                            else
+                            {
+                                temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_", $"{propetyActual}:{customFieldId}");
+                                temlKeyColumn.ExcelColumnAttribute.Header = temlKeyColumn.Header = temlKeyColumn.PropertyName + ":" + customFieldDef;
+                            }
+
+
+
 
                             sheetBuilder.AppendColumnHeaderRowItem(temlKeyColumn);
                         }
+
                     }
                     else
                     {
@@ -257,7 +272,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                     object dictionaryObj = null;
 
-                    if (sheetBuilder.GetCurrentTableName == columnName) {
+                    if (sheetBuilder.GetCurrentTableName == columnName)
+                    {
                         dictionaryObj = value;
                     }
                     else if (columnName.Contains(":"))
@@ -350,9 +366,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     }
 
                 }
-                else if (columnName.EndsWith("_CustomField_"))
+                else if (columnName.EndsWith("_CustomField_") || columnName.EndsWith("_CustomField_Single_"))
                 {
-                    columnName = columnName.Replace("_CustomField_", "");
+                    bool isSingleValue = columnName.Contains("Single_");
+
+                    columnName = columnName.Replace("_CustomField_", "").Replace("Single_", "");
 
                     List<object> customFields = null;
                     if (columnName.Contains(":"))
@@ -373,7 +391,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                     //need to get all custom columns
 
-                    var allCustomColumns = sheetBuilder.SheetColumns.Where(w => w.PropertyName.StartsWith(columnName)).ToList();
+                    List<ExcelColumnInfo> allCustomColumns = null;
+                    if (isSingleValue)
+                    {
+                        allCustomColumns = sheetBuilder.SheetColumns.Where(w => w.PropertyName == columnName).ToList();
+                    }
+                    else
+                    {
+                        allCustomColumns = sheetBuilder.SheetColumns.Where(w => w.PropertyName.StartsWith(columnName)).ToList();
+                    }
+
 
                     var objID = GetFieldOrPropertyValue(value, "ID");
 
@@ -383,7 +410,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                         ExcelCell customValueHeaderCell = new ExcelCell();
 
-                        if (objectCustomField == null)
+                        if (objectCustomField == null && !isSingleValue)
                         {
                             customValueHeaderCell.IsLocked = true;
                             customValueHeaderCell.CellHeader = customColumn.Header;
@@ -393,15 +420,29 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         {
                             dynamic customFieldItem = (dynamic)objectCustomField;
 
-                            string isActualText = customFieldItem.Actual ? ":Actual" : string.Empty;
-                            string columnNameCombined = $"{columnName}{isActualText}:{customFieldItem.ID}";
+
+
+                            string isActualText = string.Empty;
+                            string columnNameCombined = string.Empty;
+
+                            if (isSingleValue)
+                            {
+                                isActualText = columnName.Contains("Actual") ? ":Actual" : string.Empty;
+                                columnNameCombined = $"{columnName}{isActualText}";
+                                customFieldItem = (dynamic)customFields.First();
+                            }
+                            else
+                            {
+                                isActualText = customFieldItem.Actual ? ":Actual" : string.Empty;
+                                columnNameCombined = $"{columnName}{isActualText}:{customFieldItem.ID}";
+                            }
 
                             customValueHeaderCell.CellHeader = customColumn.Header;
 
 
                             ExcelCell valuePreservationCell = new ExcelCell();
                             valuePreservationCell.CellHeader = $"{columnNameCombined}:Value:{objID}";
-                            if (objectCustomField.GetType().GetProperty("ComputedValue") == null)
+                            if (customFieldItem != null && customFieldItem.GetType().GetProperty("ComputedValue") == null)
                             {
                                 valuePreservationCell.CellValue = customFieldItem.Value;
                                 customValueHeaderCell.CellValue = customFieldItem.Value;
@@ -415,6 +456,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             {
                                 valuePreservationCell.CellValue = customFieldItem.ComputedValue;
                                 customValueHeaderCell.CellValue = customFieldItem.ComputedValue;
+                            }
+
+                            if (valuePreservationCell.CellValue!=null && valuePreservationCell.CellValue.GetType() == typeof(DateTime))
+                            {
+                                valuePreservationCell.CellValue = valuePreservationCell.CellValue.ToString();
+                                customValueHeaderCell.CellValue = customValueHeaderCell.CellValue.ToString();
                             }
 
                             CreatePreserveCell(valuePreservationCell, document);
@@ -513,7 +560,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         private void PopulateInnerObjectSheets(ExcelSheetInfoCollection sheetsInfo, IXlsxDocumentBuilder document, Type itemType)
         {
             if (sheetsInfo == null)
-                return; 
+                return;
 
             foreach (var sheet in sheetsInfo)
             {
@@ -668,6 +715,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                                 isResultList = true;
                             }
+                        }
+                        else if (result.GetType().FullName.Contains("CustomFieldModel") || result.GetType().FullName.Contains("OverrideProperty"))
+                        {
+                            var exist = resultsList.Any(a => ((dynamic)a).ID == ((dynamic)result).ID);
+                            if (!exist)
+                                resultsList.Add(result);
+                            isResultCustomField = true;
                         }
                         else if (result.GetType().Name.StartsWith("Dictionary"))
                         {

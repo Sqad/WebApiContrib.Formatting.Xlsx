@@ -442,7 +442,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                             ExcelCell valuePreservationCell = new ExcelCell();
                             valuePreservationCell.CellHeader = $"{columnNameCombined}:Value:{objID}";
-                            if (customFieldItem != null && customFieldItem.GetType().GetProperty("ComputedValue") == null)
+                            if (customFieldItem != null)
                             {
                                 valuePreservationCell.CellValue = customFieldItem.Value;
                                 customValueHeaderCell.CellValue = customFieldItem.Value;
@@ -452,13 +452,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                                     customValueHeaderCell.CellValue = customFieldItem.Override;
                                 }
                             }
-                            else
-                            {
-                                valuePreservationCell.CellValue = customFieldItem.ComputedValue;
-                                customValueHeaderCell.CellValue = customFieldItem.ComputedValue;
-                            }
 
-                            if (valuePreservationCell.CellValue!=null && valuePreservationCell.CellValue.GetType() == typeof(DateTime))
+
+                            if (valuePreservationCell.CellValue != null && valuePreservationCell.CellValue.GetType() == typeof(DateTime))
                             {
                                 valuePreservationCell.CellValue = valuePreservationCell.CellValue.ToString();
                                 customValueHeaderCell.CellValue = customValueHeaderCell.CellValue.ToString();
@@ -473,7 +469,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                             ExcelCell textPreservationCell = new ExcelCell();
                             textPreservationCell.CellHeader = $"{columnNameCombined}:Text:{objID}";
-                            textPreservationCell.CellValue = customFieldItem.Override;
+                            textPreservationCell.CellValue = customFieldItem.Text;
                             CreatePreserveCell(textPreservationCell, document);
 
                             ExcelCell hiddenTextPreservationCell = new ExcelCell();

@@ -173,7 +173,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                             string propetyActual = isActual ? ":Actual" : string.Empty;
 
-                            string customFieldDef = _staticValuesResolver.GetCustomField(customFieldId);
+                            string customFieldDef = _staticValuesResolver.GetCustomFieldName(customFieldId);
 
                             if (col.PropertyName.EndsWith("_CustomField_Single_"))
                             {

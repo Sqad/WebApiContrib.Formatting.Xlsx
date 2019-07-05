@@ -212,6 +212,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                     typeof(DateTimeOffset),
                     typeof(TimeSpan),
                     typeof(Guid),
+                    typeof(object),
                     //take nullable types into consideration
                     typeof(int?),
                     typeof(decimal?),

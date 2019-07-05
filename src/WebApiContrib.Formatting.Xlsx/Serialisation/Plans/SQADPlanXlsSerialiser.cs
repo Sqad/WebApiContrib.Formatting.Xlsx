@@ -64,6 +64,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 if (sheetBuilder == null)
                 {
                     sheetBuilder = new SqadXlsxPlanSheetBuilder(sheetName);
+                    //Move this to attribute hidden property
+                    if (new List<string>() { "PreservationSheet","Formulas","LeftTableColumn","Cells" }.Contains(sheetName))
+                    {
+                        sheetBuilder.IsHidden = true;
+                    }
+
                     document.AppendSheet(sheetBuilder);
                 }
 

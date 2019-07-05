@@ -17,10 +17,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
 
         public ExcelColumnInfoCollection SheetColumns { get; private set; }
 
-        protected SqadXlsxSheetBuilderBase(string sheetName, bool isReferenceSheet = false, bool isPreservationSheet = false, bool shouldAutoFit = true)
+        protected SqadXlsxSheetBuilderBase(string sheetName, bool isReferenceSheet = false, bool isPreservationSheet = false, bool isHidden=false, bool shouldAutoFit = true)
         {
             IsReferenceSheet = isReferenceSheet;
             IsPreservationSheet = isPreservationSheet;
+            IsHidden = isHidden;
 
             _shouldAutoFit = shouldAutoFit;
 
@@ -35,6 +36,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
         public bool IsReferenceSheet { get; }
 
         public bool IsPreservationSheet { get; }
+
+        public bool IsHidden { get; set; }
 
         public void AddAndActivateNewTable(string sheetName)
         {
@@ -111,11 +114,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
             if (IsReferenceSheet)
             {
                 worksheet = package.Workbook.Worksheets.Add("Reference");
-                //worksheet.Hidden = eWorkSheetHidden.VeryHidden;
+                worksheet.Hidden = eWorkSheetHidden.VeryHidden;
             }
             else
             {
                 worksheet = package.Workbook.Worksheets.Add(CurrentTable.TableName);
+                if(IsHidden)
+                    worksheet.Hidden = eWorkSheetHidden.VeryHidden;
             }
 
             PreCompileActions();

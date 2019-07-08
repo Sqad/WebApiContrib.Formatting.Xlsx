@@ -21,8 +21,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
         public bool ShouldAddHeaderRow { private get; set; }
 
-        public SqadXlsxPlanSheetBuilder(string sheetName, bool isReferenceSheet = false, bool isPreservationSheet = false)
-            : base(sheetName, isReferenceSheet,isPreservationSheet)
+        public SqadXlsxPlanSheetBuilder(string sheetName, bool isReferenceSheet = false, bool isPreservationSheet = false, bool isHidden = false)
+            : base(sheetName, isReferenceSheet,isPreservationSheet,isHidden)
         {
             _sheetCodeColumnStatements = new List<string>();
         }

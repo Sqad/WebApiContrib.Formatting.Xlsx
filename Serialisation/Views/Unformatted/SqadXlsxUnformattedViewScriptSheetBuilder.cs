@@ -152,67 +152,171 @@ End Sub
 
         private string GetBrowserRefreshDataScript()
         {
+            const string makeScriptFileName = "MakeSCPTFile.scpt";
+            const string makeScriptFunctionName = "CreateSCPTFile";
+            const string refreshScriptDataFileName = "RefreshData.scpt";
+            const string tokenInputId = "token";
+
             return $@"
-Sub RefreshButtonClick()
-    On Error GoTo error_handler
+#If Mac Then ' Run only on MacOS
 
-    Dim ieObject As Object
-    Set ieObject = CreateObject(""InternetExplorer.Application"")
+    Sub RefreshButtonClick()
+        On Error GoTo error_handler
     
-    ieObject.Visible = True
-    ieObject.Navigate ""{_settings.TokenPageLink}""
-
-    Dim shell As Object
-    Dim eachIE As Object
-    Do
-        Set shell = CreateObject(""Shell.Application"")
-        For Each eachIE In shell.Windows
-            If InStr(1, eachIE.locationurl, ""{_settings.LoginPageLink}"") Or InStr(1, eachIE.locationurl, ""{_settings.TokenPageLink}"") Then
-                Set ieObject = eachIE
-                Set eachIE = Nothing
-                Set shell = Nothing
-            Exit Do
-            End If
-        Next eachIE
-    Loop
-    
-    Do Until ieObject.ReadyState = 4 And ieObject.LocationName = ""Excel Data Exports"": DoEvents: Loop
-    
-    Dim token As String
-    token = ieObject.Document.getElementById(""token"").Value
-    
-    ieObject.Quit
-    Set ieObject = Nothing
-    
-
-    Dim sheet As Worksheet
-    Set sheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
-    
-    Dim qt As QueryTable
-    Set qt = sheet.QueryTables(""{RefreshDataQueryTableName}"")
-    
-    qt.Connection = ""URL;"" & ExportUrl & ""&userToken="" & token
-    qt.Refresh
-
-    MsgBox ""Data was updated""
-    sheet.Activate
-    
-    Exit Sub
+        If CheckAppleScriptTaskExcelScriptFile(ScriptFileName:=""{makeScriptFileName}"") = False Then
+            MsgBox ""Please download MakeSCPTFile.scpt file""
+            Exit Sub
+        End If
+        
+        Dim AppleScriptTaskFolder As String
+        Dim FileName As String
+        
+        FileName = ""{refreshScriptDataFileName}""
+        
+        AppleScriptTaskFolder = MacScript(""return POSIX path of (path to desktop folder) as string"")
+        AppleScriptTaskFolder = Replace(AppleScriptTaskFolder, ""/Desktop"", """") & ""Library/Application Scripts/com.microsoft.Excel/""
+        AppleScriptTaskFolder = AppleScriptTaskFolder & FileName
+        
+        ' AppleScript for data refreshing:
+        ' - open Safari
+        ' - navigate to MedtiaTools
+        ' - wait user login
+        ' - extract token
+        Dim ScriptString As String
+        ScriptString = ""on GetToken(tokenUrl)"" & Chr(13)
+        ScriptString = ScriptString & "" tell application """"Safari"""""" & Chr(13)
+        ScriptString = ScriptString & ""     tell window 1"" & Chr(13)
+        ScriptString = ScriptString & ""         activate"" & Chr(13)
+        ScriptString = ScriptString & ""             set myTab to make new tab"" & Chr(13)
+        ScriptString = ScriptString & ""             set URL of myTab to tokenUrl"" & Chr(13)
+        ScriptString = ScriptString & ""             set tabIndex to index of myTab"" & Chr(13)
+        ScriptString = ScriptString & ""             set current tab to tab tabIndex"" & Chr(13)
+        ScriptString = ScriptString & ""             repeat until (URL of myTab contains tokenUrl and source of myTab is not equal to """""""")"" & Chr(13)
+        ScriptString = ScriptString & ""                 delay 1"" & Chr(13)
+        ScriptString = ScriptString & ""             end repeat"" & Chr(13)
+        ScriptString = ScriptString & ""             set tokenTag to do shell script """"awk 'match($0, /<input.*?id=\""""{tokenInputId}\"""".*?value=\"""".*?\""""/){{print substr($0, RSTART,RLENGTH)}}' <<< '"""" & source of myTab & """"'"""""" & Chr(13)
+        ScriptString = ScriptString & ""             delete myTab"" & Chr(13)
+        ScriptString = ScriptString & ""     end tell"" & Chr(13)
+        ScriptString = ScriptString & "" end tell"" & Chr(13)
+        ScriptString = ScriptString & "" return tokenTag"" & Chr(13)
+        ScriptString = ScriptString & ""end GetToken""
+        
+        Dim scriptCreationString As String
+        scriptCreationString = ScriptString & "";"" & AppleScriptTaskFolder
+        
+        ' Create script for data refreshing
+        RunMyScript = AppleScriptTask(""{makeScriptFileName}"", ""{makeScriptFunctionName}"", scriptCreationString)
+        
+        ' Get token from apple script
+        Dim tokenTag As String
+        tokenTag = AppleScriptTask(""{refreshScriptDataFileName}"", ""GetToken"", TokenPageLink)
+        
+        If Not (tokenTag Like ""*value=""""*"""""") Then
+            MsgBox ""Error while data exports""
+            Exit Sub
+        End If
+        
+        ' Parse token
+        Dim dirtyToken As String
+        dirtyToken = Split(tokenTag, ""value="""""")(1)
+        Dim Token As String
+        Token = Left(dirtyToken, Len(dirtyToken) - 1)
+        
+        RefreshQueryTable (Token)
+        Exit Sub
 error_handler:
-    MsgBox (""Error while data exports"")
+        MsgBox (""Error while data exports"")
+    End Sub
     
-    If Not ieObject Is Nothing Then
+    Function CheckAppleScriptTaskExcelScriptFile(ScriptFileName As String) As Boolean
+        Dim AppleScriptTaskFolder As String
+        Dim TestStr As String
+    
+        AppleScriptTaskFolder = MacScript(""return POSIX path of (path to desktop folder) as string"")
+        AppleScriptTaskFolder = Replace(AppleScriptTaskFolder, ""/Desktop"", """") & _
+            ""Library/Application Scripts/com.microsoft.Excel/""
+    
+        On Error Resume Next
+        TestStr = Dir(AppleScriptTaskFolder & ScriptFileName, vbDirectory)
+        On Error GoTo 0
+        If TestStr = vbNullString Then
+            CheckAppleScriptTaskExcelScriptFile = False
+        Else
+            CheckAppleScriptTaskExcelScriptFile = True
+        End If
+    End Function
+    
+#Else ' Run only on Windows
+    Sub RefreshButtonClick()
+        On Error GoTo error_handler
+        Dim Token As String
+        
+        ' Create Internet Explorer application
+        Dim ieObject As Object
+        Set ieObject = CreateObject(""InternetExplorer.Application"")
+            
+        ' Try to navigate to page with token (with redirect to Login page)
+        ieObject.Visible = True
+        ieObject.Navigate TokenPageLink
+        
+        ' Hack for local testing (IE opens new instance for intranet locations)
+        ' So need to find newly opened instance
+        Dim shell As Object
+        Dim eachIE As Object
+        Do
+            Set shell = CreateObject(""Shell.Application"")
+            For Each eachIE In shell.Windows
+                If InStr(1, eachIE.locationurl, LoginPageLink) Or InStr(1, eachIE.locationurl, TokenPageLink) Then
+                    Set ieObject = eachIE
+                    Set eachIE = Nothing
+                    Set shell = Nothing
+                Exit Do
+                End If
+            Next eachIE
+        Loop
+            
+        ' Do loop while user not redirected to requested page from Login page
+        Do Until ieObject.ReadyState = 4 And ieObject.LocationName = ""Excel Data Exports"": DoEvents: Loop
+            
+        ' Get token from hidden input
+        Token = ieObject.Document.getElementById(""{tokenInputId}"").Value
+            
+        ' Clean up resources
         ieObject.Quit
         Set ieObject = Nothing
-    End If
-    If Not shell Is Nothing Then
-        Set shell = Nothing
-    End If
-    If Not eachIE Is Nothing Then
-        Set eachIE = Nothing
-    End If
-End Sub
+    
+        RefreshQueryTable (Token)
+        
+        Exit Sub
+error_handler:
+        MsgBox (""Error while data exports"")
+        
+        If Not ieObject Is Nothing Then
+            ieObject.Quit
+            Set ieObject = Nothing
+        End If
+        If Not shell Is Nothing Then
+            Set shell = Nothing
+        End If
+        If Not eachIE Is Nothing Then
+            Set eachIE = Nothing
+        End If
+    End Sub
+#End If
 
+Sub RefreshQueryTable(Token As String)
+    Dim sheet As Worksheet
+    Set sheet = Sheets(""Data"")
+        
+    Dim qt As QueryTable
+    Set qt = sheet.QueryTables(""{RefreshDataQueryTableName}"")
+        
+    qt.Connection = ""URL;"" & ExportUrl & ""&userToken="" & Token
+    qt.Refresh
+    
+    MsgBox ""Data was updated""
+    sheet.Activate
+End Sub
 ";
         }
 

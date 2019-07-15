@@ -150,10 +150,10 @@ End Sub
 ";
         }
 
-        private string GetBrowserRefreshDataScript()
+        private static string GetBrowserRefreshDataScript()
         {
-            const string makeScriptFileName = "MakeSCPTFile.scpt";
-            const string makeScriptFunctionName = "CreateSCPTFile";
+            const string makeScriptFileName = "MakeAppleScriptFile.scpt";
+            const string makeScriptFunctionName = "CreateAppleScriptFile";
             const string refreshScriptDataFileName = "RefreshData.scpt";
             const string tokenInputId = "token";
 
@@ -163,11 +163,20 @@ End Sub
     Sub RefreshButtonClick()
         On Error GoTo error_handler
     
-        If CheckAppleScriptTaskExcelScriptFile(ScriptFileName:=""{makeScriptFileName}"") = False Then
-            MsgBox ""Please download MakeSCPTFile.scpt file""
+         If CheckAppleScriptTaskExcelScriptFile(ScriptFileName:=""{makeScriptFileName}"") = False Then
+            messageBox = MsgBox(""Excel is not configured for refreshing data."" & vbCr _
+                & vbCr _
+                & ""Do you want to download script for setting up Excel?"", vbYesNo, ""There is a problem..."")
+            
+            If messageBox = vbYes Then
+                ActiveWorkbook.FollowHyperlink Address:=""https://google.com""
+                MsgBox ""Please run downloaded script, and then try refresh data again""
+            End If
+                
             Exit Sub
         End If
-        
+
+
         Dim AppleScriptTaskFolder As String
         Dim FileName As String
         

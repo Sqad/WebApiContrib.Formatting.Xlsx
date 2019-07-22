@@ -780,7 +780,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 else if (!string.IsNullOrWhiteSpace(info.FormatString) & string.IsNullOrEmpty(info.ExcelNumberFormat))
                     return string.Format(info.FormatString, cellValue);
 
-                else if (cellValue.GetType() == typeof(DateTime) || DateTime.TryParse(cellValue.ToString(), out var test))
+                else if (cellValue.GetType() == typeof(DateTime) || (!Double.TryParse(cellValue.ToString(), out var test1) && DateTime.TryParse(cellValue.ToString(), out var test)))
                     return string.Format("{0:MM/dd/yyyy}", DateTime.Parse(cellValue.ToString()));
 
             }

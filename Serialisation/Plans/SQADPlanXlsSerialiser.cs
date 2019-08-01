@@ -483,6 +483,15 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             hiddenTextPreservationCell.CellValue = $"\"{customFieldItem.HiddenText}\"";
                             CreatePreserveCell(hiddenTextPreservationCell, document);
 
+                            ExcelCell mixedPropertyPreservationCell = new ExcelCell();
+                            mixedPropertyPreservationCell.CellHeader = $"{columnNameCombined}:Mixed:{objID}";
+                            mixedPropertyPreservationCell.CellValue = $"\"{customFieldItem.Mixed}\"";
+                            CreatePreserveCell(mixedPropertyPreservationCell, document);
+
+                            ExcelCell commonPropertyPreservationCell = new ExcelCell();
+                            commonPropertyPreservationCell.CellHeader = $"{columnNameCombined}:Common:{objID}";
+                            commonPropertyPreservationCell.CellValue = $"\"{customFieldItem.Common}\"";
+                            CreatePreserveCell(commonPropertyPreservationCell, document);
                         }
                         row.Add(customValueHeaderCell);
                     }

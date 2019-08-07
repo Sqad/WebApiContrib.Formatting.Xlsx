@@ -469,7 +469,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                             ExcelCell overridePreservationCell = new ExcelCell();
                             overridePreservationCell.CellHeader = $"{columnNameCombined}:Override:{objID}";
-                            overridePreservationCell.CellValue = customFieldItem.Override;
+                            overridePreservationCell.CellValue = customFieldItem.Override?.ToString();
                             CreatePreserveCell(overridePreservationCell, document);
 
                             ExcelCell textPreservationCell = new ExcelCell();

@@ -12,6 +12,7 @@ using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted;
+using WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -104,7 +105,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                               new SQADPlanXlsSerialiser(staticValuesResolver),
                               new SqadFormattedViewXlsxSerializer(),
                               new SqadUnformattedViewXlsxSerializer(),
-                              new SqadSummaryPlanXlsxSerializer()
+                              new SqadSummaryPlanXlsxSerializer(),
+                              new SQADApprovalReportXlsSerialiser(),
+                              new SqadFormattedViewXlsxSerializer()
                           };
 
             //DefaultSerializer = new SqadXlsxSerialiser(staticValuesResolver); //new DefaultXlsxSerialiser();

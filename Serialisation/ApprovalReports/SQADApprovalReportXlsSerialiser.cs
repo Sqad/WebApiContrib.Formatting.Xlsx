@@ -38,17 +38,18 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
                 dataRow[columns[(int)ApprovalReportElement.Product]] = approvalReports[i].Product;
                 dataRow[columns[(int)ApprovalReportElement.NameVersion]] = approvalReports[i].NameVersion;
                 dataRow[columns[(int)ApprovalReportElement.SubmittedBy]] = approvalReports[i].SubmittedBy;
-                dataRow[columns[(int)ApprovalReportElement.DateSubmitted]] = approvalReports[i].DateSubmitted;
+                dataRow[columns[(int)ApprovalReportElement.DateSubmitted]] = approvalReports[i].DateSubmitted.ToString("MM/dd/yyyy hh:mm");
                 dataRow[columns[(int)ApprovalReportElement.StatusStep]] = approvalReports[i].StatusStep;
-                dataRow[columns[(int)ApprovalReportElement.DateCompleted]] = approvalReports[i].DateCompleted;
+                dataRow[columns[(int)ApprovalReportElement.DateCompleted]] = approvalReports[i].DateCompleted?.ToString("MM/dd/yyyy hh:mm");
                 dataRow[columns[(int)ApprovalReportElement.Days]] = approvalReports[i].Days;
                 dataRow[columns[(int)ApprovalReportElement.Action]] = approvalReports[i].Action;
                 dataRow[columns[(int)ApprovalReportElement.Comments]] = approvalReports[i].Comments;
                 dataRow[columns[(int)ApprovalReportElement.Currency]] = approvalReports[i].Currency;
-                dataRow[columns[(int)ApprovalReportElement.GrossCost]] = approvalReports[i].GrossCost;
-                dataRow[columns[(int)ApprovalReportElement.WorkingCost]] = approvalReports[i].WorkingCost;
-                dataRow[columns[(int)ApprovalReportElement.NonWorkingCosts]] = approvalReports[i].NonWorkingCosts;
-                dataRow[columns[(int)ApprovalReportElement.Fees]] = approvalReports[i].Fees;
+                dataRow[columns[(int)ApprovalReportElement.GrossCost]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].GrossCost?.ToString("n2") ?? "-"}";
+                dataRow[columns[(int)ApprovalReportElement.NetCost]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].NetCost?.ToString("n2") ?? "-"}";
+                dataRow[columns[(int)ApprovalReportElement.WorkingCost]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].WorkingCost?.ToString("n2") ?? "-"}";
+                dataRow[columns[(int)ApprovalReportElement.NonWorkingCosts]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].NonWorkingCosts?.ToString("n2") ?? "-"}";
+                dataRow[columns[(int)ApprovalReportElement.Fees]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].Fees?.ToString("n2") ?? "-"}";
 
                 dataTable.Rows.Add(dataRow);
             }
@@ -86,9 +87,13 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
             var approvalReportDataTable = CreateApprovalReportDataTable(approvalReports);
             var columns = approvalReportDataTable.Columns;
             var rows = approvalReportDataTable.Rows;
+            var startDateApprovalReport = approvalReports.FirstOrDefault().StartDate;
+            var endDateApprovalReport = approvalReports.FirstOrDefault().EndDate;
+            var approvalType = string.Join(',', approvalReports.Select(item => item.ApprovalType).Distinct());
 
             var sheetBuilder = new SqadXlsxApprovalReportSheetBuilder(startHeaderIndex: 5, startDataIndex: 6,
-                totalCountColumns: columns.Count, totalCountRows: rows.Count,new DateTime(),new DateTime());
+                totalCountColumns: columns.Count, totalCountRows: rows.Count, startDateApprovalReport, endDateApprovalReport,
+                approvalType);
             document.AppendSheet(sheetBuilder);
 
             sheetBuilder.AppendColumns(columns);

@@ -16,9 +16,11 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
         private readonly int _totalCountRows;
         private readonly DateTime _startDateApprovalReport;
         private readonly DateTime _endDateApprovalReport;
+        private readonly string _approvalType;
+
         public SqadXlsxApprovalReportSheetBuilder(int startHeaderIndex, int startDataIndex,
             int totalCountColumns, int totalCountRows, DateTime startDateApprovalReport,
-            DateTime endDateApprovalReport) : base(ExportConstants.ApprovalReportSheetName)
+            DateTime endDateApprovalReport, string approvalType) : base(ExportConstants.ApprovalReportSheetName)
         {
             _startHeaderIndex = startHeaderIndex;
             _startDataIndex = startDataIndex;
@@ -26,6 +28,19 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
             _totalCountRows = totalCountRows;
             _startDateApprovalReport = startDateApprovalReport;
             _endDateApprovalReport = endDateApprovalReport;
+            _approvalType = approvalType;
+        }
+
+        private void FormatHeaderTemplate(ExcelWorksheet worksheet)
+        {
+            //Base configuration of excel document
+            worksheet.SetValue(1, 1, "Appoval Report");
+            worksheet.Cells[1, 1].Style.Font.Bold = true;
+
+            worksheet.SetValue(2, 1, $"Date Range: {_startDateApprovalReport.ToString("MM/dd/yyyy")} to {_endDateApprovalReport.ToString("MM/dd/yyyy")}");
+            //worksheet.Cells[1, 1].Style.Numberformat
+
+            worksheet.SetValue(3, 1, $"Approval Type: {_approvalType}");
         }
 
         protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
@@ -35,10 +50,7 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
                 return;
             }
 
-            //Base configuration of excel document
-            worksheet.SetValue(0, 0, "Appoval Report");
-            worksheet.SetValue(1, 0, $"Date Range: {_startDateApprovalReport} to {_endDateApprovalReport}");
-
+            FormatHeaderTemplate(worksheet);
 
             for (int i = 0; i < _totalCountColumns; i++)
             {
@@ -46,6 +58,7 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
                 var numberExcelColumn = i + 1;
 
                 worksheet.SetValue(_startHeaderIndex, numberExcelColumn, column.ColumnName);
+                worksheet.Cells[_startHeaderIndex,numberExcelColumn].Style.Font.Bold = true;
 
                 for (var j = 0; j < _totalCountRows; j++)
                 {

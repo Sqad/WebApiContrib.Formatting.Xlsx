@@ -24,13 +24,36 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
                 sheetBuilder.AppendRow(dataRow);
             }
         }
+        private IEnumerable<ExcelColumnAttribute> ApplyCollumnFilters(IEnumerable<ExcelColumnAttribute> columns, bool isGrossCost, bool isNetCost, bool isIncludeNonWorking, bool isIncludeFees)
+        {
+            if (!isGrossCost)
+            {
+                columns = columns.Where(item => item.Order != (int)ApprovalReportElement.GrossCost);
+            }
+            if (!isNetCost)
+            {
+                columns = columns.Where(item => item.Order != (int)ApprovalReportElement.NetCost);
+            }
+            if (!isIncludeNonWorking)
+            {
+                columns = columns.Where(item => item.Order != (int)ApprovalReportElement.NonWorkingCosts);
+            }
+            if (!isIncludeFees)
+            {
+                columns = columns.Where(item => item.Order != (int)ApprovalReportElement.Fees);
+            }
 
-        private void FillDataTable(DataTable dataTable, List<ApprovalReportExportData> approvalReports)
+            return columns.OrderBy(item => item.Order);
+        }
+        private void FillDataTable(DataTable dataTable, ApprovalReportExportRequestModel approvalReportExportRequest)
         {
             var columns = dataTable.Columns;
+            var approvalReports = approvalReportExportRequest.ApprovalReports;
+
             for (var i = 0; i < approvalReports.Count(); i++)
             {
                 var dataRow = dataTable.NewRow();
+                var countDeletedColumns = 0;
 
                 dataRow[columns[(int)ApprovalReportElement.ResourceSet]] = approvalReports[i].ResourceSet;
                 dataRow[columns[(int)ApprovalReportElement.Country]] = approvalReports[i].Country;
@@ -45,28 +68,58 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
                 dataRow[columns[(int)ApprovalReportElement.Action]] = approvalReports[i].Action;
                 dataRow[columns[(int)ApprovalReportElement.Comments]] = approvalReports[i].Comments;
                 dataRow[columns[(int)ApprovalReportElement.Currency]] = approvalReports[i].Currency;
-                dataRow[columns[(int)ApprovalReportElement.GrossCost]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].GrossCost?.ToString("n2") ?? "-"}";
-                dataRow[columns[(int)ApprovalReportElement.NetCost]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].NetCost?.ToString("n2") ?? "-"}";
-                dataRow[columns[(int)ApprovalReportElement.WorkingCost]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].WorkingCost?.ToString("n2") ?? "-"}";
-                dataRow[columns[(int)ApprovalReportElement.NonWorkingCosts]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].NonWorkingCosts?.ToString("n2") ?? "-"}";
-                dataRow[columns[(int)ApprovalReportElement.Fees]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].Fees?.ToString("n2") ?? "-"}";
 
+                if (approvalReportExportRequest.IsGrossCost)
+                {
+                    dataRow[columns[(int)ApprovalReportElement.GrossCost]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].GrossCost?.ToString("n2") ?? "-"}";
+                }
+                else
+                {
+                    countDeletedColumns++;
+                }
+
+                if (approvalReportExportRequest.IsNetCost)
+                {
+                    dataRow[columns[(int)ApprovalReportElement.NetCost - countDeletedColumns]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].NetCost?.ToString("n2") ?? "-"}";
+                }
+                else
+                {
+                    countDeletedColumns++;
+                }
+
+                dataRow[columns[(int)ApprovalReportElement.WorkingCost - countDeletedColumns]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].WorkingCost?.ToString("n2") ?? "-"}";
+
+                if (approvalReportExportRequest.IsIncludeNonWorking)
+                {
+                    dataRow[columns[(int)ApprovalReportElement.NonWorkingCosts - countDeletedColumns]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].NonWorkingCosts?.ToString("n2") ?? "-"}";
+                }
+                else
+                {
+                    countDeletedColumns++;
+                }
+
+                if (approvalReportExportRequest.IsIncludeFees)
+                {
+                    dataRow[columns[(int)ApprovalReportElement.Fees - countDeletedColumns]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].Fees?.ToString("n2") ?? "-"}";
+                }
                 dataTable.Rows.Add(dataRow);
             }
         }
-        private DataTable CreateApprovalReportDataTable(List<ApprovalReportExportData> approvalReports)
+        private DataTable CreateApprovalReportDataTable(ApprovalReportExportRequestModel approvalReportExportRequest)
         {
-            var columns = typeof(ApprovalReportExportData).GetProperties()
+            var columns = typeof(ApprovalReportExportDataModel).GetProperties()
                           .SelectMany(item => item.GetCustomAttributes(typeof(ExcelColumnAttribute), false))
-                          .Select(item => (ExcelColumnAttribute)item)
-                          .OrderBy(item => item.Order)
-                          .Select(item => new DataColumn(item.Header));
+                          .Select(item => (ExcelColumnAttribute)item);
+
+            columns = ApplyCollumnFilters(columns: columns, isGrossCost: approvalReportExportRequest.IsGrossCost,
+                isNetCost: approvalReportExportRequest.IsNetCost, isIncludeNonWorking: approvalReportExportRequest.IsIncludeNonWorking,
+                isIncludeFees: approvalReportExportRequest.IsIncludeFees);
 
             var dataTable = new DataTable();
 
-            dataTable.Columns.AddRange(columns.ToArray());
+            dataTable.Columns.AddRange(columns.Select(item => new DataColumn(item.Header)).ToArray());
 
-            FillDataTable(dataTable, approvalReports);
+            FillDataTable(dataTable, approvalReportExportRequest);
 
             return dataTable;
         }
@@ -74,22 +127,22 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
 
         public bool CanSerialiseType(Type valueType, Type itemType)
         {
-            return valueType == typeof(List<ApprovalReportExportData>);
+            return valueType == typeof(ApprovalReportExportRequestModel);
         }
 
         public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, SqadXlsxPlanSheetBuilder sheetbuilderOverride)
         {
-            if (!(value is List<ApprovalReportExportData> approvalReports))
+            if (!(value is ApprovalReportExportRequestModel approvalReportExportRequest))
             {
                 throw new ArgumentException($"{nameof(value)} has invalid type!");
             }
 
-            var approvalReportDataTable = CreateApprovalReportDataTable(approvalReports);
+            var approvalReportDataTable = CreateApprovalReportDataTable(approvalReportExportRequest);
             var columns = approvalReportDataTable.Columns;
             var rows = approvalReportDataTable.Rows;
-            var startDateApprovalReport = approvalReports.FirstOrDefault().StartDate;
-            var endDateApprovalReport = approvalReports.FirstOrDefault().EndDate;
-            var approvalType = string.Join(',', approvalReports.Select(item => item.ApprovalType).Distinct());
+            var startDateApprovalReport = approvalReportExportRequest.StartDate;
+            var endDateApprovalReport = approvalReportExportRequest.EndDate;
+            var approvalType = string.Join(',', approvalReportExportRequest.ApprovalReports.Select(item => item.ApprovalType).Distinct());
 
             var sheetBuilder = new SqadXlsxApprovalReportSheetBuilder(startHeaderIndex: 5, startDataIndex: 6,
                 totalCountColumns: columns.Count, totalCountRows: rows.Count, startDateApprovalReport, endDateApprovalReport,

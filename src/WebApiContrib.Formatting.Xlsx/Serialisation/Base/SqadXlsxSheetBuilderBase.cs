@@ -53,14 +53,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base
             }
         }
 
-        //public void AppendColumnsWithProperType(DataColumnCollection columns)
-        //{
-        //    foreach (DataColumn c in columns)
-        //    {
-        //        CurrentTable.Columns.Add(c.ColumnName, c.DataType);
-        //    }
-        //}
-
         public void AppendRow(IEnumerable<ExcelCell> row)
         {
             var dataRow = CurrentTable.NewRow();

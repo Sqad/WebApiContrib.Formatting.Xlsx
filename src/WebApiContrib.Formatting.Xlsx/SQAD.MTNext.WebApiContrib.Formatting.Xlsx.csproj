@@ -72,6 +72,8 @@
     <Compile Include="Interfaces\IXlsxDocumentBuilder.cs" />
     <Compile Include="Serialisation\Base\SerializerType.cs" />
     <Compile Include="Serialisation\Base\SqadXlsxSheetBuilderBase.cs" />
+    <Compile Include="Serialisation\CostSources\SqadCostSourceDataSheetBuilder.cs" />
+    <Compile Include="Serialisation\CostSources\SqadCostSourceXlsxSerializer.cs" />
     <Compile Include="Serialisation\DefaultColumnResolver.cs" />
     <Compile Include="Serialisation\DefaultSheetResolver.cs" />
     <Compile Include="Serialisation\ExcelCell.cs" />

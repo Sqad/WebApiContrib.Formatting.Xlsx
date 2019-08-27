@@ -38,7 +38,6 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
             worksheet.Cells[1, 1].Style.Font.Bold = true;
 
             worksheet.SetValue(2, 1, $"Date Range: {_startDateApprovalReport.ToString("MM/dd/yyyy")} to {_endDateApprovalReport.ToString("MM/dd/yyyy")}");
-            //worksheet.Cells[1, 1].Style.Numberformat
 
             worksheet.SetValue(3, 1, $"Approval Type: {_approvalType}");
         }
@@ -58,12 +57,13 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
                 var numberExcelColumn = i + 1;
 
                 worksheet.SetValue(_startHeaderIndex, numberExcelColumn, column.ColumnName);
-                worksheet.Cells[_startHeaderIndex,numberExcelColumn].Style.Font.Bold = true;
+                worksheet.Cells[_startHeaderIndex, numberExcelColumn].Style.Font.Bold = true;
 
                 for (var j = 0; j < _totalCountRows; j++)
                 {
                     var row = table.Rows[j];
                     var rowValue = ((ExcelCell)row[column.ColumnName]).CellValue;
+
                     worksheet.SetValue(_startDataIndex + j, numberExcelColumn, rowValue);
                 }
             }

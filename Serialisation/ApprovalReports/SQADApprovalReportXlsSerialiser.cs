@@ -71,7 +71,7 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
 
                 if (approvalReportExportRequest.IsGrossCost)
                 {
-                    dataRow[columns[(int)ApprovalReportElement.GrossCost]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].GrossCost?.ToString("n2") ?? "-"}";
+                    dataRow[columns[(int)ApprovalReportElement.GrossCost]] = approvalReports[i].WorkingCost != null ? (approvalReports[i].CurrencySymbol + approvalReports[i].GrossCost?.ToString("n2")) : "";
                 }
                 else
                 {
@@ -80,18 +80,18 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
 
                 if (approvalReportExportRequest.IsNetCost)
                 {
-                    dataRow[columns[(int)ApprovalReportElement.NetCost - countDeletedColumns]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].NetCost?.ToString("n2") ?? "-"}";
+                    dataRow[columns[(int)ApprovalReportElement.NetCost - countDeletedColumns]] = approvalReports[i].NetCost != null ? (approvalReports[i].CurrencySymbol + approvalReports[i].NetCost?.ToString("n2")) : "";
                 }
                 else
                 {
                     countDeletedColumns++;
                 }
 
-                dataRow[columns[(int)ApprovalReportElement.WorkingCost - countDeletedColumns]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].WorkingCost?.ToString("n2") ?? "-"}";
+                dataRow[columns[(int)ApprovalReportElement.WorkingCost - countDeletedColumns]] = approvalReports[i].WorkingCost != null ? (approvalReports[i].CurrencySymbol + approvalReports[i].WorkingCost?.ToString("n2")) : "";
 
                 if (approvalReportExportRequest.IsIncludeNonWorking)
                 {
-                    dataRow[columns[(int)ApprovalReportElement.NonWorkingCosts - countDeletedColumns]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].NonWorkingCosts?.ToString("n2") ?? "-"}";
+                    dataRow[columns[(int)ApprovalReportElement.NonWorkingCosts - countDeletedColumns]] = approvalReports[i].NonWorkingCosts != null ? (approvalReports[i].CurrencySymbol + approvalReports[i].NonWorkingCosts?.ToString("n2")) : "";
                 }
                 else
                 {
@@ -100,7 +100,7 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
 
                 if (approvalReportExportRequest.IsIncludeFees)
                 {
-                    dataRow[columns[(int)ApprovalReportElement.Fees - countDeletedColumns]] = $"{approvalReports[i].CurrencySymbol} {approvalReports[i].Fees?.ToString("n2") ?? "-"}";
+                    dataRow[columns[(int)ApprovalReportElement.Fees - countDeletedColumns]] = approvalReports[i].Fees != null ? (approvalReports[i].CurrencySymbol + approvalReports[i].Fees?.ToString("n2")) : "";
                 }
                 dataTable.Rows.Add(dataRow);
             }

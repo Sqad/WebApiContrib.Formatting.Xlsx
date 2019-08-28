@@ -1,4 +1,5 @@
 ﻿using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using System;
@@ -42,15 +43,24 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
             worksheet.SetValue(3, 1, $"Approval Type: {_approvalType}");
         }
 
-        protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
+        private void FormatNumber(ExcelRange cells)
         {
-            if (table.Rows.Count == 0)
-            {
-                return;
-            }
+            cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+            cells.Style.Numberformat.Format = "#";
+        }
+        private void FormatNumberData(ExcelWorksheet worksheet, int countRows)
+        {
+            var startRow = _startHeaderIndex + 1;
+            var endRow = startRow + countRows;
+            var numberDayColumn = 10;
 
-            FormatHeaderTemplate(worksheet);
+            var cells = worksheet.Cells[_startHeaderIndex + 1, numberDayColumn, endRow, numberDayColumn];
 
+            FormatNumber(cells);
+        }
+
+        private void FillWorksheetData(ExcelWorksheet worksheet, DataTable table)
+        {
             for (int i = 0; i < _totalCountColumns; i++)
             {
                 var column = table.Columns[i];
@@ -63,10 +73,23 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
                 {
                     var row = table.Rows[j];
                     var rowValue = ((ExcelCell)row[column.ColumnName]).CellValue;
-
                     worksheet.SetValue(_startDataIndex + j, numberExcelColumn, rowValue);
                 }
             }
+        }
+
+        protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
+        {
+            if (table.Rows.Count == 0)
+            {
+                return;
+            }
+
+            FormatHeaderTemplate(worksheet);
+
+            FillWorksheetData(worksheet, table);
+
+            FormatNumberData(worksheet, table.Rows.Count);
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Linq;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
+using WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted
 {
@@ -36,6 +37,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             sheetBuilder.AppendColumns(columns);
 
             PopulateData(sheetBuilder, columns, records);
+
+            var scriptBuilder = new SqadXlsxFormattedViewScriptsSheetBuilder();
+            document.AppendSheet(scriptBuilder);
         }
 
         private static void PopulateData(SqadXlsxSheetBuilderBase sheetBuilder, DataColumnCollection columns, IEnumerable<FormattedExcelDataRow> records)

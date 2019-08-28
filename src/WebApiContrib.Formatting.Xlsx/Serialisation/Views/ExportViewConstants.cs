@@ -6,6 +6,6 @@
         public const string UnformattedViewInstructionsSheetName = "Instructions";
         public const string UnformattedViewPivotSheetName = "Pivot";
         public const string UnformattedViewDataSheetName = "Data";
-        public const string UnformattedViewScriptSheetName = "Scripts";
+        public const string ScriptSheetName = "Scripts";
     }
 }

@@ -93,6 +93,7 @@
     <Compile Include="Serialisation\Views\Formatted\SqadFormattedViewXlsxSerializer.cs" />
     <Compile Include="Serialisation\Plans\SQADPlanXlsSerialiser.cs" />
     <Compile Include="Serialisation\Views\Formatted\SqadSummaryPlanXlsxSerializer.cs" />
+    <Compile Include="Serialisation\Views\Formatted\SqadXlsxFormattedViewScriptsSheetBuilder.cs" />
     <Compile Include="Serialisation\Views\Formatted\SqadXlsxSummaryViewSheetBuilder.cs" />
     <Compile Include="Serialisation\Views\Helpers\NeutralColorGenerator.cs" />
     <Compile Include="Serialisation\Views\Helpers\WorksheetHelpers.cs" />

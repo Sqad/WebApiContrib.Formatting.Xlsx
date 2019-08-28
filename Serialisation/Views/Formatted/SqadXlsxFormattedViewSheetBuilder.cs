@@ -68,7 +68,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             var percentsCells = sheet.Cells[firstDataRowIndex, 1, sheet.Dimension.Rows, 1];
             percentsCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
             percentsCells.Style.Fill.BackgroundColor.SetColor(WorksheetHelpers.DataTotalsBackgroundColor);
-            percentsCells.Style.Numberformat.Format = "0 %";
 
             var beginningCells = sheet.Cells[firstDataRowIndex, _leftPaneWidth, sheet.Dimension.Rows, _leftPaneWidth];
             FormatNumbers(beginningCells);
@@ -237,7 +236,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
         private static void FormatNumbers(ExcelRange cells)
         {
             cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
-            cells.Style.Numberformat.Format = "#,###";
         }
 
         private static void SetBordersToCells(ExcelRange cells)

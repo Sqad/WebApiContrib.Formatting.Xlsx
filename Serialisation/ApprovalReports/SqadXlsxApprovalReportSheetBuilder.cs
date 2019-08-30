@@ -7,6 +7,7 @@ using System;
 using System.Data;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports.Helpers;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports.Enums;
+using System.Drawing;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports
 {
@@ -157,15 +158,23 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
             {
                 var column = table.Columns[i];
                 var numberExcelColumn = i + 1;
+                var headerCell = worksheet.Cells[_startHeaderIndex, numberExcelColumn];
 
-                worksheet.SetValue(_startHeaderIndex, numberExcelColumn, column.ColumnName);
-                worksheet.Cells[_startHeaderIndex, numberExcelColumn].Style.Font.Bold = true;
+                headerCell.Value = column.ColumnName;
+                headerCell.Style.Font.Bold = true;
 
                 for (var j = 0; j < _totalCountRows; j++)
                 {
                     var row = table.Rows[j];
                     var rowValue = ((ExcelCell)row[column.ColumnName]).CellValue;
-                    worksheet.SetValue(_startDataIndex + j, numberExcelColumn, rowValue);
+                    var rowCell = worksheet.Cells[_startDataIndex + j, numberExcelColumn];
+
+                    rowCell.Value = rowValue;
+                    if ((bool.Parse(((ExcelCell)row[ExportConstants.EvenGroupColumnName]).CellValue.ToString())) == true)
+                    {
+                        rowCell.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                        rowCell.Style.Fill.BackgroundColor.SetColor(ExportConstants.EvenGroupDefaultColor);
+                    }
                 }
             }
         }

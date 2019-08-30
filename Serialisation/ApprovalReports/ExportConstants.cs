@@ -2,10 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports
+namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports
 {
-    public static class ExportConstants
+    internal static class ExportConstants
     {
-        public const string ApprovalReportSheetName = "Approval Report";
+        internal const string ApprovalReportSheetName = "Approval Report",
+                              IntExcelFormatTemplate = "#",
+                              DateExcelFormatTemplate = "m/d/yyyy h:mm",
+                              AccountingExcelFormatTemplate = "_($* #,##0.00_);_($* (#,##0.00);_($* - ??_);_(@_)";
     }
 }

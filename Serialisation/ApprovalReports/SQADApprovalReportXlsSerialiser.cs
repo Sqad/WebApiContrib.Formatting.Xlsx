@@ -1,6 +1,5 @@
 ﻿using OfficeOpenXml;
 using SQAD.MTNext.Business.Models.Attributes;
-using SQAD.MTNext.Business.Models.Core.ApprovalReport;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using SQAD.MTNext.Business.Models.FlowChart.Enums;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
@@ -12,7 +11,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
-namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports
+namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports
 {
     public class SQADApprovalReportXlsSerialiser : IXlsxSerialiser
     {
@@ -71,7 +70,7 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
 
                 if (approvalReportExportRequest.IsGrossCost)
                 {
-                    dataRow[columns[(int)ApprovalReportElement.GrossCost]] = approvalReports[i].WorkingCost != null ? (approvalReports[i].CurrencySymbol + approvalReports[i].GrossCost?.ToString("n2")) : "";
+                    dataRow[columns[(int)ApprovalReportElement.GrossCost]] =  approvalReports[i].GrossCost;
                 }
                 else
                 {
@@ -80,18 +79,18 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
 
                 if (approvalReportExportRequest.IsNetCost)
                 {
-                    dataRow[columns[(int)ApprovalReportElement.NetCost - countDeletedColumns]] = approvalReports[i].NetCost != null ? (approvalReports[i].CurrencySymbol + approvalReports[i].NetCost?.ToString("n2")) : "";
+                    dataRow[columns[(int)ApprovalReportElement.NetCost - countDeletedColumns]] = approvalReports[i].NetCost;
                 }
                 else
                 {
                     countDeletedColumns++;
                 }
 
-                dataRow[columns[(int)ApprovalReportElement.WorkingCost - countDeletedColumns]] = approvalReports[i].WorkingCost != null ? (approvalReports[i].CurrencySymbol + approvalReports[i].WorkingCost?.ToString("n2")) : "";
+                dataRow[columns[(int)ApprovalReportElement.WorkingCost - countDeletedColumns]] = approvalReports[i].WorkingCost;
 
                 if (approvalReportExportRequest.IsIncludeNonWorking)
                 {
-                    dataRow[columns[(int)ApprovalReportElement.NonWorkingCosts - countDeletedColumns]] = approvalReports[i].NonWorkingCosts != null ? (approvalReports[i].CurrencySymbol + approvalReports[i].NonWorkingCosts?.ToString("n2")) : "";
+                    dataRow[columns[(int)ApprovalReportElement.NonWorkingCosts - countDeletedColumns]] = approvalReports[i].NonWorkingCosts;
                 }
                 else
                 {
@@ -100,7 +99,7 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
 
                 if (approvalReportExportRequest.IsIncludeFees)
                 {
-                    dataRow[columns[(int)ApprovalReportElement.Fees - countDeletedColumns]] = approvalReports[i].Fees != null ? (approvalReports[i].CurrencySymbol + approvalReports[i].Fees?.ToString("n2")) : "";
+                    dataRow[columns[(int)ApprovalReportElement.Fees - countDeletedColumns]] = approvalReports[i].Fees;
                 }
                 dataTable.Rows.Add(dataRow);
             }

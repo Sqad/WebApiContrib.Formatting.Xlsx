@@ -1,13 +1,14 @@
 ﻿using OfficeOpenXml;
 using OfficeOpenXml.Style;
+using SQAD.MTNext.Business.Models.FlowChart.Enums;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Text;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports.Helpers;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports.Enums;
 
-namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports
+namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports
 {
     public class SqadXlsxApprovalReportSheetBuilder : SqadXlsxSheetBuilderBase
     {
@@ -31,7 +32,6 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
             _endDateApprovalReport = endDateApprovalReport;
             _approvalType = approvalType;
         }
-
         private void FormatHeaderTemplate(ExcelWorksheet worksheet)
         {
             //Base configuration of excel document
@@ -43,20 +43,112 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
             worksheet.SetValue(3, 1, $"Approval Type: {_approvalType}");
         }
 
-        private void FormatNumber(ExcelRange cells)
+        private void FormatNumber(ExcelRange cells, string format)
         {
             cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
-            cells.Style.Numberformat.Format = "#";
+            cells.Style.Numberformat.Format = format;
         }
-        private void FormatNumberData(ExcelWorksheet worksheet, int countRows)
+
+        private void FormatNumberCell(ExcelWorksheet worksheet, DataTable dataTable, int currentRowWorksheet, int currentRowDataTable, int currentColumnWorksheet,
+                                      int currentColumnDataTable, ExcelFormatType excelFormatType)
         {
-            var startRow = _startHeaderIndex + 1;
-            var endRow = startRow + countRows;
-            var numberDayColumn = 10;
+            var columnCount = dataTable.Columns.Count;
 
-            var cells = worksheet.Cells[_startHeaderIndex + 1, numberDayColumn, endRow, numberDayColumn];
+            var worksheetCell = worksheet.Cells[currentRowWorksheet, currentColumnWorksheet];
+            var dataItem = currentColumnDataTable < columnCount ? dataTable.Rows[currentRowDataTable][currentColumnDataTable] : null;
+            var excelCell = (ExcelCell)dataItem;
 
-            FormatNumber(cells);
+            if (excelCell != null)
+            {
+                switch (excelFormatType)
+                {
+                    case ExcelFormatType.IntNullable:
+                        worksheetCell.Value = Parser.ParseNullableInt(excelCell.CellValue?.ToString());
+                        FormatNumber(worksheetCell, ExportConstants.IntExcelFormatTemplate);
+                        break;
+                    case ExcelFormatType.Date:
+                        worksheetCell.Value = DateTime.Parse(excelCell.CellValue.ToString());
+                        FormatNumber(worksheetCell, ExportConstants.DateExcelFormatTemplate);
+                        break;
+                    case ExcelFormatType.DateNullable:
+                        worksheetCell.Value = Parser.ParseNullableDateTime(excelCell.CellValue?.ToString());
+                        FormatNumber(worksheetCell, ExportConstants.DateExcelFormatTemplate);
+                        break;
+                    case ExcelFormatType.AccountingNullable:
+                        worksheetCell.Value = Parser.ParseNullableFloat(excelCell.CellValue?.ToString());
+                        FormatNumber(worksheetCell, ExportConstants.AccountingExcelFormatTemplate);
+                        break;
+                    default: throw new Exception("Inccorect excel format type");
+                }
+            }
+        }
+
+        private void FormatNumberData(ExcelWorksheet worksheet, DataTable dataTable)
+        {
+            var startRowWorksheet = _startHeaderIndex + 1;
+
+            //Datatable starts calculate index from 0 
+            int numberDayColumnDataTable = (int)ApprovalReportElement.Days,
+                numberDateSubmitedColumnDataTable = (int)ApprovalReportElement.DateSubmitted,
+                numberDateCompletedColumnDataTable = (int)ApprovalReportElement.DateCompleted,
+                numberGrossCostColumnDataTable = (int)ApprovalReportElement.GrossCost,
+                //For delete one column gross or net cost we should use minus 1
+                numberWorkingCostColumnDataTable = (int)ApprovalReportElement.WorkingCost - 1,
+                numberNonWorkingCostColumnDataTable = (int)ApprovalReportElement.NonWorkingCosts - 1,
+                numberFeesCostColumnDataTable = (int)ApprovalReportElement.Fees - 1;
+
+            //Worksheet starts calculate index from 1 
+            int numberDayColumnWorksheet = numberDayColumnDataTable + 1,
+                numberDateSubmitedColumnWorksheet = numberDateSubmitedColumnDataTable + 1,
+                numberDateCompletedColumnWorksheet = numberDateCompletedColumnDataTable + 1,
+                numberGrossCostColumnWorksheet = numberGrossCostColumnDataTable + 1,
+                numberWorkingCostColumnWorksheet = numberWorkingCostColumnDataTable + 1,
+                numberNonWorkingCostColumnWorksheet = numberNonWorkingCostColumnDataTable + 1,
+                numberFeesCostColumnWorksheet = numberFeesCostColumnDataTable + 1;
+
+            for (int i = 0; i < dataTable.Rows.Count; i++)
+            {
+                //Days
+                FormatNumberCell(worksheet: worksheet, dataTable: dataTable,
+                                 currentRowWorksheet: startRowWorksheet + i, currentRowDataTable: i,
+                                 currentColumnWorksheet: numberDayColumnWorksheet, currentColumnDataTable: numberDayColumnDataTable,
+                                 ExcelFormatType.IntNullable);
+
+                //DateSubmitted
+                FormatNumberCell(worksheet: worksheet, dataTable: dataTable,
+                               currentRowWorksheet: startRowWorksheet + i, currentRowDataTable: i,
+                               currentColumnWorksheet: numberDateSubmitedColumnWorksheet, currentColumnDataTable: numberDateSubmitedColumnDataTable,
+                               ExcelFormatType.Date);
+
+                //DateCompleted
+                FormatNumberCell(worksheet: worksheet, dataTable: dataTable,
+                             currentRowWorksheet: startRowWorksheet + i, currentRowDataTable: i,
+                             currentColumnWorksheet: numberDateCompletedColumnWorksheet, currentColumnDataTable: numberDateCompletedColumnDataTable,
+                             ExcelFormatType.DateNullable);
+                //Gross or Net cost
+                FormatNumberCell(worksheet: worksheet, dataTable: dataTable,
+                           currentRowWorksheet: startRowWorksheet + i, currentRowDataTable: i,
+                           currentColumnWorksheet: numberGrossCostColumnWorksheet, currentColumnDataTable: numberGrossCostColumnDataTable,
+                           ExcelFormatType.AccountingNullable);
+
+                //Working cost
+                FormatNumberCell(worksheet: worksheet, dataTable: dataTable,
+                           currentRowWorksheet: startRowWorksheet + i, currentRowDataTable: i,
+                           currentColumnWorksheet: numberWorkingCostColumnWorksheet, currentColumnDataTable: numberWorkingCostColumnDataTable,
+                           ExcelFormatType.AccountingNullable);
+
+                //Non-Working cost
+                FormatNumberCell(worksheet: worksheet, dataTable: dataTable,
+                           currentRowWorksheet: startRowWorksheet + i, currentRowDataTable: i,
+                           currentColumnWorksheet: numberNonWorkingCostColumnWorksheet, currentColumnDataTable: numberNonWorkingCostColumnDataTable,
+                           ExcelFormatType.AccountingNullable);
+
+                //Fees cost
+                FormatNumberCell(worksheet: worksheet, dataTable: dataTable,
+                           currentRowWorksheet: startRowWorksheet + i, currentRowDataTable: i,
+                           currentColumnWorksheet: numberFeesCostColumnWorksheet, currentColumnDataTable: numberFeesCostColumnDataTable,
+                           ExcelFormatType.AccountingNullable);
+            }
         }
 
         private void FillWorksheetData(ExcelWorksheet worksheet, DataTable table)
@@ -89,7 +181,7 @@ namespace WebApiContrib.Formatting.Xlsx.src.WebApiContrib.Formatting.Xlsx.Serial
 
             FillWorksheetData(worksheet, table);
 
-            FormatNumberData(worksheet, table.Rows.Count);
+            FormatNumberData(worksheet, table);
         }
     }
 }

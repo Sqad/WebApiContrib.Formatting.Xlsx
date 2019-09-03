@@ -76,8 +76,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
                         FormatNumber(worksheetCell, ExportConstants.DateExcelFormatTemplate);
                         break;
                     case ExcelFormatType.AccountingNullable:
+                        var currencySymbol = (ExcelCell)dataTable.Rows[currentRowDataTable][ExportConstants.CurrencySymbolColumnName];
+
                         worksheetCell.Value = Parser.ParseNullableFloat(excelCell.CellValue?.ToString());
-                        FormatNumber(worksheetCell, ExportConstants.AccountingExcelFormatTemplate);
+                        FormatNumber(worksheetCell, ExportConstants.CreateAccountingExcelFormatTemplate(currencySymbol.CellValue.ToString()));
                         break;
                     default: throw new Exception("Inccorect excel format type");
                 }

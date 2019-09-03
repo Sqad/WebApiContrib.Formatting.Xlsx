@@ -107,6 +107,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
                 }
 
                 dataRow[columns[(int)ApprovalReportElement.IsEvenGroup - countDeletedColumns]] = approvalReports[i].IsEvenGroup;
+                dataRow[columns[(int)ApprovalReportElement.CurrencySymbol - countDeletedColumns]] = approvalReports[i].CurrencySymbol;
 
                 dataTable.Rows.Add(dataRow);
             }
@@ -150,9 +151,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
             var endDateApprovalReport = approvalReportExportRequest.EndDate;
             var approvalType = string.Join(',', approvalReportExportRequest.ApprovalReports.Select(item => item.ApprovalType).Distinct());
 
-            //We should minus 1 for count columns for delete IsEvenGroup from Worksheet. Because it's flag field
+            //We should minus 2 for count columns for delete IsEvenGroup and CurrencySymbol from Worksheet. Because it's flag field
             var sheetBuilder = new SqadXlsxApprovalReportSheetBuilder(startHeaderIndex: 5, startDataIndex: 6,
-                totalCountColumns: columns.Count - 1, totalCountRows: rows.Count, startDateApprovalReport, endDateApprovalReport,
+                totalCountColumns: columns.Count - 2, totalCountRows: rows.Count, startDateApprovalReport, endDateApprovalReport,
                 approvalType);
             document.AppendSheet(sheetBuilder);
 

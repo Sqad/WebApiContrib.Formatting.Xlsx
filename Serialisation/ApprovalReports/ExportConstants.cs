@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports
 {
@@ -6,9 +7,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
     {
         internal const string ApprovalReportSheetName = "Approval Report",
                               EvenGroupColumnName= "IsEvenGroup",
+                              CurrencySymbolColumnName = "CurrencySymbol",
                               IntExcelFormatTemplate = "#",
-                              DateExcelFormatTemplate = "m/d/yyyy h:mm",
-                              AccountingExcelFormatTemplate = "_($* #,##0.00_);_($* (#,##0.00);_($* - ??_);_(@_)";
+                              DateExcelFormatTemplate = "m/d/yyyy h:mm";
+
+        internal static Func<string, string> CreateAccountingExcelFormatTemplate = currencySymbol => $"_({currencySymbol}* #,##0.00_);_({currencySymbol}* (#,##0.00);_({currencySymbol}* - ??_);_(@_)";
 
         internal static Color EvenGroupDefaultColor = Color.LightGray;
     }

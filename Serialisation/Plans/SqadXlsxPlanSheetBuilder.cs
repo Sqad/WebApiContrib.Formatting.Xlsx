@@ -68,17 +68,17 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
         protected override void PostCompileActions(ExcelWorksheet worksheet)
         {
-            if (ActualRow) return;
-            worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Fill.PatternType =
+            var row = ActualRow ? 1 : 3;
+            worksheet.Cells[row, 1, row, worksheet.Dimension.Columns].Style.Fill.PatternType =
                 OfficeOpenXml.Style.ExcelFillStyle.Solid;
-            worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Fill.BackgroundColor
+            worksheet.Cells[row, 1, row, worksheet.Dimension.Columns].Style.Fill.BackgroundColor
                      .SetColor(System.Drawing.Color.FromArgb(242, 242, 242));
 
-            worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Border.Top.Style =
+            worksheet.Cells[row, 1, row, worksheet.Dimension.Columns].Style.Border.Top.Style =
                 OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-            worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Border.Bottom.Style =
+            worksheet.Cells[row, 1, row, worksheet.Dimension.Columns].Style.Border.Bottom.Style =
                 OfficeOpenXml.Style.ExcelBorderStyle.Thick;
-            worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Border.Bottom.Color
+            worksheet.Cells[row, 1, row, worksheet.Dimension.Columns].Style.Border.Bottom.Color
                      .SetColor(System.Drawing.Color.Black);
 
             if (!_sheetCodeColumnStatements.Any())

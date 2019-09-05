@@ -79,7 +79,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
                         var currencySymbol = (ExcelCell)dataTable.Rows[currentRowDataTable][ExportConstants.CurrencySymbolColumnName];
 
                         worksheetCell.Value = Parser.ParseNullableFloat(excelCell.CellValue?.ToString());
-                        FormatNumber(worksheetCell, ExportConstants.CreateAccountingExcelFormatTemplate(currencySymbol.CellValue.ToString()));
+                        FormatNumber(worksheetCell, ExportConstants.CreateAccountingExcelFormatTemplate(currencySymbol.CellValue?.ToString()));
                         break;
                     default: throw new Exception("Inccorect excel format type");
                 }

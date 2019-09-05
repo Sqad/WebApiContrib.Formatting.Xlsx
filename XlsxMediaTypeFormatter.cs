@@ -12,6 +12,7 @@ using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.Attributes;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.Services.Repositories.Export;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted;
@@ -112,7 +113,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                 new SQADPlanXlsSerialiser(staticValuesResolver, modelMetadataProvider),
                 new SqadFormattedViewXlsxSerializer(),
                 new SqadUnformattedViewXlsxSerializer(),
-                new SqadSummaryPlanXlsxSerializer()
+                new SqadSummaryPlanXlsxSerializer(),
+                new SqadActualXlsSerialiser()
             };
 
             _httpContextAccessor = httpContextAccessor;

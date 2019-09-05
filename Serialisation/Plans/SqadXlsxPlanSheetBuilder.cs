@@ -20,6 +20,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         
 
         public bool ShouldAddHeaderRow { private get; set; }
+        public bool ActualRow { get; set; } = false;
+
 
         public SqadXlsxPlanSheetBuilder(string sheetName, bool isReferenceSheet = false, bool isPreservationSheet = false, bool isHidden = false)
             : base(sheetName, isReferenceSheet,isPreservationSheet,isHidden)
@@ -66,6 +68,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
         protected override void PostCompileActions(ExcelWorksheet worksheet)
         {
+            if (ActualRow) return;
             worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Fill.PatternType =
                 OfficeOpenXml.Style.ExcelFillStyle.Solid;
             worksheet.Cells[3, 1, 3, worksheet.Dimension.Columns].Style.Fill.BackgroundColor
@@ -189,7 +192,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
             foreach (DataColumn col in table.Columns)
             {
-                if (worksheet.Name.Equals("Reference")) break;
+                if (worksheet.Name.Equals("Reference"))  break;
 
                 var colName = worksheet.Cells[_rowsCount, col.Ordinal + 1].RichText.Add(col.ColumnName);
                 colName.Bold = true;
@@ -200,6 +203,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 worksheet.Cells[_rowsCount, col.Ordinal + 1].Style.Border.Right.Color
                          .SetColor(System.Drawing.Color.Black);
 
+                if (worksheet.Name.Equals("Properties")) break;
                 if ((col.Ordinal + 1) % 2 == 0)
                 {
                     int maxRows = _rowsCount + table.Rows.Count;

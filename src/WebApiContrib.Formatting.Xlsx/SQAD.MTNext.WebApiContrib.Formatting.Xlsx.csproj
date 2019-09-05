@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{B6A319B2-82A4-41BA-A895-4FC02A0D53EF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SQAD.MTNext.WebApiContrib.Formatting.Xlsx</RootNamespace>
+    <AssemblyName>SQAD.MTNext.WebApiContrib.Formatting.Xlsx</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>false</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>mt50.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.8.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\DocumentFormat.OpenXml.2.8.1\lib\net40\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="EPPlus, Version=4.5.3.2, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\EPPlus.4.5.3.2\lib\net40\EPPlus.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="System" />
+    <Reference Include="System.configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Interfaces\IXlsxDocumentBuilder.cs" />
+    <Compile Include="Serialisation\Base\SerializerType.cs" />
+    <Compile Include="Serialisation\Base\SqadXlsxSheetBuilderBase.cs" />
+    <Compile Include="Serialisation\CostSources\SqadCostSourceDataSheetBuilder.cs" />
+    <Compile Include="Serialisation\CostSources\SqadCostSourceXlsxSerializer.cs" />
+    <Compile Include="Serialisation\DefaultColumnResolver.cs" />
+    <Compile Include="Serialisation\DefaultSheetResolver.cs" />
+    <Compile Include="Serialisation\ExcelCell.cs" />
+    <Compile Include="Serialisation\ExcelSheetInfo.cs" />
+    <Compile Include="Serialisation\ExcelSheetInfoCollection.cs" />
+    <Compile Include="Serialisation\ExcelColumnInfo.cs" />
+    <Compile Include="Serialisation\ExcelColumnInfoCollection.cs" />
+    <Compile Include="Interfaces\IColumnResolver.cs" />
+    <Compile Include="Interfaces\ISheetResolver.cs" />
+    <Compile Include="Interfaces\IXlsxSerialiser.cs" />
+    <Compile Include="Serialisation\KeyedCollectionBase.cs" />
+    <Compile Include="Serialisation\PerRequestColumnResolver.cs" />
+    <Compile Include="Serialisation\SQADActualsXlsSerialiser.cs" />
+    <Compile Include="Serialisation\Views\Formatted\FormattedExcelDataRow.cs" />
+    <Compile Include="Serialisation\Views\ExportViewConstants.cs" />
+    <Compile Include="Serialisation\Views\ExcelDataRow.cs" />
+    <Compile Include="Serialisation\Views\Formatted\SqadFormattedViewXlsxSerializer.cs" />
+    <Compile Include="Serialisation\Plans\SQADPlanXlsSerialiser.cs" />
+    <Compile Include="Serialisation\Views\Formatted\SqadSummaryPlanXlsxSerializer.cs" />
+    <Compile Include="Serialisation\Views\Formatted\SqadXlsxFormattedViewScriptsSheetBuilder.cs" />
+    <Compile Include="Serialisation\Views\Formatted\SqadXlsxSummaryViewSheetBuilder.cs" />
+    <Compile Include="Serialisation\Views\Helpers\NeutralColorGenerator.cs" />
+    <Compile Include="Serialisation\Views\Helpers\WorksheetHelpers.cs" />
+    <Compile Include="Serialisation\Views\Unformatted\SqadXlsxUnformattedViewScriptSheetBuilder.cs" />
+    <Compile Include="Serialisation\Views\WorksheetDataHelper.cs" />
+    <Compile Include="Serialisation\Views\Unformatted\SqadUnformattedViewXlsxSerializer.cs" />
+    <Compile Include="Serialisation\Views\Formatted\SqadXlsxFormattedViewSheetBuilder.cs" />
+    <Compile Include="Serialisation\Views\Unformatted\SqadXlsxUnformattedViewDataSheetBuilder.cs" />
+    <Compile Include="Serialisation\Views\Unformatted\SqadXlsxUnformattedViewInstructionsSheetBuilder.cs" />
+    <Compile Include="SqadXlsxDocumentBuilder.cs" />
+    <Compile Include="Serialisation\Plans\SqadXlsxPlanSheetBuilder.cs" />
+    <Compile Include="Utils\HttpContextFactory.cs" />
+    <Compile Include="XlsxMediaTypeFormatter.cs" />
+    <Compile Include="FormatterUtils.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="mt50.snk" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\SQAD.MTNext.Business\SQAD.MTNext.Business.csproj">
+      <Project>{c46b1bed-a17c-42f7-9ebf-6d179e897856}</Project>
+      <Name>SQAD.MTNext.Business</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\SQAD.MTNext.Resources\SQAD.MTNext.Resources.csproj">
+      <Project>{52a526e9-4153-42cd-aa70-19db0d23965b}</Project>
+      <Name>SQAD.MTNext.Resources</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\SQAD.MTNext.Services.Repositories\SQAD.MTNext.Services.Repositories.csproj">
+      <Project>{6D582102-42A1-40CB-B61E-747500515A33}</Project>
+      <Name>SQAD.MTNext.Services.Repositories</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

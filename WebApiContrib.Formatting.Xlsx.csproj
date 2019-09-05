@@ -5,6 +5,12 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="src\**" />
+      <EmbeddedResource Remove="src\**" />
+      <None Remove="src\**" />
+    </ItemGroup>
+
+    <ItemGroup>
       <Compile Remove="Serialisation\Actuals\SqadActualSheetBuilder.cs" />
       <Compile Remove="Serialisation\SQADActualsXlsSerialiser.cs" />
     </ItemGroup>

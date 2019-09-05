@@ -14,7 +14,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
         private readonly bool _needCreatePivotSheet;
 
         public SqadXlsxUnformattedViewScriptSheetBuilder(UnformattedExportSettings settings, bool needCreatePivotSheet)
-            : base(ExportViewConstants.UnformattedViewScriptSheetName, shouldAutoFit: false)
+            : base(ExportViewConstants.ScriptSheetName, shouldAutoFit: false)
         {
             _settings = settings;
             _needCreatePivotSheet = needCreatePivotSheet;
@@ -55,7 +55,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
 Private Sub Workbook_Open()
     Dim tmpSheet As Worksheet
-    Set tmpSheet = Sheets(""{ExportViewConstants.UnformattedViewScriptSheetName}"")
+    Set tmpSheet = Sheets(""{ExportViewConstants.ScriptSheetName}"")
     If tmpSheet.Visible = xlSheetVeryHidden Then
         Exit Sub
     End If

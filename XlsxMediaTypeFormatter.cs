@@ -15,6 +15,7 @@ using SQAD.MTNext.Services.Repositories.Export;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.CostSources;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.DeliverySources;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted;
@@ -117,6 +118,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                 new SqadSummaryPlanXlsxSerializer(),
                 new SqadActualXlsSerialiser(),
                 new SqadCostSourceXlsxSerializer()
+                new SqadDeliverySourceXlsxSerializer()
             };
 
             _httpContextAccessor = httpContextAccessor;
@@ -166,7 +168,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
             // Set content disposition to use this file name.
             headers.ContentDisposition = new ContentDispositionHeaderValue("inline")
-                {FileName = fileName};
+            { FileName = fileName };
 
             base.SetDefaultContentHeaders(type, headers, mediaType);
         }

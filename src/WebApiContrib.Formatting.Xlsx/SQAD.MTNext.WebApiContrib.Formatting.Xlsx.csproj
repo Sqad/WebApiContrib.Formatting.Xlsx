@@ -70,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Interfaces\IXlsxDocumentBuilder.cs" />
+    <Compile Include="Serialisation\Actuals\SQADActualXlsSerialiser.cs" />
     <Compile Include="Serialisation\Base\SerializerType.cs" />
     <Compile Include="Serialisation\Base\SqadXlsxSheetBuilderBase.cs" />
     <Compile Include="Serialisation\CostSources\SqadCostSourceDataSheetBuilder.cs" />

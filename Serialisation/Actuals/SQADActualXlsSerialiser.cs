@@ -4,7 +4,6 @@ using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,12 +29,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
             var export = (ActualExport)value;
 
+            CreatePropertySheet(document, export);
             PopulateSheets(document, export);
 
-            CreateReferenceSheet(document, export);
 
         }
-        public void CreateReferenceSheet( IXlsxDocumentBuilder document, ActualExport value)
+        public void CreatePropertySheet( IXlsxDocumentBuilder document, ActualExport value)
         {
             string name = "Properties";
 
@@ -170,8 +169,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
         }
         private void FormatWorkSheet(SqadXlsxPlanSheetBuilder builder, ActualWorksheet item, Dictionary<string, string> custom)
         {
-
-            var excelinfo = new ExcelColumnInfo(item.Data, null, new ExcelColumnAttribute(), null);
+            var excelinfo = new ExcelColumnInfo(item.Data, null, new ExcelColumnAttribute() {IsHidden=true}, null);
             builder.AppendColumnHeaderRowItem(excelinfo);
 
             excelinfo = new ExcelColumnInfo(item.PlanName, null, new ExcelColumnAttribute(), null);

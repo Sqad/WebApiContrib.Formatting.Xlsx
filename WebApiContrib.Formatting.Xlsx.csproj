@@ -5,11 +5,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="Serialisation\DeliverySources\**" />
       <Compile Remove="src\**" />
-      <EmbeddedResource Remove="Serialisation\DeliverySources\**" />
       <EmbeddedResource Remove="src\**" />
-      <None Remove="Serialisation\DeliverySources\**" />
       <None Remove="src\**" />
     </ItemGroup>
 

@@ -1,5 +1,6 @@
 ﻿using SQAD.MTNext.Business.Models.Actual;
 using SQAD.MTNext.Business.Models.Attributes;
+using SQAD.MTNext.Business.Models.Common.Enums;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
@@ -167,6 +168,101 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
             }
 
         }
+        private void PopulatePlannedActualColumns(SqadXlsxPlanSheetBuilder builder, ActualWorksheet item, bool actual = false)
+        {
+
+            switch (item.MediaType.MediaClass)
+            {
+                //case (int)MediaClass.Broadcast:
+                //    {
+                //        if (!actual)
+                //        {
+                //            var excelinfo = new ExcelColumnInfo(item.PlannedProduction, null, new ExcelColumnAttribute(), null);
+                //            builder.AppendColumnHeaderRowItem(excelinfo);
+
+                //            excelinfo = new ExcelColumnInfo(item.PlannedImpressions, null, new ExcelColumnAttribute(), null);
+                //            builder.AppendColumnHeaderRowItem(excelinfo);
+                //        }
+                //        else
+                //        {
+                //            //.Columns(ActualProduction).Visible = True
+                //            //.Columns(ActualImpressions).Visible = True
+                //        }
+                //        break;
+                //    }
+                case (int)MediaClass.Print:
+                case (int)MediaClass.Newspaper:
+                case (int)MediaClass.ReachBased:
+                    if (!actual)
+                    {
+                        var excelinfo = new ExcelColumnInfo(item.PlannedProduction, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+                    }
+                    else
+                    {
+                        var excelinfo = new ExcelColumnInfo(item.ActualProduction, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+                    }
+                    break;
+                case (int)MediaClass.Interactive:
+                    if (!actual)
+                    {
+                        var excelinfo = new ExcelColumnInfo(item.PlannedImpressions, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+
+                        excelinfo = new ExcelColumnInfo(item.PlannedClicks, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+
+                        excelinfo = new ExcelColumnInfo(item.PlannedLeads, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+
+                        excelinfo = new ExcelColumnInfo(item.PlannedRichMedia, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+
+                        excelinfo = new ExcelColumnInfo(item.PlannedAdServing, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+                    }
+                    else
+                    {
+                        var excelinfo = new ExcelColumnInfo(item.ActualImpressions, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+
+                        excelinfo = new ExcelColumnInfo(item.ActualClicks, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+
+                        excelinfo = new ExcelColumnInfo(item.ActualLeads, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+
+                        excelinfo = new ExcelColumnInfo(item.ActualRichMedia, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+
+                        excelinfo = new ExcelColumnInfo(item.ActualAdServing, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+                    }
+                    break;
+
+                default:
+                    if (!actual)
+                    {
+                        var excelinfo = new ExcelColumnInfo(item.PlannedProduction, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+
+                        excelinfo = new ExcelColumnInfo(item.PlannedImpressions, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+                    }
+                    else
+                    {
+                        var excelinfo = new ExcelColumnInfo(item.ActualProduction, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+
+                        excelinfo = new ExcelColumnInfo(item.ActualImpressions, null, new ExcelColumnAttribute(), null);
+                        builder.AppendColumnHeaderRowItem(excelinfo);
+                    }
+                    break;
+
+            }
+
+        }
         private void FormatWorkSheet(SqadXlsxPlanSheetBuilder builder, ActualWorksheet item, Dictionary<string, string> custom)
         {
             var excelinfo = new ExcelColumnInfo(item.Data, null, new ExcelColumnAttribute() {IsHidden=true}, null);
@@ -209,48 +305,42 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                 excelinfo = new ExcelColumnInfo(item.FundingSourceName, null, new ExcelColumnAttribute(), null);
                 builder.AppendColumnHeaderRowItem(excelinfo);
             }
-            //planned
+
             excelinfo = new ExcelColumnInfo(item.StartDate, null, new ExcelColumnAttribute(), null);
             builder.AppendColumnHeaderRowItem(excelinfo);
 
             excelinfo = new ExcelColumnInfo(item.EndDate, null, new ExcelColumnAttribute(), null);
             builder.AppendColumnHeaderRowItem(excelinfo);
 
+            //planned
             excelinfo = new ExcelColumnInfo(item.PlannedGRPs, null, new ExcelColumnAttribute(), null);
             builder.AppendColumnHeaderRowItem(excelinfo);
 
             excelinfo = new ExcelColumnInfo(item.PlannedTRPs, null, new ExcelColumnAttribute(), null);
             builder.AppendColumnHeaderRowItem(excelinfo);
 
-            excelinfo = new ExcelColumnInfo(item.PlannedReach, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
+            if (item.MediaType.EnableWeeklyReach.Value || item.MediaType.ReachType.Value > 0)
+            {
+                excelinfo = new ExcelColumnInfo(item.PlannedReach, null, new ExcelColumnAttribute(), null);
+                builder.AppendColumnHeaderRowItem(excelinfo);
 
-            excelinfo = new ExcelColumnInfo(item.PlannedFrequency, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
+                excelinfo = new ExcelColumnInfo(item.PlannedFrequency, null, new ExcelColumnAttribute(), null);
+                builder.AppendColumnHeaderRowItem(excelinfo);
+            }
 
-            excelinfo = new ExcelColumnInfo(item.PlannedGross, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
+            var shownet  = item.MediaType.ExternalActualsNet.Value;
+            if (!shownet)
+            {
+                excelinfo = new ExcelColumnInfo(item.PlannedGross, null, new ExcelColumnAttribute(), null);
+                builder.AppendColumnHeaderRowItem(excelinfo);
+            }
+            else
+            {
+                excelinfo = new ExcelColumnInfo(item.PlannedNet, null, new ExcelColumnAttribute(), null);
+                builder.AppendColumnHeaderRowItem(excelinfo);
+            }
 
-            excelinfo = new ExcelColumnInfo(item.PlannedNet, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
-
-            excelinfo = new ExcelColumnInfo(item.PlannedProduction, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
-
-            excelinfo = new ExcelColumnInfo(item.PlannedImpressions, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
-
-            excelinfo = new ExcelColumnInfo(item.PlannedClicks, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
-
-            excelinfo = new ExcelColumnInfo(item.PlannedLeads, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
-
-            excelinfo = new ExcelColumnInfo(item.PlannedRichMedia, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
-
-            excelinfo = new ExcelColumnInfo(item.PlannedAdServing, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
+            PopulatePlannedActualColumns(builder, item);
 
             //actual
             excelinfo = new ExcelColumnInfo(item.ActualGRPs, null, new ExcelColumnAttribute(), null);
@@ -259,35 +349,27 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
             excelinfo = new ExcelColumnInfo(item.ActualTRPs, null, new ExcelColumnAttribute(), null);
             builder.AppendColumnHeaderRowItem(excelinfo);
 
-            excelinfo = new ExcelColumnInfo(item.ActualReach, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
+            if (item.MediaType.EnableWeeklyReach.Value || item.MediaType.ReachType.Value > 0)
+            {
+                excelinfo = new ExcelColumnInfo(item.ActualReach, null, new ExcelColumnAttribute(), null);
+                builder.AppendColumnHeaderRowItem(excelinfo);
 
-            excelinfo = new ExcelColumnInfo(item.ActualFrequency, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
+                excelinfo = new ExcelColumnInfo(item.ActualFrequency, null, new ExcelColumnAttribute(), null);
+                builder.AppendColumnHeaderRowItem(excelinfo);
+            }
 
-            excelinfo = new ExcelColumnInfo(item.ActualGross, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
+            if (!shownet)
+            {
+                excelinfo = new ExcelColumnInfo(item.ActualGross, null, new ExcelColumnAttribute(), null);
+                builder.AppendColumnHeaderRowItem(excelinfo);
+            }
+            else
+            {
+                excelinfo = new ExcelColumnInfo(item.ActualNet, null, new ExcelColumnAttribute(), null);
+                builder.AppendColumnHeaderRowItem(excelinfo);
+            }
 
-            excelinfo = new ExcelColumnInfo(item.ActualNet, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
-
-            excelinfo = new ExcelColumnInfo(item.ActualProduction, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
-
-            excelinfo = new ExcelColumnInfo(item.ActualImpressions, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
-
-            excelinfo = new ExcelColumnInfo(item.ActualClicks, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
-
-            excelinfo = new ExcelColumnInfo(item.ActualLeads, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
-
-            excelinfo = new ExcelColumnInfo(item.ActualRichMedia, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
-
-            excelinfo = new ExcelColumnInfo(item.ActualAdServing, null, new ExcelColumnAttribute(), null);
-            builder.AppendColumnHeaderRowItem(excelinfo);
+            PopulatePlannedActualColumns(builder, item, true);
 
             excelinfo = new ExcelColumnInfo(item.DateActualized, null, new ExcelColumnAttribute(), null);
             builder.AppendColumnHeaderRowItem(excelinfo);
@@ -384,42 +466,42 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedGross;
                 cell.CellValue = rec.Planned.GrossCost;
-                row.Add(cell);
+                if(sheet.SheetColumns.Any(x=>x.Header==item.PlannedGross)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedNet;
                 cell.CellValue = rec.Planned.NetCost;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.PlannedNet)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedProduction;
                 cell.CellValue = rec.Planned.Production;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.PlannedProduction)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedImpressions;
                 cell.CellValue = rec.Planned.Impressions;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.PlannedImpressions)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedClicks;
                 cell.CellValue = rec.Planned.Clicks;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.PlannedClicks)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedLeads;
                 cell.CellValue = rec.Planned.Leads;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.PlannedLeads)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedRichMedia;
                 cell.CellValue = rec.Planned.RichMedia;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.PlannedRichMedia)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedAdServing;
                 cell.CellValue = rec.Planned.AdServing;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.PlannedAdServing)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedTRPs;
@@ -429,12 +511,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedReach;
                 cell.CellValue = rec.Planned.Reach;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.PlannedReach)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedFrequency;
                 cell.CellValue = rec.Planned.Frequency;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.PlannedFrequency)) row.Add(cell);
 
                 if (rec.Actualized)
                 {
@@ -466,42 +548,42 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualGross;
                 cell.CellValue = rec.Actual.GrossCost;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.ActualGross)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualNet;
                 cell.CellValue = rec.Actual.NetCost;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.ActualNet)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualProduction;
                 cell.CellValue = rec.Actual.Production;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.ActualProduction)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualImpressions;
                 cell.CellValue = rec.Actual.Impressions;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.ActualImpressions)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualClicks;
                 cell.CellValue = rec.Actual.Clicks;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.ActualClicks)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualLeads;
                 cell.CellValue = rec.Actual.Leads;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.ActualLeads)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualRichMedia;
                 cell.CellValue = rec.Actual.RichMedia;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.ActualRichMedia)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualAdServing;
                 cell.CellValue = rec.Actual.AdServing;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.ActualAdServing)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualTRPs;
@@ -511,17 +593,18 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualReach;
                 cell.CellValue = rec.Actual.Reach;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.ActualReach)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualFrequency;
                 cell.CellValue = rec.Actual.Frequency;
-                row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.ActualFrequency)) row.Add(cell);
 
                 sheet.AppendRow(row);
             }
 
         }
+
 
         private void PopulateSheets(IXlsxDocumentBuilder document, ActualExport export)
         {

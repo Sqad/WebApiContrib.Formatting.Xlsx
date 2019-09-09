@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using SQAD.MTNext.Business.Models.Core.CostSource;
+using SQAD.MTNext.Business.Models.Core.Demo;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
@@ -40,7 +42,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.CostSources
 
             table.Columns.Add("market", typeof(string)).Caption = "MARKET";
             table.Columns.Add("subtype", typeof(string)).Caption = "SUBTYPE";
-            table.Columns.Add("demo", typeof(string)).Caption = "DEMO";
+            if (exportData.NeedIncludeDemos)
+            {
+                table.Columns.Add("demo", typeof(string)).Caption = "DEMO";
+            }
             table.Columns.Add("unit", typeof(string)).Caption = "UNIT";
 
             foreach (var period in exportData.CostPeriods)
@@ -56,7 +61,20 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.CostSources
             {
                 foreach (var subtype in exportData.Subtypes)
                 {
-                    foreach (var demo in exportData.Demos)
+                    var demos = exportData.Demos;
+                    if (!exportData.NeedIncludeDemos)
+                    {
+                        demos = new List<DemoModel>
+                                {
+                                    new DemoModel
+                                    {
+                                        ID = 0,
+                                        Name = ""
+                                    }
+                                };
+                    }
+
+                    foreach (var demo in demos)
                     {
                         foreach (var unit in exportData.Units)
                         {
@@ -64,7 +82,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.CostSources
 
                             dataRow["market"] = market.Name;
                             dataRow["subtype"] = subtype.Name;
-                            dataRow["demo"] = demo.Name;
+
+                            if (exportData.NeedIncludeDemos)
+                            {
+                                dataRow["demo"] = demo.Name;
+                            }
+
                             dataRow["unit"] = unit.Name;
 
                             foreach (var period in exportData.CostPeriods)

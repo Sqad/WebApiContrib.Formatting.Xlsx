@@ -192,7 +192,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
             foreach (DataColumn col in table.Columns)
             {
-                if (worksheet.Name.Equals("Reference"))  break;
+                if (worksheet.Name.Equals("Reference") && !ActualRow)  break;
 
                 var colName = worksheet.Cells[_rowsCount, col.Ordinal + 1].RichText.Add(col.ColumnName);
                 colName.Bold = true;
@@ -203,7 +203,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 worksheet.Cells[_rowsCount, col.Ordinal + 1].Style.Border.Right.Color
                          .SetColor(System.Drawing.Color.Black);
 
-                if (worksheet.Name.Equals("Properties")) break;
+                if (worksheet.Name.Equals("Properties")) continue;
                 if ((col.Ordinal + 1) % 2 == 0)
                 {
                     int maxRows = _rowsCount + table.Rows.Count;

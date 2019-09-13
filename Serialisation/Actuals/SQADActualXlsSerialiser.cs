@@ -32,10 +32,32 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
             CreatePropertySheet(document, export);
             PopulateSheets(document, export);
+            CreateReferenceSheet(document, export.Id);
 
 
         }
-        public void CreatePropertySheet( IXlsxDocumentBuilder document, ActualExport value)
+        private void CreateReferenceSheet(IXlsxDocumentBuilder document, int id)
+        {
+            var builder = new SqadXlsxPlanSheetBuilder("Reference",isPreservationSheet:true,isHidden:true);
+            builder.ActualRow = true;
+
+            document.AppendSheet(builder);
+
+            var excelinfo = new ExcelColumnInfo(id.ToString(), null, new ExcelColumnAttribute(), null);
+            builder.AppendColumnHeaderRowItem(excelinfo);
+
+            excelinfo = new ExcelColumnInfo(" ", null, new ExcelColumnAttribute(), null);
+            builder.AppendColumnHeaderRowItem(excelinfo);
+
+            excelinfo = new ExcelColumnInfo("Version", null, new ExcelColumnAttribute(), null);
+            builder.AppendColumnHeaderRowItem(excelinfo);
+
+            excelinfo = new ExcelColumnInfo("2.1", null, new ExcelColumnAttribute(), null);
+            builder.AppendColumnHeaderRowItem(excelinfo);
+
+        }
+
+        private void CreatePropertySheet( IXlsxDocumentBuilder document, ActualExport value)
         {
             string name = "Properties";
 
@@ -173,23 +195,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
             switch (item.MediaType.MediaClass)
             {
-                //case (int)MediaClass.Broadcast:
-                //    {
-                //        if (!actual)
-                //        {
-                //            var excelinfo = new ExcelColumnInfo(item.PlannedProduction, null, new ExcelColumnAttribute(), null);
-                //            builder.AppendColumnHeaderRowItem(excelinfo);
-
-                //            excelinfo = new ExcelColumnInfo(item.PlannedImpressions, null, new ExcelColumnAttribute(), null);
-                //            builder.AppendColumnHeaderRowItem(excelinfo);
-                //        }
-                //        else
-                //        {
-                //            //.Columns(ActualProduction).Visible = True
-                //            //.Columns(ActualImpressions).Visible = True
-                //        }
-                //        break;
-                //    }
                 case (int)MediaClass.Print:
                 case (int)MediaClass.Newspaper:
                 case (int)MediaClass.ReachBased:
@@ -614,7 +619,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                 sheet.ActualRow = true;
                 // get offset
                 var offset = export.Flights.FirstOrDefault(x => x.MediaTypeID == item.MediaType.Id);
-                item.SetActualWorksheet(2.2,offset.CustomColumnsValues.Count);
+                item.SetActualWorksheet(offset.CustomColumnsValues.Count);
                 FormatWorkSheet(sheet, item, offset.CustomColumnsValues);
                 PopulateSheetData(export.Flights.Where(x=>x.MediaTypeID==item.MediaType.Id).ToList(), sheet, item);
                 document.AppendSheet(sheet);

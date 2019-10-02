@@ -324,7 +324,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
             excelinfo = new ExcelColumnInfo(item.PlannedTRPs, null, new ExcelColumnAttribute(), null);
             builder.AppendColumnHeaderRowItem(excelinfo);
 
-            if (item.MediaType.EnableWeeklyReach.Value || item.MediaType.ReachType.Value > 0)
+            if (Convert.ToBoolean(item.MediaType.EnableWeeklyReach) || item.MediaType.ReachType.Value > 0)
             {
                 excelinfo = new ExcelColumnInfo(item.PlannedReach, null, new ExcelColumnAttribute(), null);
                 builder.AppendColumnHeaderRowItem(excelinfo);
@@ -333,7 +333,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                 builder.AppendColumnHeaderRowItem(excelinfo);
             }
 
-            var shownet  = item.MediaType.ExternalActualsNet.Value;
+            var shownet  = Convert.ToBoolean(item.MediaType.ExternalActualsNet);
             if (!shownet)
             {
                 excelinfo = new ExcelColumnInfo(item.PlannedGross, null, new ExcelColumnAttribute(), null);
@@ -354,7 +354,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
             excelinfo = new ExcelColumnInfo(item.ActualTRPs, null, new ExcelColumnAttribute(), null);
             builder.AppendColumnHeaderRowItem(excelinfo);
 
-            if (item.MediaType.EnableWeeklyReach.Value || item.MediaType.ReachType.Value > 0)
+            if (Convert.ToBoolean(item.MediaType.EnableWeeklyReach) || item.MediaType.ReachType.Value > 0)
             {
                 excelinfo = new ExcelColumnInfo(item.ActualReach, null, new ExcelColumnAttribute(), null);
                 builder.AppendColumnHeaderRowItem(excelinfo);

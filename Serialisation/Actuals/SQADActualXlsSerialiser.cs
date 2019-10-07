@@ -454,12 +454,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.StartDate;
-                cell.CellValue = rec.StartDate;
+                cell.CellValue = string.Format("{0:MM/dd/yyyy}",rec.StartDate);
                 row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.EndDate;
-                cell.CellValue = rec.EndDate;
+                cell.CellValue = string.Format("{0:MM/dd/yyyy}",rec.EndDate);
                 row.Add(cell);
 
                 //planned
@@ -527,7 +527,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                 {
                     cell = new ExcelCell();
                     cell.CellHeader = item.DateActualized;
-                    cell.CellValue = rec.DateActualized;
+                    cell.CellValue = string.Format("{0:MM/dd/yyyy}", rec.DateActualized);
                     row.Add(cell);
 
                     cell = new ExcelCell();

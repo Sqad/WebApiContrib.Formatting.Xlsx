@@ -5,6 +5,17 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="src\**" />
+      <EmbeddedResource Remove="src\**" />
+      <None Remove="src\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Serialisation\Actuals\SqadActualSheetBuilder.cs" />
+      <Compile Remove="Serialisation\SQADActualsXlsSerialiser.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\SQAD.MTNext.Business\SQAD.MTNext.Business.csproj" />
       <ProjectReference Include="..\SQAD.MTNext.Services.Repositories\SQAD.MTNext.Services.Repositories.csproj" />
     </ItemGroup>

@@ -609,14 +609,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
             }
 
         }
-
-
         private void PopulateSheets(IXlsxDocumentBuilder document, ActualExport export)
         {
             foreach (var item in export.Sheets)
             {
                 var sheet = new SqadXlsxPlanSheetBuilder(item.MediaType.Name);
                 sheet.ActualRow = true;
+                sheet.ColNames = PopulateNameCollection(item);
                 // get offset
                 var offset = export.Flights.FirstOrDefault(x => x.MediaTypeID == item.MediaType.Id);
                 item.SetActualWorksheet(offset.CustomColumnsValues.Count);
@@ -625,6 +624,24 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                 document.AppendSheet(sheet);
             }
 
+        }
+        private Dictionary<string, string> PopulateNameCollection(ActualWorksheet item)
+        {
+            var names = new Dictionary<string, string>();
+            names.Add(item.Data, "FlightData");
+            names.Add(item.ActualGross, item.ActualGross);
+            names.Add(item.ActualGRPs, item.ActualGRPs);
+            names.Add(item.ActualTRPs, item.ActualTRPs);
+            names.Add(item.ActualNet, "ActualNet");
+            names.Add(item.ActualProduction, item.ActualProduction);
+            names.Add(item.ActualImpressions, item.ActualImpressions);
+            names.Add(item.ActualClicks, item.ActualClicks);
+            names.Add(item.ActualLeads, item.ActualLeads);
+            names.Add(item.ActualAdServing, item.ActualAdServing);
+            names.Add(item.ActualRichMedia, item.ActualRichMedia);
+            names.Add(item.ActualReach, item.ActualReach);
+            names.Add(item.ActualFrequency, item.ActualFrequency);
+            return names;
         }
     }
 }

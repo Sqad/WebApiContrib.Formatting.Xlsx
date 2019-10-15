@@ -22,6 +22,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         public bool ShouldAddHeaderRow { private get; set; }
         public bool ActualRow { get; set; } = false;
 
+        public Dictionary<string, string> ColNames { get; set; } = new Dictionary<string, string>(); 
+
 
         public SqadXlsxPlanSheetBuilder(string sheetName, bool isReferenceSheet = false, bool isPreservationSheet = false, bool isHidden = false)
             : base(sheetName, isReferenceSheet,isPreservationSheet,isHidden)
@@ -64,11 +66,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         {
             _sheetCodeColumnStatements.Clear();
             _rowsCount = ShouldAddHeaderRow ? 3 : 1;
+
         }
 
         protected override void PostCompileActions(ExcelWorksheet worksheet)
         {
-            var row = ActualRow ? 1 : 3;
+            var row = ActualRow ? StartRow(worksheet) : 3;
             worksheet.Cells[row, 1, row, worksheet.Dimension.Columns].Style.Fill.PatternType =
                 OfficeOpenXml.Style.ExcelFillStyle.Solid;
             worksheet.Cells[row, 1, row, worksheet.Dimension.Columns].Style.Fill.BackgroundColor
@@ -109,6 +112,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
         protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
         {
+            if (ActualRow) _rowsCount = StartRow(worksheet);
             if (IsReferenceSheet)
             {
                 var mergeTitleCell = worksheet.Cells[_rowsCount, 1, _rowsCount, 3];
@@ -227,6 +231,15 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 {
                     worksheet.Column(col.Ordinal + 1).Hidden = true;
                 }
+
+                /////////////////////just testing
+                if(ActualRow && ColNames.ContainsKey(col.ColumnName))
+                {
+                    ExcelRange range = worksheet.Cells[_rowsCount, col.Ordinal+ 1];
+                    worksheet.Names.Add(ColNames[col.ColumnName].Replace(" ",string.Empty), range);
+                }
+                /////////////////////just testing
+
             }
 
             foreach (DataRow row in table.Rows)
@@ -315,8 +328,18 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     }
                 }
             }
-
             _rowsCount += __ROWS_BETWEEN_REFERENCE_SHEETS__;
+
         }
+        //private void InsertRow(ExcelWorksheet worksheet)
+        //{
+        //    if (worksheet.Name.Equals("Reference") || worksheet.Name.Equals("Properties")) return;
+        //    worksheet.InsertRow(1, 1);
+        //}
+        private int StartRow(ExcelWorksheet worksheet)
+        {
+            return  (worksheet.Name.Equals("Reference") || worksheet.Name.Equals("Properties")) ? 1 : 2;
+        }
+
     }
 }

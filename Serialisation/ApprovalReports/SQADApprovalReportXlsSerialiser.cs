@@ -153,8 +153,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
 
             //We should minus 2 for count columns for delete IsEvenGroup and CurrencySymbol from Worksheet. Because it's flag field
             var sheetBuilder = new SqadXlsxApprovalReportSheetBuilder(startHeaderIndex: 5, startDataIndex: 6,
-                totalCountColumns: columns.Count - 2, totalCountRows: rows.Count, startDateApprovalReport, endDateApprovalReport,
-                approvalType);
+                totalCountColumns: columns.Count - 2, totalCountRows: rows.Count, startDateApprovalReport: startDateApprovalReport,
+                endDateApprovalReport: endDateApprovalReport,approvalType: approvalType);
             document.AppendSheet(sheetBuilder);
 
             sheetBuilder.AppendColumns(columns);

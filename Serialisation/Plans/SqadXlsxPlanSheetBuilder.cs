@@ -221,10 +221,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         OfficeOpenXml.Style.ExcelBorderStyle.Thin;
                     worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Left.Style =
                         OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                    worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Bottom.Style = 
+                        OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+
                     worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Right.Color
                              .SetColor(System.Drawing.Color.Black);
                     worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Left.Color
                              .SetColor(System.Drawing.Color.Black);
+                    worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Bottom.Color
+                            .SetColor(System.Drawing.Color.LightGray);
+
                 }
 
                 if (col.ColumnMapping == MappingType.Hidden)
@@ -329,13 +335,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 }
             }
             _rowsCount += __ROWS_BETWEEN_REFERENCE_SHEETS__;
+            if (ActualRow && !worksheet.Name.Equals("Properties")) worksheet.Cells[worksheet.Dimension.Address].AutoFilter = true;
 
         }
-        //private void InsertRow(ExcelWorksheet worksheet)
-        //{
-        //    if (worksheet.Name.Equals("Reference") || worksheet.Name.Equals("Properties")) return;
-        //    worksheet.InsertRow(1, 1);
-        //}
         private int StartRow(ExcelWorksheet worksheet)
         {
             return  (worksheet.Name.Equals("Reference") || worksheet.Name.Equals("Properties")) ? 1 : 2;

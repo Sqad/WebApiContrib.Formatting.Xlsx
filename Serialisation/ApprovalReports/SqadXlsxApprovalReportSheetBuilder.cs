@@ -115,42 +115,42 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
                 FormatNumberCell(worksheet: worksheet, dataTable: dataTable,
                                  currentRowWorksheet: startRowWorksheet + i, currentRowDataTable: i,
                                  currentColumnWorksheet: numberDayColumnWorksheet, currentColumnDataTable: numberDayColumnDataTable,
-                                 ExcelFormatType.IntNullable);
+                                 excelFormatType: ExcelFormatType.IntNullable);
 
                 //DateSubmitted
                 FormatNumberCell(worksheet: worksheet, dataTable: dataTable,
                                currentRowWorksheet: startRowWorksheet + i, currentRowDataTable: i,
                                currentColumnWorksheet: numberDateSubmitedColumnWorksheet, currentColumnDataTable: numberDateSubmitedColumnDataTable,
-                               ExcelFormatType.Date);
+                               excelFormatType: ExcelFormatType.Date);
 
                 //DateCompleted
                 FormatNumberCell(worksheet: worksheet, dataTable: dataTable,
                              currentRowWorksheet: startRowWorksheet + i, currentRowDataTable: i,
                              currentColumnWorksheet: numberDateCompletedColumnWorksheet, currentColumnDataTable: numberDateCompletedColumnDataTable,
-                             ExcelFormatType.DateNullable);
+                             excelFormatType: ExcelFormatType.DateNullable);
                 //Gross or Net cost
                 FormatNumberCell(worksheet: worksheet, dataTable: dataTable,
                            currentRowWorksheet: startRowWorksheet + i, currentRowDataTable: i,
                            currentColumnWorksheet: numberGrossCostColumnWorksheet, currentColumnDataTable: numberGrossCostColumnDataTable,
-                           ExcelFormatType.AccountingNullable);
+                           excelFormatType: ExcelFormatType.AccountingNullable);
 
                 //Working cost
                 FormatNumberCell(worksheet: worksheet, dataTable: dataTable,
                            currentRowWorksheet: startRowWorksheet + i, currentRowDataTable: i,
                            currentColumnWorksheet: numberWorkingCostColumnWorksheet, currentColumnDataTable: numberWorkingCostColumnDataTable,
-                           ExcelFormatType.AccountingNullable);
+                           excelFormatType: ExcelFormatType.AccountingNullable);
 
                 //Non-Working cost
                 FormatNumberCell(worksheet: worksheet, dataTable: dataTable,
                            currentRowWorksheet: startRowWorksheet + i, currentRowDataTable: i,
                            currentColumnWorksheet: numberNonWorkingCostColumnWorksheet, currentColumnDataTable: numberNonWorkingCostColumnDataTable,
-                           ExcelFormatType.AccountingNullable);
+                           excelFormatType: ExcelFormatType.AccountingNullable);
 
                 //Fees cost
                 FormatNumberCell(worksheet: worksheet, dataTable: dataTable,
                            currentRowWorksheet: startRowWorksheet + i, currentRowDataTable: i,
                            currentColumnWorksheet: numberFeesCostColumnWorksheet, currentColumnDataTable: numberFeesCostColumnDataTable,
-                           ExcelFormatType.AccountingNullable);
+                           excelFormatType: ExcelFormatType.AccountingNullable);
             }
         }
 

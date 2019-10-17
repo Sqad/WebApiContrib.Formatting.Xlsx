@@ -238,13 +238,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     worksheet.Column(col.Ordinal + 1).Hidden = true;
                 }
 
-                /////////////////////just testing
-                if(ActualRow && ColNames.ContainsKey(col.ColumnName))
+                //add range names
+                if (ActualRow && ColNames.ContainsKey(col.ColumnName))
                 {
                     ExcelRange range = worksheet.Cells[_rowsCount, col.Ordinal+ 1];
                     worksheet.Names.Add(ColNames[col.ColumnName].Replace(" ",string.Empty), range);
                 }
-                /////////////////////just testing
 
             }
 
@@ -335,8 +334,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 }
             }
             _rowsCount += __ROWS_BETWEEN_REFERENCE_SHEETS__;
-            if (ActualRow && !worksheet.Name.Equals("Properties")) worksheet.Cells[worksheet.Dimension.Address].AutoFilter = true;
-
+            if (ActualRow)
+            {
+                worksheet.Cells.AutoFitColumns();
+                if(!worksheet.Name.Equals("Properties")) worksheet.Cells[worksheet.Dimension.Address].AutoFilter = true;
+            }
         }
         private int StartRow(ExcelWorksheet worksheet)
         {

@@ -7,6 +7,7 @@ using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 //using WebApiContrib.Formatting.Xlsx.Serialisation.Actuals;
@@ -618,6 +619,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
         }
         private void PopulateSheetData(List<ActualFlight> list, SqadXlsxPlanSheetBuilder sheet, ActualWorksheet item)
         {
+            NumberFormatInfo format = CultureInfo.CurrentCulture.NumberFormat;
+            string currencyFormat = "#,##0.00";
+
+            currencyFormat = currencyFormat.Replace(",", format.CurrencyGroupSeparator).Replace(".", format.CurrencyDecimalSeparator);
+
             List<ExcelCell> row = new List<ExcelCell>();
             ExcelCell cell = new ExcelCell();
 
@@ -702,17 +708,17 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedGross;
-                cell.CellValue = rec.Planned.GrossCost;
+                cell.CellValue = rec.Planned.GrossCost.ToString(currencyFormat);
                 if(sheet.SheetColumns.Any(x=>x.Header==item.PlannedGross)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedNet;
-                cell.CellValue = rec.Planned.NetCost;
+                cell.CellValue = rec.Planned.NetCost.ToString(currencyFormat);
                 if (sheet.SheetColumns.Any(x => x.Header == item.PlannedNet)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedProduction;
-                cell.CellValue = rec.Planned.Production;
+                cell.CellValue = rec.Planned.Production.ToString(currencyFormat);
                 if (sheet.SheetColumns.Any(x => x.Header == item.PlannedProduction)) row.Add(cell);
 
                 cell = new ExcelCell();
@@ -732,12 +738,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedRichMedia;
-                cell.CellValue = rec.Planned.RichMedia;
+                cell.CellValue = rec.Planned.RichMedia.ToString(currencyFormat);
                 if (sheet.SheetColumns.Any(x => x.Header == item.PlannedRichMedia)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedAdServing;
-                cell.CellValue = rec.Planned.AdServing;
+                cell.CellValue = rec.Planned.AdServing.ToString(currencyFormat);
                 if (sheet.SheetColumns.Any(x => x.Header == item.PlannedAdServing)) row.Add(cell);
 
                 cell = new ExcelCell();
@@ -784,17 +790,17 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualGross;
-                cell.CellValue = rec.Actual.GrossCost;
+                cell.CellValue = rec.Actual.GrossCost.ToString(currencyFormat);
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualGross)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualNet;
-                cell.CellValue = rec.Actual.NetCost;
+                cell.CellValue = rec.Actual.NetCost.ToString(currencyFormat);
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualNet)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualProduction;
-                cell.CellValue = rec.Actual.Production;
+                cell.CellValue = rec.Actual.Production.ToString(currencyFormat);
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualProduction)) row.Add(cell);
 
                 cell = new ExcelCell();
@@ -814,12 +820,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualRichMedia;
-                cell.CellValue = rec.Actual.RichMedia;
+                cell.CellValue = rec.Actual.RichMedia.ToString(currencyFormat);
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualRichMedia)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualAdServing;
-                cell.CellValue = rec.Actual.AdServing;
+                cell.CellValue = rec.Actual.AdServing.ToString(currencyFormat);
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualAdServing)) row.Add(cell);
 
                 cell = new ExcelCell();

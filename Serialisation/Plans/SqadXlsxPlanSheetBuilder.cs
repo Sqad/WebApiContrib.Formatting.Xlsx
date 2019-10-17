@@ -8,6 +8,7 @@ using System.Reflection;
 using Microsoft.Extensions.FileProviders;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using System.Globalization;
+using OfficeOpenXml.Style;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 {
@@ -345,8 +346,20 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             if (ActualRow)
             {
                 worksheet.Cells.AutoFitColumns();
-                if(!worksheet.Name.Equals("Properties")) worksheet.Cells[worksheet.Dimension.Address].AutoFilter = true;
+                if (!worksheet.Name.Equals("Properties"))
+                {
+                    worksheet.Cells[worksheet.Dimension.Address].AutoFilter = true;
+                    InsertFirstRow(worksheet);
+                }
             }
+        }
+        private void InsertFirstRow(ExcelWorksheet worksheet)
+        {
+            var cell = worksheet.Cells[1, 2];
+            cell.Style.Font.Size = 14;
+            cell.Style.Font.Bold = true;
+            cell.Value = worksheet.Name;
+
         }
         private int StartRow(ExcelWorksheet worksheet)
         {

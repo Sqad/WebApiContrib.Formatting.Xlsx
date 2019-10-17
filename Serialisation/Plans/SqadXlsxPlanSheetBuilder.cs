@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.FileProviders;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
+using System.Globalization;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 {
@@ -241,7 +242,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 //add range names
                 if (ActualRow && ColNames.ContainsKey(col.ColumnName))
                 {
-                    ExcelRange range = worksheet.Cells[_rowsCount, col.Ordinal+ 1];
+                    ExcelRange range = worksheet.Cells[_rowsCount -1 , col.Ordinal+ 1];
                     worksheet.Names.Add(ColNames[col.ColumnName].Replace(" ",string.Empty), range);
                 }
 
@@ -264,6 +265,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     else
                     {
                         var cell = colObject as ExcelCell;
+
+                        if (ActualRow && ColNames.ContainsKey(col.ColumnName))
+                        {
+
+                            //range.Style.Numberformat.Format = NumberFormatInfo.CurrentInfo.CurrencyDecimalSeparator;
+                            worksheet.Cells[_rowsCount, excelColumnIndex].Style.Numberformat.Format = "#,##0.00";
+                        }
 
                         if (cell.IsLocked)
                         {

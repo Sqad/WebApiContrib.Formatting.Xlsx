@@ -537,17 +537,17 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedGross;
-                cell.CellValue = rec.Planned.GrossCost.ToString(currencyFormat);
+                cell.CellValue = rec.Planned.GrossCost;
                 if(sheet.SheetColumns.Any(x=>x.Header==item.PlannedGross)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedNet;
-                cell.CellValue = rec.Planned.NetCost.ToString(currencyFormat);
+                cell.CellValue = rec.Planned.NetCost;
                 if (sheet.SheetColumns.Any(x => x.Header == item.PlannedNet)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedProduction;
-                cell.CellValue = rec.Planned.Production.ToString(currencyFormat);
+                cell.CellValue = rec.Planned.Production;
                 if (sheet.SheetColumns.Any(x => x.Header == item.PlannedProduction)) row.Add(cell);
 
                 cell = new ExcelCell();
@@ -567,12 +567,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedRichMedia;
-                cell.CellValue = rec.Planned.RichMedia.ToString(currencyFormat);
+                cell.CellValue = rec.Planned.RichMedia;
                 if (sheet.SheetColumns.Any(x => x.Header == item.PlannedRichMedia)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedAdServing;
-                cell.CellValue = rec.Planned.AdServing.ToString(currencyFormat);
+                cell.CellValue = rec.Planned.AdServing;
                 if (sheet.SheetColumns.Any(x => x.Header == item.PlannedAdServing)) row.Add(cell);
 
                 cell = new ExcelCell();
@@ -693,22 +693,28 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
             }
 
         }
-        private Dictionary<string, string> PopulateNameCollection(ActualWorksheet item)
+        private Dictionary<string, Tuple<string,bool>> PopulateNameCollection(ActualWorksheet item)
         {
-            var names = new Dictionary<string, string>();
-            names.Add(item.Data, "FlightData");
-            names.Add(item.ActualGross, "ActualGross");
-            names.Add(item.ActualGRPs, item.ActualGRPs);
-            names.Add(item.ActualTRPs, item.ActualTRPs);
-            names.Add(item.ActualNet, "ActualNet");
-            names.Add(item.ActualProduction, item.ActualProduction);
-            names.Add(item.ActualImpressions, item.ActualImpressions);
-            names.Add(item.ActualClicks, item.ActualClicks);
-            names.Add(item.ActualLeads, item.ActualLeads);
-            names.Add(item.ActualAdServing, item.ActualAdServing);
-            names.Add(item.ActualRichMedia, item.ActualRichMedia);
-            names.Add(item.ActualReach, item.ActualReach);
-            names.Add(item.ActualFrequency, item.ActualFrequency);
+            var names = new Dictionary<string, Tuple<string, bool>>();
+            names.Add(item.Data, new Tuple<string, bool>("FlightData", false));
+            names.Add(item.ActualGross, new Tuple<string, bool>("ActualGross", true));
+            names.Add(item.ActualGRPs, new Tuple<string, bool>(item.ActualGRPs,false));
+            names.Add(item.ActualTRPs, new Tuple<string, bool>(item.ActualTRPs,false));
+            names.Add(item.ActualNet, new Tuple<string, bool>("ActualNet",true));
+            names.Add(item.ActualProduction, new Tuple<string, bool>(item.ActualProduction,true));
+            names.Add(item.ActualImpressions, new Tuple<string, bool>(item.ActualImpressions,false));
+            names.Add(item.ActualClicks, new Tuple<string, bool>(item.ActualClicks,false));
+            names.Add(item.ActualLeads, new Tuple<string, bool>(item.ActualLeads,false));
+            names.Add(item.ActualAdServing, new Tuple<string, bool>(item.ActualAdServing,true));
+            names.Add(item.ActualRichMedia, new Tuple<string, bool>(item.ActualRichMedia,true));
+            names.Add(item.ActualReach, new Tuple<string, bool>(item.ActualReach,false));
+            names.Add(item.ActualFrequency, new Tuple<string, bool>(item.ActualFrequency,false));
+            names.Add(item.PlannedGross, new Tuple<string, bool>(item.PlannedGross, true));
+            names.Add(item.PlannedNet, new Tuple<string, bool>(item.PlannedNet, true));
+            names.Add(item.PlannedProduction, new Tuple<string, bool>(item.PlannedProduction, true));
+            names.Add(item.PlannedRichMedia, new Tuple<string, bool>(item.PlannedRichMedia, true));
+            names.Add(item.PlannedAdServing, new Tuple<string, bool>(item.PlannedAdServing, true));
+
             return names;
         }
     }

@@ -9,6 +9,7 @@ using Microsoft.Extensions.FileProviders;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using System.Globalization;
 using OfficeOpenXml.Style;
+using System;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 {
@@ -24,7 +25,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         public bool ShouldAddHeaderRow { private get; set; }
         public bool ActualRow { get; set; } = false;
 
-        public Dictionary<string, string> ColNames { get; set; } = new Dictionary<string, string>(); 
+        public Dictionary<string, Tuple<string, bool>> ColNames { get; set; } = new Dictionary<string, Tuple<string, bool>>(); 
 
 
         public SqadXlsxPlanSheetBuilder(string sheetName, bool isReferenceSheet = false, bool isPreservationSheet = false, bool isHidden = false)
@@ -243,8 +244,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 //add range names
                 if (ActualRow && ColNames.ContainsKey(col.ColumnName))
                 {
-                    ExcelRange range = worksheet.Cells[_rowsCount -1 , col.Ordinal+ 1];
-                    worksheet.Names.Add(ColNames[col.ColumnName].Replace(" ",string.Empty), range);
+                    ExcelRange range = worksheet.Cells[_rowsCount, col.Ordinal + 1];
+                    //ExcelRange range = worksheet.Cells[1, 1, col.Ordinal + 1, table.Columns.Count + 1];
+                    worksheet.Names.Add(ColNames[col.ColumnName].Item1.Replace(" ",string.Empty), range);
                 }
 
             }
@@ -267,10 +269,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     {
                         var cell = colObject as ExcelCell;
 
-                        if (ActualRow && ColNames.ContainsKey(col.ColumnName))
+                        if (ActualRow && ColNames.ContainsKey(col.ColumnName) && ColNames[col.ColumnName].Item2)
                         {
-
-                            //range.Style.Numberformat.Format = NumberFormatInfo.CurrentInfo.CurrencyDecimalSeparator;
                             worksheet.Cells[_rowsCount, excelColumnIndex].Style.Numberformat.Format = "#,##0.00";
                         }
 

@@ -12,7 +12,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
         private readonly NeutralColorGenerator _neutralColorGenerator = new NeutralColorGenerator();
         private readonly IDictionary<int, HashSet<int>> _cellsWithData = new Dictionary<int, HashSet<int>>();
         private readonly ICollection<int> _totalColumnIndexes = new List<int>();
-        private readonly IDictionary<string, IDictionary<string, IDictionary<string, long?>>> _calculatedTotals;
+        private readonly IDictionary<string, IDictionary<string, IDictionary<string, string>>> _calculatedTotals;
         private readonly int _headerRowsCount;
 
         private bool _isMeasureColumnExists;
@@ -22,7 +22,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
         public SqadXlsxSummaryViewSheetBuilder(int headerRowsCount)
             : base(ExportViewConstants.FormattedViewSheetName)
         {
-            _calculatedTotals = new Dictionary<string, IDictionary<string, IDictionary<string, long?>>>();
+            _calculatedTotals = new Dictionary<string, IDictionary<string, IDictionary<string, string>>>();
             _headerRowsCount = headerRowsCount;
         }
 
@@ -236,7 +236,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                 totalColumnName = $"{totalColumnName} {WorksheetHelpers.TotalRowIndicator}";
             }
 
-            _calculatedTotals.Add(totalColumnName, new Dictionary<string, IDictionary<string, long?>>());
+            _calculatedTotals.Add(totalColumnName, new Dictionary<string, IDictionary<string, string>>());
 
             var uniqueRowIdBuilder = new List<string>();
             for (var rowIndex = _headerRowsCount + 1; rowIndex <= sheet.Dimension.Rows; rowIndex++)
@@ -259,7 +259,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                     {
                         if (!_calculatedTotals[totalColumnName].ContainsKey(measure.Key))
                         {
-                            _calculatedTotals[totalColumnName].Add(measure.Key, new Dictionary<string, long?>());
+                            _calculatedTotals[totalColumnName].Add(measure.Key, new Dictionary<string, string>());
                         }
 
                         var totalRowKey = $"{groupRowKey}-{nameCellValue}-{measure.Key}";
@@ -290,7 +290,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                 {
                     if (!_calculatedTotals[totalColumnName].ContainsKey(measure.Key))
                     {
-                        _calculatedTotals[totalColumnName].Add(measure.Key, new Dictionary<string, long?>());
+                        _calculatedTotals[totalColumnName].Add(measure.Key, new Dictionary<string, string>());
                     }
 
 
@@ -301,9 +301,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             }
         }
 
-        private Dictionary<string, long?> GetMeasures(ExcelWorksheet sheet, int rowIndex, int columnIndex)
+        private Dictionary<string, string> GetMeasures(ExcelWorksheet sheet, int rowIndex, int columnIndex)
         {
-            var result = new Dictionary<string, long?>();
+            var result = new Dictionary<string, string>();
 
             var uniqueMeasures = new Dictionary<string, int>();
             for (var shift = 0; shift < _measuresCount; shift++)
@@ -318,7 +318,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
 
                 uniqueMeasures[measureCellValue]++;
 
-                var totalCellValue = sheet.Cells[measureRowIndex, columnIndex].Value as long?;
+                var totalCellValue = sheet.Cells[measureRowIndex, columnIndex].Value as string;
+                if (totalCellValue == null)
+                {
+                    continue;
+                }
 
                 var counter = uniqueMeasures[measureCellValue];
                 var uniqueMeasureValue = counter > 1 ? $"{measureCellValue} ({counter})" : measureCellValue;
@@ -367,7 +371,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
 
                         var valueCell = sheet.Cells[rowIndex, lastColumn];
 
-                        if (values.Value.HasValue)
+                        if (values.Value != null)
                         {
                             valueCell.Value = values.Value;
                         }

@@ -7,6 +7,7 @@ using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 //using WebApiContrib.Formatting.Xlsx.Serialisation.Actuals;
@@ -333,177 +334,6 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
             }
 
         }
-        //private void FormatWorkSheet(SqadXlsxPlanSheetBuilder builder, ActualWorksheet item, Dictionary<string, string> custom)
-        //{
-        //    var excelinfo = new ExcelColumnInfo(item.Data, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.PlanName, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.VehicleName, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.ProductName, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.SubtypeName, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.UnitName, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.MarketName, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.DemoName, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    if (custom != null && custom.Count > 0)
-        //    {
-        //        foreach (var it in custom)
-        //        {
-        //            excelinfo = new ExcelColumnInfo(it.Key, null, new ExcelColumnAttribute(), null);
-        //            builder.AppendColumnHeaderRowItem(excelinfo);
-        //        }
-        //    }
-        //    else
-        //    {
-        //        excelinfo = new ExcelColumnInfo(item.CreativeName, null, new ExcelColumnAttribute(), null);
-        //        builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //        excelinfo = new ExcelColumnInfo(item.FundingSourceName, null, new ExcelColumnAttribute(), null);
-        //        builder.AppendColumnHeaderRowItem(excelinfo);
-        //    }
-
-        //    excelinfo = new ExcelColumnInfo(item.StartDate, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.EndDate, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    //planned
-        //    excelinfo = new ExcelColumnInfo(item.PlannedGRPs, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.PlannedTRPs, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.PlannedReach, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.PlannedFrequency, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.PlannedGross, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.PlannedNet, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    //PopulatePlannedActualColumns(builder, item);
-        //    excelinfo = new ExcelColumnInfo(item.PlannedProduction, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.PlannedImpressions, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.PlannedClicks, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.PlannedLeads, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.PlannedRichMedia, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.PlannedAdServing, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    //actual
-        //    excelinfo = new ExcelColumnInfo(item.ActualGRPs, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.ActualTRPs, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.ActualReach, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.ActualFrequency, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.ActualGross, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.ActualNet, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    //PopulatePlannedActualColumns(builder, item, true);
-        //    excelinfo = new ExcelColumnInfo(item.ActualProduction, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.ActualImpressions, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.ActualClicks, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.ActualLeads, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.ActualRichMedia, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.ActualAdServing, null, new ExcelColumnAttribute() { IsHidden = true }, null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.DateActualized, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-
-        //    excelinfo = new ExcelColumnInfo(item.ActualizedBy, null, new ExcelColumnAttribute(), null);
-        //    builder.AppendColumnHeaderRowItem(excelinfo);
-        //}
-        //private void HideShowMeasureColumns(SqadXlsxPlanSheetBuilder sheet, ActualWorksheet item)
-        //{
-
-        //    if (Convert.ToBoolean(item.MediaType.EnableWeeklyReach) || item.MediaType.ReachType.Value > 0)
-        //    {
-        //        var col = sheet.SheetColumns.FirstOrDefault(x => x.PropertyName == item.PlannedReach);
-        //        col.ExcelColumnAttribute.IsHidden = false;
-
-        //        col = sheet.SheetColumns.FirstOrDefault(x => x.PropertyName == item.PlannedFrequency);
-        //        col.ExcelColumnAttribute.IsHidden = false;
-
-        //        col = sheet.SheetColumns.FirstOrDefault(x => x.PropertyName == item.ActualReach);
-        //        col.ExcelColumnAttribute.IsHidden = false;
-
-        //        col = sheet.SheetColumns.FirstOrDefault(x => x.PropertyName == item.ActualFrequency);
-        //        col.ExcelColumnAttribute.IsHidden = false;
-        //    }
-        //    var shownet = Convert.ToBoolean(item.MediaType.ExternalActualsNet);
-        //    if (!shownet)
-        //    {
-        //        var col = sheet.SheetColumns.FirstOrDefault(x => x.PropertyName == item.PlannedGross);
-        //        col.ExcelColumnAttribute.IsHidden = false;
-
-        //        col = sheet.SheetColumns.FirstOrDefault(x => x.PropertyName == item.ActualGross);
-        //        col.ExcelColumnAttribute.IsHidden = false;
-        //    }
-        //    else
-        //    {
-        //        var col = sheet.SheetColumns.FirstOrDefault(x => x.PropertyName == item.PlannedNet);
-        //        col.ExcelColumnAttribute.IsHidden = false;
-
-        //        col = sheet.SheetColumns.FirstOrDefault(x => x.PropertyName == item.ActualNet);
-        //        col.ExcelColumnAttribute.IsHidden = false;
-
-
-        //    }
-
-
-        //}
-
         private void FormatWorkSheet(SqadXlsxPlanSheetBuilder builder, ActualWorksheet item, Dictionary<string, string> custom)
         {
             var excelinfo = new ExcelColumnInfo(item.Data, null, new ExcelColumnAttribute() { IsHidden = true }, null);
@@ -618,6 +448,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
         }
         private void PopulateSheetData(List<ActualFlight> list, SqadXlsxPlanSheetBuilder sheet, ActualWorksheet item)
         {
+            NumberFormatInfo format = CultureInfo.CurrentCulture.NumberFormat;
+            string currencyFormat = "#,##0.00";
+
+            currencyFormat = currencyFormat.Replace(",", format.CurrencyGroupSeparator).Replace(".", format.CurrencyDecimalSeparator);
+
             List<ExcelCell> row = new List<ExcelCell>();
             ExcelCell cell = new ExcelCell();
 
@@ -783,7 +618,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                 row.Add(cell);
 
                 cell = new ExcelCell();
-                cell.CellHeader = item.ActualGross;
+                cell.CellHeader = item.ActualGross;                
                 cell.CellValue = rec.Actual.GrossCost;
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualGross)) row.Add(cell);
 
@@ -858,22 +693,28 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
             }
 
         }
-        private Dictionary<string, string> PopulateNameCollection(ActualWorksheet item)
+        private Dictionary<string, Tuple<string,bool>> PopulateNameCollection(ActualWorksheet item)
         {
-            var names = new Dictionary<string, string>();
-            names.Add(item.Data, "FlightData");
-            names.Add(item.ActualGross, "ActualGross");
-            names.Add(item.ActualGRPs, item.ActualGRPs);
-            names.Add(item.ActualTRPs, item.ActualTRPs);
-            names.Add(item.ActualNet, "ActualNet");
-            names.Add(item.ActualProduction, item.ActualProduction);
-            names.Add(item.ActualImpressions, item.ActualImpressions);
-            names.Add(item.ActualClicks, item.ActualClicks);
-            names.Add(item.ActualLeads, item.ActualLeads);
-            names.Add(item.ActualAdServing, item.ActualAdServing);
-            names.Add(item.ActualRichMedia, item.ActualRichMedia);
-            names.Add(item.ActualReach, item.ActualReach);
-            names.Add(item.ActualFrequency, item.ActualFrequency);
+            var names = new Dictionary<string, Tuple<string, bool>>();
+            names.Add(item.Data, new Tuple<string, bool>("FlightData", false));
+            names.Add(item.ActualGross, new Tuple<string, bool>("ActualGross", true));
+            names.Add(item.ActualGRPs, new Tuple<string, bool>(item.ActualGRPs,false));
+            names.Add(item.ActualTRPs, new Tuple<string, bool>(item.ActualTRPs,false));
+            names.Add(item.ActualNet, new Tuple<string, bool>("ActualNet",true));
+            names.Add(item.ActualProduction, new Tuple<string, bool>(item.ActualProduction,true));
+            names.Add(item.ActualImpressions, new Tuple<string, bool>(item.ActualImpressions,false));
+            names.Add(item.ActualClicks, new Tuple<string, bool>(item.ActualClicks,false));
+            names.Add(item.ActualLeads, new Tuple<string, bool>(item.ActualLeads,false));
+            names.Add(item.ActualAdServing, new Tuple<string, bool>(item.ActualAdServing,true));
+            names.Add(item.ActualRichMedia, new Tuple<string, bool>(item.ActualRichMedia,true));
+            names.Add(item.ActualReach, new Tuple<string, bool>(item.ActualReach,false));
+            names.Add(item.ActualFrequency, new Tuple<string, bool>(item.ActualFrequency,false));
+            names.Add(item.PlannedGross, new Tuple<string, bool>(item.PlannedGross, true));
+            names.Add(item.PlannedNet, new Tuple<string, bool>(item.PlannedNet, true));
+            names.Add(item.PlannedProduction, new Tuple<string, bool>(item.PlannedProduction, true));
+            names.Add(item.PlannedRichMedia, new Tuple<string, bool>(item.PlannedRichMedia, true));
+            names.Add(item.PlannedAdServing, new Tuple<string, bool>(item.PlannedAdServing, true));
+
             return names;
         }
     }

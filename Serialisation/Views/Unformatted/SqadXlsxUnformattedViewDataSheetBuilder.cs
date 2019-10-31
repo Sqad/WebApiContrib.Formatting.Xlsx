@@ -22,14 +22,22 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
             WorksheetDataHelper.FillData(worksheet, table, true);
 
-            FormatDateTimeColumns(worksheet);
+            FormatColumns(worksheet);
         }
         
-        private void FormatDateTimeColumns(ExcelWorksheet worksheet)
+        private void FormatColumns(ExcelWorksheet worksheet)
         {
             for (var i = 0; i < CurrentTable.Columns.Count; i++)
             {
-                if (!(((ExcelCell)CurrentTable.Rows[0][i]).CellValue is DateTime))
+                var columnValue = ((ExcelCell) CurrentTable.Rows[0][i]).CellValue;
+                if (columnValue is double)
+                {
+                    //note: force EPPlus to DON'T ROUND NUMBERS
+                    worksheet.Cells[2, i + 1, worksheet.Dimension.Rows, i + 1].Style.Numberformat.Format = "0.00";
+                    continue;
+                }
+
+                if (!(columnValue is DateTime))
                 {
                     continue;
                 }

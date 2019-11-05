@@ -71,6 +71,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
             var dataTable = tables[DataTableName];
 
+            //note: dirty fix, remove dummy row for JSON deserialization
+            dataTable.Rows.RemoveAt(0);
+
             var dataSheetBuilder = new SqadXlsxUnformattedViewDataSheetBuilder();
             document.AppendSheet(dataSheetBuilder);
 

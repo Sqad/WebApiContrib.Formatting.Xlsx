@@ -861,7 +861,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
             if (preservationSheet == null)
             {
-                preservationSheet = new SqadXlsxPlanSheetBuilder(_PreservationSheetName_, false, true, true);
+                preservationSheet = new SqadXlsxPlanSheetBuilder(_PreservationSheetName_, isPreservationSheet: true);
                 document.AppendSheet(preservationSheet);
             }
             else

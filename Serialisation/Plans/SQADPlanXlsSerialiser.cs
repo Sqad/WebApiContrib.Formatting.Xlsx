@@ -22,7 +22,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         private IExportHelpersRepository _staticValuesResolver { get; set; }
         public bool IgnoreFormatting => false;
 
-        public SQADPlanXlsSerialiser(IExportHelpersRepository staticValuesResolver,IModelMetadataProvider modelMetadataProvider)
+        public SQADPlanXlsSerialiser(IExportHelpersRepository staticValuesResolver, IModelMetadataProvider modelMetadataProvider)
             : this(new DefaultSheetResolver(), new DefaultColumnResolver(modelMetadataProvider), staticValuesResolver)
         {
 
@@ -66,7 +66,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 {
                     sheetBuilder = new SqadXlsxPlanSheetBuilder(sheetName);
                     //Move this to attribute hidden property
-                    if (new List<string>() {"Formulas","LeftTableColumn","Cells" }.Contains(sheetName))
+                    if (new List<string>() { "Formulas", "LeftTableColumn", "Cells" }.Contains(sheetName))
                     {
                         sheetBuilder.IsHidden = true;
                     }
@@ -861,7 +861,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
             if (preservationSheet == null)
             {
-                preservationSheet = new SqadXlsxPlanSheetBuilder(_PreservationSheetName_, isReferenceSheet: true);
+                preservationSheet = new SqadXlsxPlanSheetBuilder(_PreservationSheetName_, false, true, true);
                 document.AppendSheet(preservationSheet);
             }
             else

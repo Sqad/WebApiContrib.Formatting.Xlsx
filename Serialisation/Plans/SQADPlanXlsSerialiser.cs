@@ -22,7 +22,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         private IExportHelpersRepository _staticValuesResolver { get; set; }
         public bool IgnoreFormatting => false;
 
-        public SQADPlanXlsSerialiser(IExportHelpersRepository staticValuesResolver,IModelMetadataProvider modelMetadataProvider)
+        public SQADPlanXlsSerialiser(IExportHelpersRepository staticValuesResolver, IModelMetadataProvider modelMetadataProvider)
             : this(new DefaultSheetResolver(), new DefaultColumnResolver(modelMetadataProvider), staticValuesResolver)
         {
 

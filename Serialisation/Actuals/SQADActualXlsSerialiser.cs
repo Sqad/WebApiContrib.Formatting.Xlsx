@@ -162,8 +162,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
             row.Add(cell);
             sheetBuilder.AppendRow(row);
 
-            PopulateNames(sheetBuilder, exp, sec, "Products", value.Flights.Select(x=>x.ProductName).Distinct().ToList());
-            if(value.PlanTypeNames.Any())
+            //PopulateNames(sheetBuilder, exp, sec, "Products", value.Flights.Select(x=>x.ProductName).Distinct().ToList());
+            PopulateNames(sheetBuilder, exp, sec, "Products", value.ProductNames);
+            if (value.PlanTypeNames.Any())
                 PopulateNames(sheetBuilder, exp, sec, "Plan Types", value.PlanTypeNames);
 
 

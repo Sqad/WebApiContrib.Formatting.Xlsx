@@ -390,7 +390,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
             excelinfo = new ExcelColumnInfo(item.PlannedTRPs, null, new ExcelColumnAttribute(), null);
             builder.AppendColumnHeaderRowItem(excelinfo);
 
-            var hidden = !(Convert.ToBoolean(item.MediaType.EnableWeeklyReach) || item.MediaType.ReachType.Value > 0);
+            var hidden = !(Convert.ToBoolean(item.MediaType.EnableWeeklyReach) || Convert.ToInt16(item.MediaType.ReachType) > 0);
             excelinfo = new ExcelColumnInfo(item.PlannedReach, null, new ExcelColumnAttribute() { IsHidden=hidden}, null);
             builder.AppendColumnHeaderRowItem(excelinfo);
 

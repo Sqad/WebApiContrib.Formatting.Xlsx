@@ -20,7 +20,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         private readonly List<string> _sheetCodeColumnStatements;
         private int _rowsCount;
 
-        
+
 
         public bool ShouldAddHeaderRow { private get; set; }
         public bool ActualRow { get; set; } = false;
@@ -29,7 +29,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
 
         public SqadXlsxPlanSheetBuilder(string sheetName, bool isReferenceSheet = false, bool isPreservationSheet = false, bool isHidden = false)
-            : base(sheetName, isReferenceSheet,isPreservationSheet,isHidden)
+            : base(sheetName, isReferenceSheet, isPreservationSheet, isHidden)
         {
             _sheetCodeColumnStatements = new List<string>();
         }
@@ -126,7 +126,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 _rowsCount++;
             }
 
-            if (ShouldAddHeaderRow)
+            if (ShouldAddHeaderRow && !IsHidden)
             {
                 worksheet.DefaultColWidth = 13;
                 var headerRow = worksheet.Row(1);
@@ -138,7 +138,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 logoAndTabTitleCells.Merge = true;
 
                 //Picture
-                 
+
                 var embeddedProvider = new EmbeddedFileProvider(Assembly.Load("SQAD.MTNext.Resources"));
 
                 var sqadLogo = Image.FromStream(embeddedProvider.GetFileInfo("Resources/SQADLogo.png").CreateReadStream());
@@ -188,58 +188,59 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                 var fullLogoCells = worksheet.Cells[1, 9, 1, 12];
                 fullLogoCells.Merge = true;
-                
-               
+
+
                 var logoX = Image.FromStream(embeddedProvider.GetFileInfo("Resources/logox.png").CreateReadStream());
                 var fullLogo =
                     worksheet.Drawings.AddPicture("SQADLogoFull", logoX);
                 fullLogo.SetPosition(0, 2, 9, 0);
             }
 
-
-            foreach (DataColumn col in table.Columns)
+            if (IsHidden == false)
             {
+                foreach (DataColumn col in table.Columns)
+                {
                 if (worksheet.Name.Equals("Reference") && !ActualRow)  break;
 
-                var colName = worksheet.Cells[_rowsCount, col.Ordinal + 1].RichText.Add(col.ColumnName);
-                colName.Bold = true;
-                colName.Size = 13;
+                    var colName = worksheet.Cells[_rowsCount, col.Ordinal + 1].RichText.Add(col.ColumnName);
+                    colName.Bold = true;
+                    colName.Size = 13;
 
-                worksheet.Cells[_rowsCount, col.Ordinal + 1].Style.Border.Right.Style =
-                    OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-                worksheet.Cells[_rowsCount, col.Ordinal + 1].Style.Border.Right.Color
-                         .SetColor(System.Drawing.Color.Black);
+                    worksheet.Cells[_rowsCount, col.Ordinal + 1].Style.Border.Right.Style =
+                        OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                    worksheet.Cells[_rowsCount, col.Ordinal + 1].Style.Border.Right.Color
+                             .SetColor(System.Drawing.Color.Black);
 
                 if (worksheet.Name.Equals("Properties")) continue;
-                if ((col.Ordinal + 1) % 2 == 0)
-                {
-                    int maxRows = _rowsCount + table.Rows.Count;
+                    if ((col.Ordinal + 1) % 2 == 0)
+                    {
+                        int maxRows = _rowsCount + table.Rows.Count;
 
-                    worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Fill.PatternType =
-                        OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                    worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Fill.BackgroundColor
-                             .SetColor(System.Drawing.Color.FromArgb(242, 242, 242));
+                        worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Fill.PatternType =
+                            OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                        worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Fill.BackgroundColor
+                                 .SetColor(System.Drawing.Color.FromArgb(242, 242, 242));
 
-                    worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Right.Style =
-                        OfficeOpenXml.Style.ExcelBorderStyle.Thin;
-                    worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Left.Style =
-                        OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                        worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Right.Style =
+                            OfficeOpenXml.Style.ExcelBorderStyle.Thin;
+                        worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Left.Style =
+                            OfficeOpenXml.Style.ExcelBorderStyle.Thin;
                     worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Bottom.Style = 
                         OfficeOpenXml.Style.ExcelBorderStyle.Thin;
 
-                    worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Right.Color
-                             .SetColor(System.Drawing.Color.Black);
-                    worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Left.Color
-                             .SetColor(System.Drawing.Color.Black);
+                        worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Right.Color
+                                 .SetColor(System.Drawing.Color.Black);
+                        worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Left.Color
+                                 .SetColor(System.Drawing.Color.Black);
                     worksheet.Cells[_rowsCount, col.Ordinal + 1, maxRows, col.Ordinal + 1].Style.Border.Bottom.Color
                             .SetColor(System.Drawing.Color.LightGray);
 
-                }
+                    }
 
-                if (col.ColumnMapping == MappingType.Hidden)
-                {
-                    worksheet.Column(col.Ordinal + 1).Hidden = true;
-                }
+                    if (col.ColumnMapping == MappingType.Hidden)
+                    {
+                        worksheet.Column(col.Ordinal + 1).Hidden = true;
+                    }
 
                 //add range names
                 if (ActualRow && ColNames.ContainsKey(col.ColumnName))
@@ -249,7 +250,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     worksheet.Names.Add(ColNames[col.ColumnName].Item1.Replace(" ",string.Empty), range);
                 }
 
+                }
             }
+
+            Dictionary<int, List<int>> rowColumnPair = new Dictionary<int, List<int>>();
 
             foreach (DataRow row in table.Rows)
             {
@@ -304,43 +308,48 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                         worksheet.Cells[_rowsCount, excelColumnIndex].Value = cell.CellValue;
 
-                        if (!string.IsNullOrEmpty(cell.DataValidationSheet))
+                        if (!IsHidden && !IsReferenceSheet)
                         {
-                            var dataValidation =
-                                worksheet.DataValidations.AddListValidation(worksheet
-                                                                            .Cells[_rowsCount, excelColumnIndex]
-                                                                            .Address);
-                            dataValidation.ShowErrorMessage = true;
+                            if (!string.IsNullOrEmpty(cell.DataValidationSheet))
+                            {
+                                var dataValidation =
+                                    worksheet.DataValidations.AddListValidation(worksheet
+                                                                                .Cells[_rowsCount, excelColumnIndex]
+                                                                                .Address);
+                                dataValidation.ShowErrorMessage = true;
 
-                            string validationAddress =
-                                $"'Reference'!{worksheet.Cells[cell.DataValidationBeginRow, cell.DataValidationNameCellIndex, (cell.DataValidationBeginRow + cell.DataValidationRowsCount) - 1, cell.DataValidationNameCellIndex]}";
-                            dataValidation.Formula.ExcelFormula = validationAddress;
+                                string validationAddress =
+                                    $"'Reference'!{worksheet.Cells[cell.DataValidationBeginRow, cell.DataValidationNameCellIndex, (cell.DataValidationBeginRow + cell.DataValidationRowsCount) - 1, cell.DataValidationNameCellIndex]}";
+                                dataValidation.Formula.ExcelFormula = validationAddress;
 
-                            string code = string.Empty;
-                            code += $"If Target.Column = {excelColumnIndex} Then \n";
-                            code +=
-                                $"   matchVal = Application.Match(Target.Value, Worksheets(\"Reference\").Range(\"{worksheet.Cells[cell.DataValidationBeginRow, cell.DataValidationNameCellIndex, (cell.DataValidationBeginRow + cell.DataValidationRowsCount) - 1, cell.DataValidationNameCellIndex].Address}\"), 0) \n";
-                            code +=
-                                $"   selectedNum = Application.Index(Worksheets(\"Reference\").Range(\"{worksheet.Cells[cell.DataValidationBeginRow, cell.DataValidationValueCellIndex, (cell.DataValidationBeginRow + cell.DataValidationRowsCount) - 1, cell.DataValidationValueCellIndex].Address}\"), matchVal, 1) \n";
-                            code += "   If Not IsError(selectedNum) Then \n";
-                            code += "       Target.Value = selectedNum \n";
-                            code += "   End If \n";
-                            code += "End If \n";
+                                string code = string.Empty;
+                                code += $"If Target.Column = {excelColumnIndex} Then \n";
+                                code +=
+                                    $"   matchVal = Application.Match(Target.Value, Worksheets(\"Reference\").Range(\"{worksheet.Cells[cell.DataValidationBeginRow, cell.DataValidationNameCellIndex, (cell.DataValidationBeginRow + cell.DataValidationRowsCount) - 1, cell.DataValidationNameCellIndex].Address}\"), 0) \n";
+                                code +=
+                                    $"   selectedNum = Application.Index(Worksheets(\"Reference\").Range(\"{worksheet.Cells[cell.DataValidationBeginRow, cell.DataValidationValueCellIndex, (cell.DataValidationBeginRow + cell.DataValidationRowsCount) - 1, cell.DataValidationValueCellIndex].Address}\"), matchVal, 1) \n";
+                                code += "   If Not IsError(selectedNum) Then \n";
+                                code += "       Target.Value = selectedNum \n";
+                                code += "   End If \n";
+                                code += "End If \n";
 
-                            _sheetCodeColumnStatements.Add(code);
-                        }
-                        else if (cell.CellValue != null && bool.TryParse(cell.CellValue.ToString(), out var result))
-                        {
-                            var dataValidation =
-                                worksheet.DataValidations.AddListValidation(worksheet
-                                                                            .Cells[_rowsCount, excelColumnIndex]
-                                                                            .Address);
-                            dataValidation.ShowErrorMessage = true;
-                            dataValidation.Formula.Values.Add("True");
-                            dataValidation.Formula.Values.Add("False");
+                                _sheetCodeColumnStatements.Add(code);
+                            }
+                            else if (cell.CellValue != null && bool.TryParse(cell.CellValue.ToString(), out var result))
+                            {
+                                string address = worksheet.Cells[_rowsCount, excelColumnIndex].Address;
+                                if (worksheet.DataValidations[address] == null)
+                                {
+                                    var dataValidation = worksheet.DataValidations.AddListValidation(address);
+                                    dataValidation.ShowErrorMessage = true;
+                                    dataValidation.Formula.Values.Add("True");
+                                    dataValidation.Formula.Values.Add("False");
+                                }
+                            }
                         }
                     }
                 }
+
             }
             _rowsCount += __ROWS_BETWEEN_REFERENCE_SHEETS__;
             if (ActualRow)

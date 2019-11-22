@@ -196,8 +196,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 fullLogo.SetPosition(0, 2, 9, 0);
             }
 
-            if (IsHidden == false)
-            {
+            //if (IsHidden == false)
+            //{
                 foreach (DataColumn col in table.Columns)
                 {
                 if (worksheet.Name.Equals("Reference") && !ActualRow)  break;
@@ -251,7 +251,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 }
 
                 }
-            }
+            //}
 
             Dictionary<int, List<int>> rowColumnPair = new Dictionary<int, List<int>>();
 

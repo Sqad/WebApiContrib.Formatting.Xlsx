@@ -147,7 +147,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
             cell = new ExcelCell();
             cell.CellHeader = sec;
-            cell.CellValue = $"{DateTime.Now.ToString("dddd, MMMM dd, yyyy HH:mm")}";
+            cell.CellValue = $"{value.Request.CreateDate.ToString("dddd, MMMM dd, yyyy HH:mm")}";
             row.Add(cell);
             sheetBuilder.AppendRow(row);
 

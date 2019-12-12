@@ -38,6 +38,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.DeliverySource
             headerRow.Style.Fill.BackgroundColor.SetColor(Color.FromArgb(122, 122, 122));
             headerRow.Style.Font.Color.SetColor(Color.White);
 
+            if (table.Rows.Count < 1)
+            {
+                return;
+            }
+
             var periodCells = worksheet.Cells[2,
                                               worksheet.Dimension.Columns - _periodsCount,
                                               worksheet.Dimension.Rows,

@@ -21,6 +21,7 @@ using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.DeliverySources;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted;
+using WebApiContrib.Formatting.Xlsx.Serialisation.Internal;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -86,20 +87,18 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         /// <param name="headerStyle">An action method that modifies the cell style of the first (header) row in the
         /// worksheet.</param>
         public XlsxMediaTypeFormatter(IHttpContextAccessor httpContextAccessor,
-            IModelMetadataProvider modelMetadataProvider,
-            bool autoFit = true,
-            bool autoFilter = false,
-            bool freezeHeader = false,
-            double? headerHeight = null,
-            Action<ExcelStyle> cellStyle = null,
-            Action<ExcelStyle> headerStyle = null,
-            IExportHelpersRepository staticValuesResolver = null,
-            SerializerType serializerType = SerializerType.Default
-        )
+                                      IModelMetadataProvider modelMetadataProvider,
+                                      bool autoFit = true,
+                                      bool autoFilter = false,
+                                      bool freezeHeader = false,
+                                      double? headerHeight = null,
+                                      Action<ExcelStyle> cellStyle = null,
+                                      Action<ExcelStyle> headerStyle = null,
+                                      IExportHelpersRepository staticValuesResolver = null,
+                                      SerializerType serializerType = SerializerType.Default)
         {
             SupportedMediaTypes.Clear();
-            SupportedMediaTypes.Add(
-                new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/vnd.ms-excel"));
 
             AutoFit = autoFit;
@@ -113,16 +112,17 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
             // Initialise serialisers.
             Serialisers = new List<IXlsxSerialiser>
-            {
-                new SQADPlanXlsSerialiser(staticValuesResolver, modelMetadataProvider),
-                new SqadFormattedViewXlsxSerializer(),
-                new SqadUnformattedViewXlsxSerializer(),
-                new SqadSummaryPlanXlsxSerializer(),
-                new SqadActualXlsSerialiser(),
-                new SqadCostSourceXlsxSerializer(),
-                new SqadDeliverySourceXlsxSerializer(),
-                new SQADApprovalReportXlsSerialiser()
-            };
+                          {
+                              new SQADPlanXlsSerialiser(staticValuesResolver, modelMetadataProvider),
+                              new SqadFormattedViewXlsxSerializer(),
+                              new SqadUnformattedViewXlsxSerializer(),
+                              new SqadSummaryPlanXlsxSerializer(),
+                              new SqadActualXlsSerialiser(),
+                              new SqadCostSourceXlsxSerializer(),
+                              new SqadDeliverySourceXlsxSerializer(),
+                              new SQADApprovalReportXlsSerialiser(),
+                              new SqadInternalDatabaseSetupRecordsXlsxSerializer()
+                          };
 
             _httpContextAccessor = httpContextAccessor;
             //DefaultSerializer = new SqadXlsxSerialiser(staticValuesResolver); //new DefaultXlsxSerialiser();

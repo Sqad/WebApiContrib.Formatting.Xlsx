@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using OfficeOpenXml;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
+using WebApiContrib.Formatting.Xlsx.Models;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -18,6 +19,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
         //New Stuff
         private List<SqadXlsxSheetBuilderBase> _sheets { get; set; }
+
+        private XlsxTemplateInfo _templateInfo;
 
         public SqadXlsxDocumentBuilder(Stream stream)
         {
@@ -42,21 +45,43 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
         public bool IsVBA => _sheets.Any(a => a.IsReferenceSheet);
 
+        public void SetTemplateInfo(XlsxTemplateInfo templateInfo)
+        {
+            _templateInfo = templateInfo;
+        }
+
         public async  Task WriteToStream()
         {
-            ExcelPackage package = await Task.Run(() =>
-            {
-                ExcelPackage excelPackage = new ExcelPackage();
+            var package = await Task.Run(() =>
+                                         {
+                                             Stream templateStream = null;
+                                             ExcelPackage excelPackage;
+                                             try
+                                             {
+                                                 if (_templateInfo == null)
+                                                 {
+                                                     excelPackage = new ExcelPackage();
+                                                 }
+                                                 else
+                                                 {
+                                                     templateStream = File.OpenRead(_templateInfo.Path);
+                                                     excelPackage = new ExcelPackage(templateStream);
+                                                 }
+                                             }
+                                             finally
+                                             {
+                                                 templateStream?.Dispose();
+                                             }
 
-                foreach (var sheet in _sheets.OrderBy(o => o.IsReferenceSheet))
-                {
-                    sheet.CompileSheet(excelPackage);
-                }
+                                             foreach (var sheet in _sheets.OrderBy(o => o.IsReferenceSheet))
+                                             {
+                                                 sheet.CompileSheet(excelPackage);
+                                             }
 
-                excelPackage.SaveAs(_stream);
+                                             excelPackage.SaveAs(_stream);
 
-                return excelPackage;
-            });
+                                             return excelPackage;
+                                         });
         }
 
         public bool IsExcelSupportedType(object expression)

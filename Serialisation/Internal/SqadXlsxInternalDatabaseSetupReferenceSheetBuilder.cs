@@ -93,8 +93,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
             var propertyExpressions = new List<Expression>();
             foreach (var propertyInfo in properties)
             {
-                if (!(propertyInfo.GetCustomAttributes(typeof(ExcelParseColumnAttribute), false)
-                                  .FirstOrDefault() is ExcelParseColumnAttribute columnAttribute))
+                if (!(propertyInfo.GetCustomAttributes(typeof(ExcelExportColumnAttribute), false)
+                                  .FirstOrDefault() is ExcelExportColumnAttribute columnAttribute))
                 {
                     continue;
                 }
@@ -103,7 +103,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
                 {
                     throw new ArgumentException($"Property '{propertyInfo.Name}' from type '{type.FullName}' " +
                                                 $"has no specified '{nameof(columnAttribute.ColumnName)}' for " +
-                                                $"'{nameof(ExcelParseColumnAttribute)}' attribute.");
+                                                $"'{nameof(ExcelExportColumnAttribute)}' attribute.");
                 }
 
                 if (!propertyInfo.GetMethod.IsPublic)
@@ -112,7 +112,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
                                                 $"'{type.FullName}' has no public getter.");
                 }
 
-                var valueParameter = Expression.Property(Expression.Convert(rowParameter, type), propertyInfo);
+                var valueParameter = Expression.Convert(Expression.Property(Expression.Convert(rowParameter, type),
+                                                                            propertyInfo),
+                                                        typeof(object));
                 var columnNameParameter = Expression.Constant(columnAttribute.ColumnName);
 
                 var writeInstruction = Expression.Call(WriteCellMethodInfo,
@@ -170,6 +172,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
             }
 
             sheet.Cells[rowIndex, columnIndex].Value = value;
+            
+            if (value is DateTime)
+            {
+                sheet.Cells[rowIndex, columnIndex].Style.Numberformat.Format = "mm-dd-yy";
+            }
         }
     }
 }

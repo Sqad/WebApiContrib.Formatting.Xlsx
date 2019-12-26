@@ -56,6 +56,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
                 var sheet = workbook.Worksheets[sheetAttribute.SheetName];
                 FillSheet(sheet, type, exportResult);
 
+                //note vv: force GC to free memory since each IEnumerable can be huge
                 GC.Collect();
             }
         }
@@ -63,7 +64,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
         private static void FillSheet(ExcelWorksheet sheet, Type rowType, ExportResultItem<ExcelRowBase> result)
         {
             var (fillRowActions, columns) = BuildFillRowAction(rowType);
-            var columnsLookup = BuildColumnsLookup(sheet, columns);
+            var columnsLookup = BuildColumnsLookup(sheet, columns.Keys);
 
             var currentRow = HeaderRowsCount + 1;
             foreach (var row in result.Rows)
@@ -75,11 +76,23 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
 
                 currentRow++;
             }
+
+            foreach (var (key, value) in columns)
+            {
+                if (value != typeof(DateTime))
+                {
+                    continue;
+                }
+
+                var columnIndex = columnsLookup[key];
+                var cells =sheet.Cells[HeaderRowsCount + 1, columnIndex, sheet.Dimension.Rows, columnIndex];
+                cells.Style.Numberformat.Format = "mm-dd-yy";
+            }
         }
 
         private static (
-            IEnumerable<Action<ExcelWorksheet, ExcelRowBase, int, IDictionary<string, int>>>,
-            HashSet<string>
+            ICollection<Action<ExcelWorksheet, ExcelRowBase, int, IDictionary<string, int>>>,
+            IDictionary<string, Type>
             ) BuildFillRowAction(Type type)
         {
             var sheetParameter = Expression.Parameter(typeof(ExcelWorksheet), "sheet");
@@ -89,12 +102,12 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
             var rowParameter = Expression.Parameter(typeof(ExcelRowBase), "row");
 
             var properties = type.GetProperties();
-            var columns = new HashSet<string>();
+            var columns = new Dictionary<string, Type>();
             var propertyExpressions = new List<Expression>();
             foreach (var propertyInfo in properties)
             {
-                if (!(propertyInfo.GetCustomAttributes(typeof(ExcelParseColumnAttribute), false)
-                                  .FirstOrDefault() is ExcelParseColumnAttribute columnAttribute))
+                if (!(propertyInfo.GetCustomAttributes(typeof(ExcelExportColumnAttribute), false)
+                                  .FirstOrDefault() is ExcelExportColumnAttribute columnAttribute))
                 {
                     continue;
                 }
@@ -103,7 +116,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
                 {
                     throw new ArgumentException($"Property '{propertyInfo.Name}' from type '{type.FullName}' " +
                                                 $"has no specified '{nameof(columnAttribute.ColumnName)}' for " +
-                                                $"'{nameof(ExcelParseColumnAttribute)}' attribute.");
+                                                $"'{nameof(ExcelExportColumnAttribute)}' attribute.");
                 }
 
                 if (!propertyInfo.GetMethod.IsPublic)
@@ -112,7 +125,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
                                                 $"'{type.FullName}' has no public getter.");
                 }
 
-                var valueParameter = Expression.Property(Expression.Convert(rowParameter, type), propertyInfo);
+                var valueParameter = Expression.Convert(Expression.Property(Expression.Convert(rowParameter, type),
+                                                                            propertyInfo),
+                                                        typeof(object));
                 var columnNameParameter = Expression.Constant(columnAttribute.ColumnName);
 
                 var writeInstruction = Expression.Call(WriteCellMethodInfo,
@@ -123,7 +138,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
                                                        valueParameter);
                 propertyExpressions.Add(writeInstruction);
 
-                columns.Add(columnAttribute.ColumnName);
+                columns.Add(columnAttribute.ColumnName, propertyInfo.PropertyType);
             }
 
             var lambdas =
@@ -133,9 +148,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
                                                                               sheetParameter,
                                                                               rowParameter,
                                                                               rowIndexParameter,
-                                                                              columnsLookupParameter));
+                                                                              columnsLookupParameter))
+                                   .Select(x=>x.Compile())
+                                   .ToList();
 
-            return (lambdas.Select(x => x.Compile()), columns);
+            return (lambdas, columns);
         }
 
         private static Dictionary<string, int> BuildColumnsLookup(ExcelWorksheet sheet, ICollection<string> columnNames)
@@ -146,8 +163,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
                 var cell = sheet.Cells[HeaderRowsCount - 1, columnIndex];
                 var cellValue = cell.Value as string;
 
-                if (!columnNames.Contains(cellValue)
-                    || string.IsNullOrWhiteSpace(cellValue))
+                if (string.IsNullOrWhiteSpace(cellValue)
+                    || !columnNames.Contains(cellValue))
                 {
                     continue;
                 }

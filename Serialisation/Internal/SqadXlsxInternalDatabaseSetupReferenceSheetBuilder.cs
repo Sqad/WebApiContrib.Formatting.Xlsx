@@ -5,8 +5,8 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using OfficeOpenXml;
-using SQAD.MTNext.Business.Models.Internal.DatabaseSetup.Parsing;
 using SQAD.MTNext.Business.Models.Internal.DatabaseSetup.Parsing.Attributes;
+using SQAD.MTNext.Business.Models.Internal.DatabaseSetup.Parsing.Base;
 using SQAD.MTNext.Business.Models.Internal.DatabaseSetup.Result;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 
@@ -26,14 +26,18 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
         }
 
         public SqadXlsxInternalDatabaseSetupReferenceSheetBuilder(IEnumerable<ExportResultItem<ExcelRowBase>> exportResults)
-            : base(string.Empty, true)
+            : base(string.Empty)
         {
             _exportResults = exportResults;
         }
 
-        protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
+        public override void CompileSheet(ExcelPackage package)
         {
-            var workbook = worksheet.Workbook;
+            var workbook = package.Workbook;
+
+            //todo delete
+            var reference = workbook.Worksheets["Reference"];
+            workbook.Worksheets.Delete(reference);
 
             foreach (var exportResult in _exportResults)
             {
@@ -59,6 +63,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
                 //note vv: force GC to free memory since each IEnumerable can be huge
                 GC.Collect();
             }
+        }
+
+        protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
+        {
+            throw new NotImplementedException();
         }
 
         private static void FillSheet(ExcelWorksheet sheet, Type rowType, ExportResultItem<ExcelRowBase> result)

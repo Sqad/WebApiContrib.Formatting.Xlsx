@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using SQAD.MTNext.Business.Models.Internal.DatabaseSetup.Parsing;
+using SQAD.MTNext.Business.Models.Internal.DatabaseSetup.Parsing.Base;
 using SQAD.MTNext.Business.Models.Internal.DatabaseSetup.Result;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
@@ -31,7 +31,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
                 throw new ArgumentException($"{nameof(value)} has invalid type!");
             }
 
-            document.SetTemplateInfo(new XlsxTemplateInfo("ExcelTemplates/Internal_Database_Setup.xlsx",
+            document.SetTemplateInfo(new XlsxTemplateInfo("ExcelTemplates/Internal_Database_Setup.xlsm",
                                                           null)); //todo: add password protection
 
             document.AppendSheet(new SqadXlsxInternalDatabaseSetupReferenceSheetBuilder(exportResults));

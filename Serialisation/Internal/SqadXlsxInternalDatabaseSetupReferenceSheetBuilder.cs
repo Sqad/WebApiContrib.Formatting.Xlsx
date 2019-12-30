@@ -35,10 +35,6 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
         {
             var workbook = package.Workbook;
 
-            //todo delete
-            var reference = workbook.Worksheets["Reference"];
-            workbook.Worksheets.Delete(reference);
-
             foreach (var exportResult in _exportResults)
             {
                 var type = exportResult.RowType;

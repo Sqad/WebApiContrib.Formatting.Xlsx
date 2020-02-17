@@ -22,6 +22,7 @@ using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Internal;
+using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -121,7 +122,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                               new SqadCostSourceXlsxSerializer(),
                               new SqadDeliverySourceXlsxSerializer(),
                               new SQADApprovalReportXlsSerialiser(),
-                              new SqadInternalDatabaseSetupRecordsXlsxSerializer()
+                              new SqadInternalDatabaseSetupRecordsXlsxSerializer(),
+                              new FormattedPlanSerializer()
                           };
 
             _httpContextAccessor = httpContextAccessor;

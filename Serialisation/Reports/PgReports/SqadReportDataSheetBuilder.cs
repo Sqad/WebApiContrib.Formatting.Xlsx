@@ -8,13 +8,12 @@ using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Reports.PgReports
 {
-    public class SqadPgReportsDataSheetBuilder : SqadXlsxSheetBuilderBase
+    public class SqadReportDataSheetBuilder : SqadXlsxSheetBuilderBase
     {
         private readonly DataTable _dataTable;
         private readonly ApprovalHistoryReportRequestModel _exportData;
 
-        public SqadPgReportsDataSheetBuilder(string sheetName,
-            DataTable dataTable,
+        public SqadReportDataSheetBuilder(string sheetName,
             ApprovalHistoryReportRequestModel exportData,
             bool isReferenceSheet = false,
             bool isPreservationSheet = false,
@@ -22,7 +21,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Reports.PgReports
             bool shouldAutoFit = true)
             : base(sheetName, isReferenceSheet, isPreservationSheet, isHidden, shouldAutoFit)
         {
-            _dataTable = dataTable;
+            _dataTable = exportData.ApprovalHistoryDataTable;
             _exportData = exportData;
         }
 

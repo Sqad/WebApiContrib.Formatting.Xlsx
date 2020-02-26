@@ -31,7 +31,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Reports.PgReports
             worksheet.Cells["A1"].Value = _exportData.ReportName;
             worksheet.Cells["A2"].Value = "P&G RESTRICTED";
             worksheet.Cells["A3"].Value = "From: " + _exportData.StartDate.ToShortDateString() + "-" +
-                                          _exportData.EndDate.AddDays(-1).ToShortDateString();
+                                          _exportData.EndDate.ToShortDateString();
             worksheet.Cells["A4"].Value = "Printed: " + DateTime.Now;
             worksheet.Cells["A5"].Value = dataTable.Rows.Count + " Records";
 

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Data;
-using System.Threading.Tasks;
-using SQAD.MTNext.Business.Auth;
 using SQAD.MTNext.Business.Models.Core.Reports;
+using SQAD.MTNext.Business.Models.Core.Reports.PgReports;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.Services.Repositories.Export;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
@@ -22,27 +20,18 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Reports.PgReports
 
         public bool CanSerialiseType(Type valueType, Type itemType)
         {
-            return valueType == typeof(ApprovalHistoryReportRequestModel) || 
-                valueType == typeof(GlobalReachReportRequestModel);
+            return valueType == typeof(PgReportSerializeDto);
         }
 
         public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, SqadXlsxPlanSheetBuilder sheetbuilderOverride)
         {
-            if (value is ApprovalHistoryReportRequestModel exportDataApprovalHistory)
-            {
-                var sheetBuilder = new SqadReportDataSheetBuilder("Data", exportDataApprovalHistory);
-                document.AppendSheet(sheetBuilder);
-            }
-            else if (value is GlobalReachReportRequestModel exportDataGlobalReach)
-            {
-                
-            }
-            else
+            if (!(value is PgReportSerializeDto exportData))
             {
                 throw new ArgumentException($"{nameof(value)} has invalid type!");
             }
-
             
+            var sheetBuilder = new SqadReportDataSheetBuilder("Data", exportData);
+            document.AppendSheet(sheetBuilder);
         }
     }
 }

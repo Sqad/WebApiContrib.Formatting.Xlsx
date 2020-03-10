@@ -48,16 +48,21 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
         protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
         {
             var flightsTablePainter = new FlightsTablePainter(worksheet);
-            _flightsTableWidth = flightsTablePainter.DrawFlightsTable(_chartData);
+            var indexes = flightsTablePainter.DrawFlightsTable(_chartData);
+            _flightsTableWidth = indexes.maxColumnIndex;
 
             FillCalendarHeader(worksheet);
-            FillGrid(worksheet);
+            var maxFlightIndex = FillGrid(worksheet);
+
+            var maxRowIndex = Math.Max(indexes.maxRowIndex, maxFlightIndex);
+            flightsTablePainter.FillRowNumbers(maxRowIndex, _flightsTableWidth);
         }
 
         private void FillCalendarHeader(ExcelWorksheet worksheet)
         {
             var calendarSpans = _periodHelper.Build();
 
+            //var sh = worksheet.Drawings.AddShape("", eShapeStyle.Rect);
             _columnsLookup = new Dictionary<DateTime, int>();
 
             const int monthRowIndex = 1;
@@ -119,8 +124,10 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             worksheet.View.FreezePanes(HEADER_HEIGHT + 1, 1);
         }
 
-        private void FillGrid(ExcelWorksheet worksheet)
+        private int FillGrid(ExcelWorksheet worksheet)
         {
+            var maxRowIndex = 0;
+
             var flightPainter = new FlightPainter(worksheet, _daily, HEADER_HEIGHT, _columnsLookup);
             foreach (var flight in _chartData.Objects.Flights)
             {
@@ -130,8 +137,14 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                     vehicle = _chartData.Vehicles.FirstOrDefault(x => x.ID == flight.VehicleID);
                 }
 
-                flightPainter.DrawFlight(flight, vehicle);
+                var flightRowIndex = flightPainter.DrawFlight(flight, vehicle);
+                if (maxRowIndex < flightRowIndex)
+                {
+                    maxRowIndex = flightRowIndex;
+                }
             }
+
+            return maxRowIndex;
         }
 
         private static void FormatMonthCells(ExcelRangeBase cells)

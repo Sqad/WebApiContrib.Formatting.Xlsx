@@ -14,6 +14,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
     internal class FlightsTablePainter
     {
         private const int HEADER_ROW_INDEX = 2;
+        private const int ROW_MULTIPLIER = 3;
         private const string DEFAULT_COLUMN_NAME = "No Formula";
 
         private readonly ExcelWorksheet _worksheet;
@@ -23,9 +24,10 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             _worksheet = worksheet;
         }
 
-        public int DrawFlightsTable(ChartData chartData)
+        public (int maxColumnIndex, int maxRowIndex) DrawFlightsTable(ChartData chartData)
         {
             var maxColumnIndex = 0;
+            var maxRowIndex = 0;
             foreach (var tableCell in chartData.Cells)
             {
                 var cellAddress = new CellAddress(tableCell.Key);
@@ -39,7 +41,18 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     maxColumnIndex = cellAddress.ColumnIndex;
                 }
 
-                var cell = _worksheet.Cells[cellAddress.RowIndex, cellAddress.ColumnIndex];
+                if (cellAddress.RowIndex > maxRowIndex)
+                {
+                    maxRowIndex = cellAddress.RowIndex;
+                }
+
+                var startRowIndex = cellAddress.RowIndex - 1;
+                var endRowIndex = cellAddress.RowIndex + 1;
+                var cell = _worksheet.Cells[startRowIndex, cellAddress.ColumnIndex, endRowIndex,
+                                            cellAddress.ColumnIndex];
+
+                cell.Merge = true;
+                cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                 cell.Value = tableCell.Value;
 
                 if (tableCell.Value is DateTime)
@@ -48,21 +61,58 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                 }
             }
 
-            var columnsLookup = chartData.LeftTableColumns.ToDictionary(x => int.Parse(x.Key) + 1);
+            var columnsLookup = chartData.LeftTableColumns.ToDictionary(x => int.Parse(x.Key) + 2);
+            columnsLookup.Add(1, new TextValue
+                                 {
+                                     Label = "#"
+                                 });
+
             for (var headerColumnIndex = 1; headerColumnIndex <= maxColumnIndex; headerColumnIndex++)
             {
                 var labelCell = _worksheet.Cells[HEADER_ROW_INDEX, headerColumnIndex];
                 labelCell.Value = columnsLookup.TryGetValue(headerColumnIndex, out var column)
                                       ? column.Label
                                       : DEFAULT_COLUMN_NAME;
-
-                //var addressCell = _worksheet.Cells[HEADER_ROW_INDEX + 1, headerColumnIndex];
-                //addressCell.Value = GetExcelColumnName(headerColumnIndex);
             }
 
             FormatFlightsTable(maxColumnIndex, columnsLookup.Keys.ToImmutableHashSet());
 
-            return maxColumnIndex;
+            return (maxColumnIndex, maxRowIndex);
+        }
+
+        public void FillRowNumbers(int maxRowIndex, int maxColumnIndex)
+        {
+            var estimatedNumberColumnWidth = 5.0;
+
+            for (var columnIndex = 1; columnIndex <= maxColumnIndex; columnIndex++)
+            {
+                var rowNumber = 1;
+                for (var rowIndex = 5; rowIndex <= maxRowIndex; rowIndex += ROW_MULTIPLIER)
+                {
+                    var cells = _worksheet.Cells[rowIndex - 1, columnIndex, rowIndex + 1, columnIndex];
+                    cells.Merge = true;
+
+                    if (columnIndex != 1)
+                    {
+                        continue;
+                    }
+
+                    cells.Value = rowNumber;
+                    cells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                    cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+
+                    var columnWidth = Math.Floor(Math.Log10(rowNumber) + 1);
+                    if (estimatedNumberColumnWidth < columnWidth)
+                    {
+                        estimatedNumberColumnWidth = columnWidth;
+                    }
+
+                    rowNumber++;
+                }
+            }
+
+            var column = _worksheet.Column(1);
+            column.Width = estimatedNumberColumnWidth;
         }
 
         private void FormatFlightsTable(int maxColumnIndex, ICollection<int> columnsWithLabel)
@@ -93,7 +143,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     labelCell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
                     labelCell.Style.Border.Right.Color.SetColor(Colors.DayHeaderBorderColor);
                 }
-                
+
                 if (!isLabelDefined)
                 {
                     labelCell.Style.Font.Color.SetColor(Colors.DayHeaderHolidayFontColor);
@@ -142,8 +192,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     return;
                 }
 
-                RowIndex = int.Parse(rawAddress[1]) + 2 + HEADER_ROW_INDEX;
-                ColumnIndex = int.Parse(rawAddress[2]) + 1;
+                RowIndex = (int.Parse(rawAddress[1]) + 1) * ROW_MULTIPLIER + HEADER_ROW_INDEX;
+                ColumnIndex = int.Parse(rawAddress[2]) + 2;
             }
 
             public bool IsFlightsTableAddress { get; }

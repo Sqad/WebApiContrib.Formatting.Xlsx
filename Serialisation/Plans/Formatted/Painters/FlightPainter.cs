@@ -4,6 +4,7 @@ using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using OfficeOpenXml.Drawing;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Formulas;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
 
@@ -12,18 +13,15 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
     internal class FlightPainter
     {
         private readonly ExcelWorksheet _worksheet;
-        private readonly bool _daily;
         private readonly int _rowsOffset;
         private readonly Dictionary<DateTime, int> _columnsLookup;
         private readonly FormulaParser _formulaParser;
 
         public FlightPainter(ExcelWorksheet worksheet,
-                             bool daily,
                              int rowsOffset,
                              Dictionary<DateTime, int> columnsLookup)
         {
             _worksheet = worksheet;
-            _daily = daily;
             _rowsOffset = rowsOffset;
             _columnsLookup = columnsLookup;
 
@@ -60,11 +58,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
         private static void FormatFlight(ExcelRange cells, CellsAppearance appearance)
         {
-            cells.Merge = true;
-
-            cells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            cells.Style.Fill.BackgroundColor.SetColor(appearance.BackgroundColor);
-            cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            ApplyAppearance(cells, appearance);
 
             cells.Style.Border.BorderAround(ExcelBorderStyle.Thin, appearance.CellBorderColor);
         }
@@ -76,6 +70,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                                       CellsAppearance appearance)
         {
             var cells = DrawCaption(flight.FlightCaption.Above, flight, rowNumber, startColumn, endColumn, appearance);
+
+            cells.Style.VerticalAlignment = ExcelVerticalAlignment.Bottom;
+            ApplyAppearance(cells, appearance);
 
             cells.Style.Border.Top.Style = ExcelBorderStyle.Thin;
             cells.Style.Border.Top.Color.SetColor(appearance.CellBorderColor);
@@ -90,6 +87,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             var cells = DrawCaption(flight.FlightCaption.Below, flight, rowNumber, startColumn, endColumn, appearance);
 
             cells.Style.VerticalAlignment = ExcelVerticalAlignment.Top;
+            ApplyAppearance(cells, appearance);
+
             cells.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
             cells.Style.Border.Bottom.Color.SetColor(appearance.CellBorderColor);
         }
@@ -102,9 +101,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                                        CellsAppearance appearance)
         {
             var cells = _worksheet.Cells[rowNumber, startColumn, rowNumber, endColumn];
-            cells.Merge = true;
             cells.Style.WrapText = true;
-            cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
             cells.Style.Border.Right.Style = ExcelBorderStyle.Thin;
             cells.Style.Border.Right.Color.SetColor(appearance.CellBorderColor);
@@ -130,6 +127,51 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             }
 
             return cells;
+        }
+
+        private static void ApplyAppearance(ExcelRange cells, CellsAppearance appearance)
+        {
+            cells.Merge = true;
+
+            switch (appearance.TextAlignment)
+            {
+                case eTextAlignment.Left:
+                    cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                    break;
+                case eTextAlignment.Right:
+                    cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                    break;
+                default:
+                    cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    break;
+            }
+
+            switch (appearance.TextVerticalAlignment)
+            {
+                case eTextAnchoringType.Top:
+                    cells.Style.VerticalAlignment = ExcelVerticalAlignment.Top;
+                    break;
+                case eTextAnchoringType.Bottom:
+                    cells.Style.VerticalAlignment = ExcelVerticalAlignment.Bottom;
+                    break;
+                default:
+                    cells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                    break;
+            }
+
+            cells.Style.Font.Color.SetColor(appearance.TextColor);
+            cells.Style.Font.Size = appearance.FontSize;
+            cells.Style.Font.Bold = appearance.Bold;
+            cells.Style.Font.Italic = appearance.Italic;
+
+            if (appearance.Underline)
+            {
+                cells.Style.Font.UnderLine = appearance.Underline;
+                cells.Style.Font.UnderLineType = ExcelUnderLineType.Single;
+            }
+
+            cells.Style.Fill.PatternType = ExcelFillStyle.Solid;
+            cells.Style.Fill.BackgroundColor.SetColor(appearance.BackgroundColor);
         }
     }
 }

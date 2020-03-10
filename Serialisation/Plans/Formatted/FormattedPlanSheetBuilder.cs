@@ -39,9 +39,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             _chartData = JsonConvert.DeserializeObject<ChartData>(exportPlanRequest.Chart.Version.JsonData,
                                                                   new JsonSerializerSettings
                                                                   {
-                                                                      StringEscapeHandling = StringEscapeHandling.EscapeHtml,
+                                                                      StringEscapeHandling =
+                                                                          StringEscapeHandling.EscapeHtml,
                                                                       NullValueHandling = NullValueHandling.Ignore,
-                                                                      MissingMemberHandling = MissingMemberHandling.Ignore
+                                                                      MissingMemberHandling =
+                                                                          MissingMemberHandling.Ignore
                                                                   });
         }
 
@@ -53,8 +55,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
 
             FillCalendarHeader(worksheet);
             var maxFlightIndex = FillGrid(worksheet);
+            var maxCaptionIndex = FillCaptions(worksheet);
 
-            var maxRowIndex = Math.Max(indexes.maxRowIndex, maxFlightIndex);
+            var maxRowIndex = Math.Max(Math.Max(indexes.maxRowIndex, maxFlightIndex), maxCaptionIndex);
             flightsTablePainter.FillRowNumbers(maxRowIndex, _flightsTableWidth);
         }
 
@@ -62,7 +65,6 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
         {
             var calendarSpans = _periodHelper.Build();
 
-            //var sh = worksheet.Drawings.AddShape("", eShapeStyle.Rect);
             _columnsLookup = new Dictionary<DateTime, int>();
 
             const int monthRowIndex = 1;
@@ -128,7 +130,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
         {
             var maxRowIndex = 0;
 
-            var flightPainter = new FlightPainter(worksheet, _daily, HEADER_HEIGHT, _columnsLookup);
+            var flightPainter = new FlightPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
             foreach (var flight in _chartData.Objects.Flights)
             {
                 VehicleModel vehicle = null;
@@ -141,6 +143,23 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                 if (maxRowIndex < flightRowIndex)
                 {
                     maxRowIndex = flightRowIndex;
+                }
+            }
+
+            return maxRowIndex;
+        }
+
+        private int FillCaptions(ExcelWorksheet worksheet)
+        {
+            var maxRowIndex = 0;
+            var captionsPainter = new CaptionsPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
+            foreach (var caption in _chartData.Objects.Texts)
+            {
+                var rowIndex = captionsPainter.DrawCaption(caption);
+
+                if (maxRowIndex < rowIndex)
+                {
+                    maxRowIndex = rowIndex;
                 }
             }
 
@@ -170,7 +189,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             {
                 cells.Style.Font.Color.SetColor(Colors.DayHeaderHolidayFontColor);
             }
-            
+
             cells.Style.Border.Left.Style = ExcelBorderStyle.Thin;
             cells.Style.Border.Left.Color.SetColor(Colors.DayHeaderBorderColor);
 
@@ -207,8 +226,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
 
             column.Style.Fill.PatternType = ExcelFillStyle.Solid;
 
-            column.Style.Fill.BackgroundColor.SetColor(holiday 
-                                                           ? Colors.HolidayColumnBackgroundColor 
+            column.Style.Fill.BackgroundColor.SetColor(holiday
+                                                           ? Colors.HolidayColumnBackgroundColor
                                                            : Color.White);
         }
     }

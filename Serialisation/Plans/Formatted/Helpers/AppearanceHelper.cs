@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using OfficeOpenXml.Drawing;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
@@ -7,7 +8,13 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
     {
         public static CellsAppearance GetAppearance(Flight flight, VehicleModel vehicle)
         {
-            var appearance = GetMergedAppearance(flight.Appearance, vehicle?.Appearance);
+            return GetAppearance(flight.Appearance, vehicle?.Appearance);
+        }
+
+        public static CellsAppearance GetAppearance(Appearance childAppearance, Appearance parentAppearance = null)
+        {
+            var appearance = GetMergedAppearance(childAppearance, parentAppearance);
+
             var cellsAppearance = new CellsAppearance();
 
             if (appearance.UseBackColor ?? false)
@@ -28,6 +35,59 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
                 cellsAppearance.CellBorderColor = cellsAppearance.BackgroundColor;
             }
 
+            cellsAppearance.TextColor = string.IsNullOrWhiteSpace(appearance.TextColor)
+                                            ? Color.Black
+                                            : ColorTranslator.FromHtml(appearance.TextColor);
+
+            const int baseFontSizeDiff = 16 - 11;
+            if (string.IsNullOrWhiteSpace(appearance.FontSize))
+            {
+                cellsAppearance.FontSize = 16 - baseFontSizeDiff;
+            }
+            else
+            {
+                var sourceValue = appearance.FontSize.Replace("em", "");
+                if (!double.TryParse(sourceValue, out var value))
+                {
+                    value = 1;
+                }
+
+                cellsAppearance.FontSize = (int) (value * (16 - baseFontSizeDiff));
+            }
+
+            cellsAppearance.Bold = appearance.Bold ?? false;
+            cellsAppearance.Italic = appearance.Italic ?? false;
+            cellsAppearance.Underline = appearance.Underline ?? false;
+
+            const string flexStartValue = "flex-start";
+            const string flexEndValue = "flex-end";
+
+            switch (appearance.TextAlign)
+            {
+                case flexStartValue:
+                    cellsAppearance.TextAlignment = eTextAlignment.Left;
+                    break;
+                case flexEndValue:
+                    cellsAppearance.TextAlignment = eTextAlignment.Right;
+                    break;
+                default:
+                    cellsAppearance.TextAlignment = eTextAlignment.Center;
+                    break;
+            }
+
+            switch (appearance.TextVerticalAlign)
+            {
+                case flexStartValue:
+                    cellsAppearance.TextVerticalAlignment = eTextAnchoringType.Top;
+                    break;
+                case flexEndValue:
+                    cellsAppearance.TextVerticalAlignment = eTextAnchoringType.Bottom;
+                    break;
+                default:
+                    cellsAppearance.TextVerticalAlignment = eTextAnchoringType.Center;
+                    break;
+            }
+
             return cellsAppearance;
         }
 
@@ -37,19 +97,31 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 
             if (baseAppearance != null)
             {
-                appearance.UseBackColor = baseAppearance.UseBackColor;
-                appearance.BackColor = baseAppearance.BackColor;
-
-                appearance.UseCellBorderColor = baseAppearance.UseCellBorderColor;
-                appearance.CellBorderColor = baseAppearance.CellBorderColor;
+                FillAppearance(appearance, baseAppearance);
             }
 
-            appearance.UseBackColor = childAppearance.UseBackColor ?? appearance.UseBackColor;
-            appearance.BackColor = childAppearance.BackColor ?? appearance.BackColor;
-            appearance.UseCellBorderColor = childAppearance.UseCellBorderColor ?? appearance.UseCellBorderColor;
-            appearance.CellBorderColor = childAppearance.CellBorderColor ?? appearance.CellBorderColor;
+            FillAppearance(appearance, childAppearance);
 
             return appearance;
+        }
+
+        private static void FillAppearance(Appearance target, Appearance source)
+        {
+            target.UseBackColor = source.UseBackColor ?? target.UseBackColor;
+            target.BackColor = source.BackColor ?? target.BackColor;
+
+            target.UseCellBorderColor = source.UseCellBorderColor ?? target.UseCellBorderColor;
+            target.CellBorderColor = source.CellBorderColor ?? target.CellBorderColor;
+
+            target.TextColor = source.TextColor ?? target.TextColor;
+            target.FontSize = source.FontSize ?? target.FontSize;
+            target.Bold = source.Bold ?? target.Bold;
+            target.Italic = source.Italic ?? target.Italic;
+            target.Underline = source.Underline ?? target.Underline;
+
+            target.TextAlign = source.TextAlign ?? target.TextAlign;
+            target.TextVerticalAlign = source.TextVerticalAlign ?? target.TextVerticalAlign;
+            target.TextDirection = source.TextDirection ?? target.TextDirection;
         }
     }
 
@@ -57,5 +129,15 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
     {
         public Color BackgroundColor { get; set; }
         public Color CellBorderColor { get; set; }
+
+        public Color TextColor { get; set; }
+        public int FontSize { get; set; }
+
+        public bool Bold { get; set; }
+        public bool Italic { get; set; }
+        public bool Underline { get; set; }
+
+        public eTextAlignment TextAlignment { get; set; }
+        public eTextAnchoringType TextVerticalAlignment { get; set; }
     }
 }

@@ -149,10 +149,6 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     labelCell.Style.Font.Color.SetColor(Colors.DayHeaderHolidayFontColor);
                 }
 
-                //var addressCell = _worksheet.Cells[HEADER_ROW_INDEX + 1, columnIndex];
-                //addressCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                //addressCell.Style.Font.Color.SetColor(Colors.DayHeaderHolidayFontColor);
-
                 if (columnIndex == maxColumnIndex)
                 {
                     column.Style.Border.Right.Style = ExcelBorderStyle.Medium;

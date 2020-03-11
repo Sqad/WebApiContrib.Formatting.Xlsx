@@ -56,8 +56,12 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             FillCalendarHeader(worksheet);
             var maxFlightIndex = FillGrid(worksheet);
             var maxCaptionIndex = FillCaptions(worksheet);
+            var maxShapesIndex = FillShapes(worksheet);
 
-            var maxRowIndex = Math.Max(Math.Max(indexes.maxRowIndex, maxFlightIndex), maxCaptionIndex);
+            var maxRowIndex = Math.Max(Math.Max(Math.Max(indexes.maxRowIndex,
+                                                         maxFlightIndex),
+                                                maxCaptionIndex),
+                                       maxShapesIndex);
             flightsTablePainter.FillRowNumbers(maxRowIndex, _flightsTableWidth);
         }
 
@@ -152,10 +156,27 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
         private int FillCaptions(ExcelWorksheet worksheet)
         {
             var maxRowIndex = 0;
-            var captionsPainter = new CaptionsPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
+            var captionPainter = new CaptionPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
             foreach (var caption in _chartData.Objects.Texts)
             {
-                var rowIndex = captionsPainter.DrawCaption(caption);
+                var rowIndex = captionPainter.DrawCaption(caption);
+
+                if (maxRowIndex < rowIndex)
+                {
+                    maxRowIndex = rowIndex;
+                }
+            }
+
+            return maxRowIndex;
+        }
+
+        private int FillShapes(ExcelWorksheet worksheet)
+        {
+            var maxRowIndex = 0;
+            var shapePainter = new ShapePainter(worksheet, HEADER_HEIGHT, _columnsLookup);
+            foreach (var shape in _chartData.Objects.Shapes)
+            {
+                var rowIndex = shapePainter.DrawShape(shape);
 
                 if (maxRowIndex < rowIndex)
                 {
@@ -229,6 +250,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             column.Style.Fill.BackgroundColor.SetColor(holiday
                                                            ? Colors.HolidayColumnBackgroundColor
                                                            : Color.White);
+            column.Width = 8.58;
         }
     }
 }

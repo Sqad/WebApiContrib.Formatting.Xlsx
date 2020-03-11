@@ -88,6 +88,29 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
                     break;
             }
 
+            if (appearance.UseFill ?? false)
+            {
+                cellsAppearance.UseFillColor = true;
+                cellsAppearance.FillColor = ColorTranslator.FromHtml(appearance.Fill);
+            }
+            else
+            {
+                cellsAppearance.UseFillColor = false;
+                cellsAppearance.FillColor = Colors.DefaultFlightBackgroundColor;
+            }
+
+            if (appearance.UseStroke ?? false)
+            {
+                cellsAppearance.StrokeColor = ColorTranslator.FromHtml(appearance.Stroke);
+            }
+            else
+            {
+                cellsAppearance.StrokeColor = Colors.DefaultFlightBackgroundColor;
+            }
+
+            cellsAppearance.StrokeWidth = appearance.StrokeWidth ?? 3;
+            cellsAppearance.RotationAngle = appearance.RotationAngle ?? 0;
+
             return cellsAppearance;
         }
 
@@ -122,6 +145,15 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             target.TextAlign = source.TextAlign ?? target.TextAlign;
             target.TextVerticalAlign = source.TextVerticalAlign ?? target.TextVerticalAlign;
             target.TextDirection = source.TextDirection ?? target.TextDirection;
+
+            target.UseFill = source.UseFill ?? target.UseFill;
+            target.Fill = source.Fill ?? target.Fill;
+
+            target.UseStroke = source.UseStroke ?? target.UseStroke;
+            target.Stroke = source.Stroke ?? target.Stroke;
+            target.StrokeWidth = source.StrokeWidth ?? target.StrokeWidth;
+
+            target.RotationAngle = source.RotationAngle ?? target.RotationAngle;
         }
     }
 
@@ -139,5 +171,13 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 
         public eTextAlignment TextAlignment { get; set; }
         public eTextAnchoringType TextVerticalAlignment { get; set; }
+
+        public bool UseFillColor { get; set; }
+        public Color FillColor { get; set; }
+
+        public Color StrokeColor { get; set; }
+        public int StrokeWidth { get; set; }
+
+        public int RotationAngle { get; set; }
     }
 }

@@ -8,7 +8,7 @@ using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 {
-    internal class CaptionsPainter
+    internal class CaptionPainter
     {
         private const int ROW_MULTIPLIER = 3;
 
@@ -16,7 +16,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
         private readonly int _rowsOffset;
         private readonly Dictionary<DateTime, int> _columnsLookup;
 
-        public CaptionsPainter(ExcelWorksheet worksheet, int rowsOffset, Dictionary<DateTime, int> columnsLookup)
+        public CaptionPainter(ExcelWorksheet worksheet, int rowsOffset, Dictionary<DateTime, int> columnsLookup)
         {
             _worksheet = worksheet;
             _rowsOffset = rowsOffset;

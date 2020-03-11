@@ -82,6 +82,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
                 currentRow++;
             }
 
+            if (currentRow == HeaderRowsCount + 1)
+            {
+                return;
+            }
+
             foreach (var (key, value) in columns)
             {
                 if (value != typeof(DateTime))
@@ -90,7 +95,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
                 }
 
                 var columnIndex = columnsLookup[key];
-                var cells =sheet.Cells[HeaderRowsCount + 1, columnIndex, sheet.Dimension.Rows, columnIndex];
+                var cells = sheet.Cells[HeaderRowsCount + 1, columnIndex, sheet.Dimension.Rows, columnIndex];
                 cells.Style.Numberformat.Format = "mm-dd-yy";
             }
         }

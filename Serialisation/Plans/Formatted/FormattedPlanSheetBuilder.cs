@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Newtonsoft.Json;
 using OfficeOpenXml;
+using OfficeOpenXml.Style;
+using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using SQAD.MTNext.Business.Models.FlowChart.Plan;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
+using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using Newtonsoft.Json;
-using OfficeOpenXml.Style;
-using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters;
 
@@ -56,12 +56,17 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             FillCalendarHeader(worksheet);
             var maxFlightIndex = FillGrid(worksheet);
             var maxCaptionIndex = FillCaptions(worksheet);
-            var maxShapesIndex = FillShapes(worksheet);
+            var maxShapeIndex = FillShapes(worksheet);
+            
+            var picturesPainter = new PicturesPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
+            var maxPictureIndex = picturesPainter.DrawPictures(_chartData.Objects.Pictures);
 
-            var maxRowIndex = Math.Max(Math.Max(Math.Max(indexes.maxRowIndex,
-                                                         maxFlightIndex),
-                                                maxCaptionIndex),
-                                       maxShapesIndex);
+            var maxRowIndex = GetMax(indexes.maxRowIndex,
+                                     maxFlightIndex,
+                                     maxCaptionIndex,
+                                     maxShapeIndex,
+                                     maxPictureIndex);
+
             flightsTablePainter.FillRowNumbers(maxRowIndex, _flightsTableWidth);
         }
 
@@ -251,6 +256,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                                                            ? Colors.HolidayColumnBackgroundColor
                                                            : Color.White);
             column.Width = 8.58;
+        }
+
+        private static int GetMax(params int[] indexes)
+        {
+            return indexes.Max();
         }
     }
 }

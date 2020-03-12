@@ -111,6 +111,19 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             cellsAppearance.StrokeWidth = appearance.StrokeWidth ?? 3;
             cellsAppearance.RotationAngle = appearance.RotationAngle ?? 0;
 
+            if (appearance.UseOutlineColor ?? false)
+            {
+                cellsAppearance.UseOutlineColor = true;
+                cellsAppearance.OutlineColor = ColorTranslator.FromHtml(appearance.OutlineColor);
+            }
+            else
+            {
+                cellsAppearance.UseOutlineColor = false;
+                cellsAppearance.OutlineColor = Colors.DefaultFlightBackgroundColor;
+            }
+
+            cellsAppearance.Transparency = appearance.Transparency ?? 1;
+
             return cellsAppearance;
         }
 
@@ -154,6 +167,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             target.StrokeWidth = source.StrokeWidth ?? target.StrokeWidth;
 
             target.RotationAngle = source.RotationAngle ?? target.RotationAngle;
+
+            target.UseOutlineColor = source.UseOutlineColor ?? target.UseOutlineColor;
+            target.OutlineColor = source.OutlineColor ?? target.OutlineColor;
+
+            target.Transparency = source.Transparency ?? target.Transparency;
         }
     }
 
@@ -179,5 +197,10 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
         public int StrokeWidth { get; set; }
 
         public int RotationAngle { get; set; }
+
+        public bool UseOutlineColor { get; set; }
+        public Color OutlineColor { get; set; }
+
+        public double Transparency { get; set; }
     }
 }

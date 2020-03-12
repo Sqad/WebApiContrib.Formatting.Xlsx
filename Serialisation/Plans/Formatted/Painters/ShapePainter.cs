@@ -69,7 +69,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
             var appearance = AppearanceHelper.GetAppearance(shapeObject.Appearance);
             FormatShape(shape, appearance);
-            ProcessRotation(_worksheet.Drawings.DrawingXml, appearance);
+            SetRotation(_worksheet.Drawings.DrawingXml, appearance);
 
             return endRowIndex;
         }
@@ -90,7 +90,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             shape.Border.Fill.Color = appearance.StrokeColor;
         }
 
-        private static void ProcessRotation(XmlDocument xml, CellsAppearance appearance)
+        private static void SetRotation(XmlDocument xml, CellsAppearance appearance)
         {
             if (appearance.RotationAngle == 0)
             {

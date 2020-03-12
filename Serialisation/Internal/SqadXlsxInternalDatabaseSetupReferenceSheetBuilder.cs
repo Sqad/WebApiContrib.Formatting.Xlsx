@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -72,15 +73,29 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
             var columnsLookup = BuildColumnsLookup(sheet, columns.Keys);
 
             var currentRow = HeaderRowsCount + 1;
-            foreach (var row in result.Rows)
+            try
             {
-                foreach (var fillRowAction in fillRowActions)
+                foreach (var row in result.Rows)
                 {
-                    fillRowAction(sheet, row, currentRow, columnsLookup);
-                }
+                    foreach (var fillRowAction in fillRowActions)
+                    {
+                        fillRowAction(sheet, row, currentRow, columnsLookup);
+                    }
 
-                currentRow++;
+                    currentRow++;
+                }
             }
+            catch (Exception e)
+            {
+                sheet.TabColor = Color.Red;
+                var errorCell = sheet.Cells[1, sheet.Dimension.Columns + 1];
+
+                errorCell.Value = e.Message;
+                errorCell.Style.WrapText = false;
+
+                return;
+            }
+            
 
             if (currentRow == HeaderRowsCount + 1)
             {

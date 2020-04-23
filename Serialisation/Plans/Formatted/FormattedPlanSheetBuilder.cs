@@ -2,6 +2,7 @@
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
+using SQAD.MTNext.Business.Models.FlowChart.Enums;
 using SQAD.MTNext.Business.Models.FlowChart.Plan;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using System;
@@ -20,7 +21,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
 
         private readonly ExportPlanRequest _exportPlanRequest;
         private readonly PeriodHelper _periodHelper;
-        private readonly bool _daily;
+        private readonly FormattedPlanViewMode _viewMode;
         private readonly ChartData _chartData;
 
         private Dictionary<DateTime, int> _columnsLookup;
@@ -34,7 +35,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                                              exportPlanRequest.ClientCalendarType,
                                              exportPlanRequest.CalendarStructure);
 
-            _daily = exportPlanRequest.Daily;
+            _viewMode = exportPlanRequest.ViewMode;
 
             _chartData = JsonConvert.DeserializeObject<ChartData>(exportPlanRequest.Chart.Version.JsonData,
                                                                   new JsonSerializerSettings
@@ -59,7 +60,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             var maxShapeIndex = FillShapes(worksheet);
             
             var picturesPainter = new PicturesPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
-            var maxPictureIndex = picturesPainter.DrawPictures(_chartData.Objects.Pictures);
+            int maxPictureIndex = 0;
+            if (_chartData.Objects.Pictures != null)
+            {
+                maxPictureIndex = picturesPainter.DrawPictures(_chartData.Objects.Pictures);
+            }
 
             var maxRowIndex = GetMax(indexes.maxRowIndex,
                                      maxFlightIndex,
@@ -91,7 +96,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                 {
                     worksheet.Cells[weekRowIndex, weekColumnStartIndex].Value = week.Name;
 
-                    var days = _daily ? week.Spans : week.Spans.Take(1);
+                    var days = _viewMode == FormattedPlanViewMode.Daily ? week.Spans : week.Spans.Take(1);
                     foreach (var day in days)
                     {
                         _columnsLookup.Add(day.StartDate, dayColumnIndex);
@@ -99,7 +104,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                         var dayCell = worksheet.Cells[dayRowIndex, dayColumnIndex];
                         dayCell.Value = day.Day;
 
-                        var isHoliday = _daily
+                        var isHoliday = (_viewMode == FormattedPlanViewMode.Daily)
                                         && (day.StartDate.DayOfWeek == DayOfWeek.Saturday
                                             || day.StartDate.DayOfWeek == DayOfWeek.Sunday);
                         FormatColumn(worksheet.Column(dayColumnIndex), isHoliday);
@@ -108,7 +113,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                         dayColumnIndex++;
                     }
 
-                    if (!_daily)
+                    if (_viewMode != FormattedPlanViewMode.Daily)
                     {
                         foreach (var day in week.Spans.Skip(1))
                         {
@@ -140,18 +145,21 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             var maxRowIndex = 0;
 
             var flightPainter = new FlightPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
-            foreach (var flight in _chartData.Objects.Flights)
+            if (_chartData.Objects.Flights != null)
             {
-                VehicleModel vehicle = null;
-                if (flight.VehicleID.HasValue)
+                foreach (var flight in _chartData.Objects.Flights)
                 {
-                    vehicle = _chartData.Vehicles.FirstOrDefault(x => x.ID == flight.VehicleID);
-                }
+                    VehicleModel vehicle = null;
+                    if (flight.VehicleID.HasValue)
+                    {
+                        vehicle = _chartData.Vehicles.FirstOrDefault(x => x.ID == flight.VehicleID);
+                    }
 
-                var flightRowIndex = flightPainter.DrawFlight(flight, vehicle);
-                if (maxRowIndex < flightRowIndex)
-                {
-                    maxRowIndex = flightRowIndex;
+                    var flightRowIndex = flightPainter.DrawFlight(flight, vehicle);
+                    if (maxRowIndex < flightRowIndex)
+                    {
+                        maxRowIndex = flightRowIndex;
+                    }
                 }
             }
 
@@ -162,13 +170,16 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
         {
             var maxRowIndex = 0;
             var captionPainter = new CaptionPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
-            foreach (var caption in _chartData.Objects.Texts)
+            if (_chartData.Objects.Texts != null)
             {
-                var rowIndex = captionPainter.DrawCaption(caption);
-
-                if (maxRowIndex < rowIndex)
+                foreach (var caption in _chartData.Objects.Texts)
                 {
-                    maxRowIndex = rowIndex;
+                    var rowIndex = captionPainter.DrawCaption(caption);
+
+                    if (maxRowIndex < rowIndex)
+                    {
+                        maxRowIndex = rowIndex;
+                    }
                 }
             }
 
@@ -179,13 +190,16 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
         {
             var maxRowIndex = 0;
             var shapePainter = new ShapePainter(worksheet, HEADER_HEIGHT, _columnsLookup);
-            foreach (var shape in _chartData.Objects.Shapes)
+            if (_chartData.Objects.Shapes != null)
             {
-                var rowIndex = shapePainter.DrawShape(shape);
-
-                if (maxRowIndex < rowIndex)
+                foreach (var shape in _chartData.Objects.Shapes)
                 {
-                    maxRowIndex = rowIndex;
+                    var rowIndex = shapePainter.DrawShape(shape);
+
+                    if (maxRowIndex < rowIndex)
+                    {
+                        maxRowIndex = rowIndex;
+                    }
                 }
             }
 

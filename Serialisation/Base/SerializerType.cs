@@ -3,6 +3,7 @@
     public enum SerializerType
     {
         Default,
-        SummaryPlan
+        SummaryPlan,
+        FormattedPlan
     }
 }

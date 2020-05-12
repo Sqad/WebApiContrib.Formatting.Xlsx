@@ -28,16 +28,22 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             _formulaParser = new FormulaParser();
         }
 
-        public int DrawFlight(Flight flight,
+        public int DrawFlight(FlightHelper flightHelper,
                               VehicleModel vehicle)
         {
+            Flight flight = flightHelper.Flight;
             var rowIndex = ((flight.RowIndex ?? 1) * 3 - 1) + _rowsOffset;
 
             var startDate = flight.StartDate.Date;
             var endDate = flight.EndDate.AddDays(-1).Date;
 
-            var startColumn = _columnsLookup[startDate];
-            var endColumn = _columnsLookup[endDate];
+            var startColumn = _columnsLookup[startDate] + flightHelper.StartCorrection;
+            var endColumn = _columnsLookup[endDate] + flightHelper.EndCorrection;
+
+            if (startColumn > endColumn)
+            {
+                return rowIndex;
+            }
 
             var appearance = AppearanceHelper.GetAppearance(flight, vehicle);
 

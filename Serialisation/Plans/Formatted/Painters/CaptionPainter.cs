@@ -25,7 +25,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
         public int DrawCaption(Text caption)
         {
-            var startColumnIndex = _columnsLookup[caption.StartDate.AddDays(-1).Date];
+            var startColumnIndex = _columnsLookup[caption.StartDate.Date] - 1;
             var endColumnIndex = _columnsLookup[caption.EndDate.AddDays(-1).Date];
 
             var startRowIndex = caption.RowStart * ROW_MULTIPLIER + _rowsOffset - 3;

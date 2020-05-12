@@ -48,7 +48,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                 return 0;
             }
 
-            var startColumnIndex = _columnsLookup[shapeObject.StartDate.AddDays(-1).Date];
+            var startColumnIndex = _columnsLookup[shapeObject.StartDate.Date] - 1;
             var endColumnIndex = _columnsLookup[shapeObject.EndDate.AddDays(-1).Date];
 
             var startRowIndex = shapeObject.RowStart * RowMultiplier + _rowsOffset - 3;

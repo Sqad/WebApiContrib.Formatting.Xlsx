@@ -40,7 +40,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             foreach (var picture in pictures)
             {
                 var startColumnIndex = _columnsLookup[picture.StartDate.Date] - 1;
-                var endColumnIndex = _columnsLookup[picture.EndDate.Date] - 1;
+                var endColumnIndex = _columnsLookup[picture.EndDate.AddDays(-1).Date];
 
                 var startRowIndex = picture.RowStart * RowMultiplier + _rowsOffset - 3;
                 var endRowIndex = picture.RowEnd * RowMultiplier + _rowsOffset;

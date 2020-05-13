@@ -1,6 +1,8 @@
 ﻿using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
+using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
+using SQAD.MTNext.Business.Models.FlowChart.Enums;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -27,7 +29,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             _columnsLookup = columnsLookup;
         }
 
-        public int DrawPictures(List<Picture> pictures)
+        public int DrawPictures(List<Picture> pictures, FormattedPlanViewMode viewMode)
         {
             if (!pictures.Any())
             {
@@ -54,8 +56,59 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
                 shape.From.Row = startRowIndex;
                 shape.From.Column = startColumnIndex;
-                shape.To.Row = endRowIndex;
-                shape.To.Column = endColumnIndex;
+
+                double newWidth = 0;
+                double newHeight = 0;
+                double coeff = 6.5;
+                for (int i = startColumnIndex; i <= endColumnIndex; i++)
+                {
+                    newWidth += _worksheet.Column(i).Width;
+                }
+                for (int i = startRowIndex; i <= endRowIndex; i++)
+                {
+                    newHeight += _worksheet.Row(i).Height;
+                }
+
+                newWidth *= coeff;
+                
+                if ((newWidth > image.Width) || (newHeight > image.Height))
+                {
+                    if (newWidth > image.Width)
+                    {
+                        double widthOffset = (newWidth - image.Width) / 2.0;
+                        double currWidth = 0;
+                        int i;
+                        for (i = startColumnIndex; i <= endColumnIndex; i++)
+                        {
+                            if (widthOffset <= _worksheet.Column(i).Width*coeff + currWidth)
+                            {
+                                break;
+                            }
+                            currWidth += _worksheet.Column(i).Width*coeff;
+                        }
+                        shape.From.Column = i;
+
+                    }
+
+                    if (newHeight > image.Height)
+                    {
+                        double heightOffset = (newHeight - image.Height) / 2.0;
+                        double currHeight = 0;
+                        int i;
+                        for (i = startRowIndex; i <= endRowIndex; i++)
+                        {
+                            if (heightOffset <= _worksheet.Row(i).Height + currHeight)
+                            {
+                                break;
+                            }
+                            currHeight += _worksheet.Row(i).Height;
+                        }
+                        shape.From.Row = i;
+                    }
+                }
+
+                shape.SetSize(image.Width, image.Height);
+                
 
                 var appearance = AppearanceHelper.GetAppearance(picture.Appearance);
                 FormatPicture(shape, appearance);

@@ -60,11 +60,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             var maxShapeIndex = FillShapes(worksheet);
             int maxPictureIndex = 0;
             // temporary commented out while find how to paint picture properly correspoinding to aspect ratio
-            //var picturesPainter = new PicturesPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
-            //if (_chartData.Objects.Pictures != null)
-            //{
-            //    maxPictureIndex = picturesPainter.DrawPictures(_chartData.Objects.Pictures);
-            //}
+            var picturesPainter = new PicturesPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
+            if (_chartData.Objects.Pictures != null)
+            {
+                maxPictureIndex = picturesPainter.DrawPictures(_chartData.Objects.Pictures, _viewMode);
+            }
 
             var maxRowIndex = GetMax(indexes.maxRowIndex,
                                      maxFlightIndex,

@@ -6,7 +6,9 @@ using OfficeOpenXml;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using System.Linq;
 using System.Text;
+using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Style;
+using SQAD.MTNext.Business.Models.Core.Currency;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
@@ -16,18 +18,53 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
         private const int HEADER_ROW_INDEX = 2;
         private const int ROW_MULTIPLIER = 3;
         private const string DEFAULT_COLUMN_NAME = "No Formula";
+        private readonly Dictionary<int, CurrencyModel> _currencies;
 
         private readonly ExcelWorksheet _worksheet;
 
-        public FlightsTablePainter(ExcelWorksheet worksheet)
+        public FlightsTablePainter(ExcelWorksheet worksheet, Dictionary<int, CurrencyModel> currencies)
         {
             _worksheet = worksheet;
+            _currencies = currencies;
         }
 
         public (int maxColumnIndex, int maxRowIndex) DrawFlightsTable(ChartData chartData)
         {
             var maxColumnIndex = 0;
             var maxRowIndex = 0;
+
+            var columnsLookup = chartData.LeftTableColumns.ToDictionary(x => int.Parse(x.Key) + 2);
+            columnsLookup.Add(1, new TextValue
+                                 {
+                                     Label = "#",
+                                     Appearances = new Appearance
+                                                   {
+                                                       TextAlign = ""
+                                                   }
+                                 });
+
+            var separateCells = new Dictionary<string, CellAddress>();
+            foreach (var cell in chartData.Objects.Cell ?? new List<ObjectCell>())
+            {
+                if (cell?.Coordinates == null)
+                {
+                    continue;
+                }
+
+                var address = new CellAddress(cell.Coordinates);
+                if (!address.IsFlightsTableAddress)
+                {
+                    continue;
+                }
+
+                address.Cell = cell;
+                var key = $"{address.RowIndex}-{address.ColumnIndex}";
+                if (!separateCells.ContainsKey(key))
+                {
+                    separateCells.Add(key, address);
+                }
+            }
+
             foreach (var tableCell in chartData.Cells)
             {
                 var cellAddress = new CellAddress(tableCell.Key);
@@ -51,21 +88,16 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                 var cell = _worksheet.Cells[startRowIndex, cellAddress.ColumnIndex, endRowIndex,
                                             cellAddress.ColumnIndex];
 
+                var column = columnsLookup.GetValueOrDefault(cellAddress.ColumnIndex);
+                var objectCell = separateCells.GetValueOrDefault($"{cellAddress.RowIndex}-{cellAddress.ColumnIndex}")?.Cell;
+
+                var cellAppearance = GetAppearance(column, objectCell);
+
                 cell.Merge = true;
                 cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                cell.Value = tableCell.Value;
 
-                if (tableCell.Value is DateTime)
-                {
-                    cell.Style.Numberformat.Format = "mm-dd-yy";
-                }
+                cellAppearance.FillValue(tableCell.Value, cell, _currencies, false);
             }
-
-            var columnsLookup = chartData.LeftTableColumns.ToDictionary(x => int.Parse(x.Key) + 2);
-            columnsLookup.Add(1, new TextValue
-                                 {
-                                     Label = "#"
-                                 });
 
             for (var headerColumnIndex = 1; headerColumnIndex <= maxColumnIndex; headerColumnIndex++)
             {
@@ -75,7 +107,18 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                                       : DEFAULT_COLUMN_NAME;
             }
 
-            FormatFlightsTable(maxColumnIndex, columnsLookup.Keys.ToImmutableHashSet());
+            FormatFlightsTable(maxColumnIndex, columnsLookup);
+
+            foreach (var cellAddress in separateCells.Values)
+            {
+                var column = columnsLookup.GetValueOrDefault(cellAddress.ColumnIndex);
+                var cellAppearance = GetAppearance(column, cellAddress.Cell);
+                var range = _worksheet.Cells[cellAddress.RowIndex-1,
+                                             cellAddress.ColumnIndex, 
+                                             cellAddress.RowIndex + 1,
+                                             cellAddress.ColumnIndex];
+                FormatRange(range, cellAppearance);
+            }
 
             return (maxColumnIndex, maxRowIndex);
         }
@@ -115,7 +158,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             column.Width = estimatedNumberColumnWidth;
         }
 
-        private void FormatFlightsTable(int maxColumnIndex, ICollection<int> columnsWithLabel)
+        private void FormatFlightsTable(int maxColumnIndex, Dictionary<int, TextValue> tableColumns)
         {
             var emptyCells = _worksheet.Cells[1, 1, 1, maxColumnIndex];
             emptyCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -128,7 +171,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                 column.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 
                 var labelCell = _worksheet.Cells[HEADER_ROW_INDEX, columnIndex];
-                var isLabelDefined = columnsWithLabel.Contains(columnIndex);
+                var leftTableColumn = tableColumns.GetValueOrDefault(columnIndex);
 
                 labelCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
@@ -144,9 +187,19 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     labelCell.Style.Border.Right.Color.SetColor(Colors.DayHeaderBorderColor);
                 }
 
-                if (!isLabelDefined)
+                if (leftTableColumn == null)
                 {
                     labelCell.Style.Font.Color.SetColor(Colors.DayHeaderHolidayFontColor);
+                }
+                else
+                {
+                    var appearance = GetAppearance(leftTableColumn);
+                    var columnValues = _worksheet.Cells[HEADER_ROW_INDEX + 2,
+                                                        columnIndex,
+                                                        _worksheet.Dimension.Rows,
+                                                        columnIndex];
+
+                    FormatRange(columnValues, appearance);
                 }
 
                 if (columnIndex == maxColumnIndex)
@@ -157,19 +210,78 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             }
         }
 
-        private static string GetExcelColumnName(int columnIndex)
+        private void FormatRange(ExcelRange range, CellsAppearance appearance)
         {
-            var dividend = columnIndex;
-            var columnNameBuilder = new StringBuilder();
-
-            while (dividend > 0)
+            range.Style.Font.Size = appearance.FontSize;
+            range.Style.Font.Bold = appearance.Bold;
+            range.Style.Font.Italic = appearance.Italic;
+            range.Style.Font.Color.SetColor(appearance.TextColor);
+            if (appearance.Underline)
             {
-                var modulo = (dividend - 1) % 26;
-                columnNameBuilder.Insert(0, Convert.ToChar(65 + modulo));
-                dividend = (dividend - modulo) / 26;
+                range.Style.Font.UnderLine = true;
+                range.Style.Font.UnderLineType = ExcelUnderLineType.Single;
+            }
+            else
+            {
+                range.Style.Font.UnderLine = false;
             }
 
-            return columnNameBuilder.ToString();
+            if (appearance.UseBackColor)
+            {
+                range.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                range.Style.Fill.BackgroundColor.SetColor(appearance.BackgroundColor);
+            }
+            else
+            {
+                range.Style.Fill.PatternType = ExcelFillStyle.None;
+            }
+
+            switch (appearance.TextAlignment)
+            {
+                case eTextAlignment.Left:
+                    range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                    break;
+                case eTextAlignment.Right:
+                    range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                    break;
+                default:
+                    range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    break;
+            }
+
+            switch (appearance.TextVerticalAlignment)
+            {
+                case eTextAnchoringType.Top:
+                    range.Style.VerticalAlignment = ExcelVerticalAlignment.Top;
+                    break;
+                case eTextAnchoringType.Bottom:
+                    range.Style.VerticalAlignment = ExcelVerticalAlignment.Bottom;
+                    break;
+                default:
+                    range.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                    break;
+            }
+        }
+
+        private CellsAppearance GetAppearance(TextValue column, ObjectCell cell = null)
+        {
+            Appearance appearance = null;
+            if (column != null)
+            {
+                appearance = column.Appearances ?? new Appearance();
+                appearance.TextAlign = appearance.TextAlign ?? "flex-start";
+
+                if (column.Options?.GetValueOrDefault("currency") is long currency)
+                {
+                    appearance.UseCurrencySymbol = true;
+                    appearance.CurrencySymbol = (int)currency;
+                    appearance.FloatingPointAccuracy = 2;
+                }
+            }
+
+            var cellAppearance = AppearanceHelper.GetAppearance(cell?.Appearance, appearance);
+
+            return cellAppearance;
         }
 
         private class CellAddress
@@ -192,10 +304,23 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                 ColumnIndex = int.Parse(rawAddress[2]) + 2;
             }
 
+            public CellAddress(Coordinates coords)
+            {
+                IsFlightsTableAddress = coords.Type == FLIGHTS_ADDRESS_MARKER;
+                if (!IsFlightsTableAddress)
+                {
+                    return;
+                }
+
+                RowIndex = (coords.StartY + 1) * ROW_MULTIPLIER + HEADER_ROW_INDEX;
+                ColumnIndex = coords.X + 2;
+            }
+
             public bool IsFlightsTableAddress { get; }
 
             public int RowIndex { get; }
             public int ColumnIndex { get; }
+            public ObjectCell Cell { get; set; }
         }
     }
 }

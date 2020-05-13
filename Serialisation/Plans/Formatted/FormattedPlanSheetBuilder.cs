@@ -50,27 +50,29 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
 
         protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
         {
-            var flightsTablePainter = new FlightsTablePainter(worksheet);
+            var flightsTablePainter = new FlightsTablePainter(worksheet, _exportPlanRequest.Currencies);
             var indexes = flightsTablePainter.DrawFlightsTable(_chartData);
             _flightsTableWidth = indexes.maxColumnIndex;
 
             FillCalendarHeader(worksheet);
+            var maxFormulaRowIndex = FillFormulas(worksheet);
             var maxFlightIndex = FillGrid(worksheet);
             var maxCaptionIndex = FillCaptions(worksheet);
             var maxShapeIndex = FillShapes(worksheet);
             int maxPictureIndex = 0;
             // temporary commented out while find how to paint picture properly correspoinding to aspect ratio
-            //var picturesPainter = new PicturesPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
-            //if (_chartData.Objects.Pictures != null)
-            //{
-            //    maxPictureIndex = picturesPainter.DrawPictures(_chartData.Objects.Pictures);
-            //}
+            var picturesPainter = new PicturesPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
+            if (_chartData.Objects.Pictures != null)
+            {
+                maxPictureIndex = picturesPainter.DrawPictures(_chartData.Objects.Pictures, _viewMode);
+            }
 
             var maxRowIndex = GetMax(indexes.maxRowIndex,
                                      maxFlightIndex,
                                      maxCaptionIndex,
                                      maxShapeIndex,
-                                     maxPictureIndex);
+                                     maxPictureIndex,
+                                     maxFormulaRowIndex);
 
             flightsTablePainter.FillRowNumbers(maxRowIndex, _flightsTableWidth);
         }
@@ -138,6 +140,16 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             }
 
             worksheet.View.FreezePanes(HEADER_HEIGHT + 1, 1);
+        }
+
+        private int FillFormulas(ExcelWorksheet worksheet)
+        {
+            var formulasPainter = new FormulasPainter(worksheet,
+                                                      _flightsTableWidth,
+                                                      _viewMode,
+                                                      _exportPlanRequest.Currencies,
+                                                      _columnsLookup);
+            return formulasPainter.DrawFormulas(_chartData);
         }
 
         private int FillGrid(ExcelWorksheet worksheet)

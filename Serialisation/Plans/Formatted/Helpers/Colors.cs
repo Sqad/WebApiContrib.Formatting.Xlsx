@@ -12,5 +12,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
         public static readonly Color HolidayColumnBackgroundColor = ColorTranslator.FromHtml("#f7f7f7");
 
         public static readonly Color DefaultFlightBackgroundColor = ColorTranslator.FromHtml("#00acdb");
+        public static readonly Color DefaultFormulaBackgroundColor = ColorTranslator.FromHtml("#ededed");
+        public static readonly Color DefaultFormulaBorderColor = ColorTranslator.FromHtml("#cccccc");
     }
 }

@@ -1,6 +1,12 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Collections.Generic;
 using OfficeOpenXml.Drawing;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
+using System.Drawing;
+using System.Globalization;
+using System.Linq;
+using OfficeOpenXml;
+using SQAD.MTNext.Business.Models.Core.Currency;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 {
@@ -13,25 +19,34 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 
         public static CellsAppearance GetAppearance(Appearance childAppearance, Appearance parentAppearance = null)
         {
+            if (childAppearance == null)
+            {
+                childAppearance = new Appearance();
+            }
+
             var appearance = GetMergedAppearance(childAppearance, parentAppearance);
 
             var cellsAppearance = new CellsAppearance();
 
             if (appearance.UseBackColor ?? false)
             {
+                cellsAppearance.UseBackColor = true;
                 cellsAppearance.BackgroundColor = ColorTranslator.FromHtml(appearance.BackColor);
             }
             else
             {
+                cellsAppearance.UseBackColor = false;
                 cellsAppearance.BackgroundColor = Colors.DefaultFlightBackgroundColor;
             }
 
             if (appearance.UseCellBorderColor ?? false)
             {
+                cellsAppearance.UseCellBorderColor = true;
                 cellsAppearance.CellBorderColor = ColorTranslator.FromHtml(appearance.CellBorderColor);
             }
             else
             {
+                cellsAppearance.UseCellBorderColor = false;
                 cellsAppearance.CellBorderColor = cellsAppearance.BackgroundColor;
             }
 
@@ -124,6 +139,26 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 
             cellsAppearance.Transparency = appearance.Transparency ?? 1;
 
+            if (appearance.UseCurrencySymbol ?? false)
+            {
+                cellsAppearance.UseCurrencySymbol = true;
+                cellsAppearance.CurrencySymbol = appearance.CurrencySymbol ?? 0;
+                cellsAppearance.CurrencySymbolAlign = appearance.CurrencySymbolAlign;
+            }
+            else
+            {
+                cellsAppearance.UseCurrencySymbol = false;
+            }
+
+            cellsAppearance.UsePercent = appearance.UsePercent ?? false;
+            cellsAppearance.DigitGroupingChar = appearance.DigitGroupingChar ?? ",";
+            if (cellsAppearance.DigitGroupingChar == ".")
+            {
+                cellsAppearance.DigitGroupingChar = ",";
+            }
+
+            cellsAppearance.FloatingPointAccuracy = appearance.FloatingPointAccuracy ?? 0;
+
             return cellsAppearance;
         }
 
@@ -172,12 +207,46 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             target.OutlineColor = source.OutlineColor ?? target.OutlineColor;
 
             target.Transparency = source.Transparency ?? target.Transparency;
+
+            target.UseCurrencySymbol = source.UseCurrencySymbol ?? target.UseCurrencySymbol;
+            target.CurrencySymbol = source.CurrencySymbol ?? target.CurrencySymbol;
+            target.CurrencySymbolAlign = source.CurrencySymbolAlign ?? target.CurrencySymbolAlign;
+
+            target.UsePercent = source.UsePercent ?? target.UsePercent;
+            target.DigitGroupingChar = source.DigitGroupingChar ?? target.DigitGroupingChar;
+            target.FloatingPointAccuracy = source.FloatingPointAccuracy ?? target.FloatingPointAccuracy;
         }
     }
 
     public class CellsAppearance
     {
+        private static readonly Dictionary<string, string> CurrencyCodes;
+
+        static CellsAppearance()
+        {
+            CurrencyCodes = CultureInfo.GetCultures(CultureTypes.AllCultures)
+                                       .Where(x => !x.IsNeutralCulture)
+                                       .Select(x =>
+                                               {
+                                                   try
+                                                   {
+                                                       return new RegionInfo(x.Name);
+                                                   }
+                                                   catch
+                                                   {
+                                                       return null;
+                                                   }
+                                               })
+                                       .Where(x => x != null)
+                                       .GroupBy(x => x.ISOCurrencySymbol)
+                                       .ToDictionary(x => x.Key,
+                                                     x => x.First().CurrencySymbol,
+                                                     StringComparer.InvariantCultureIgnoreCase);
+        }
+
+        public bool UseBackColor { get; set; }
         public Color BackgroundColor { get; set; }
+        public bool UseCellBorderColor { get; set; }
         public Color CellBorderColor { get; set; }
 
         public Color TextColor { get; set; }
@@ -202,5 +271,82 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
         public Color OutlineColor { get; set; }
 
         public double Transparency { get; set; }
+
+        public bool UseCurrencySymbol { get; set; }
+        public int CurrencySymbol { get; set; }
+        public string CurrencySymbolAlign { get; set; }
+        public bool UsePercent { get; set; }
+        public string DigitGroupingChar { get; set; }
+        public int FloatingPointAccuracy { get; set; }
+
+        public void FillValue(object value,
+                              ExcelRange range,
+                              Dictionary<int, CurrencyModel> currencies,
+                              bool keepEmptyValues = true)
+        {
+            range.Value = value;
+
+            var numericValue = value as double? ?? value as long?;
+            if (numericValue.HasValue)
+            {
+                range.Style.Numberformat.Format = GetFormatString(currencies, numericValue.Value, keepEmptyValues);
+            }
+
+            if (value is DateTime)
+            {
+                range.Style.Numberformat.Format = "mm-dd-yy";
+            }
+        }
+
+        private string GetFormatString(IReadOnlyDictionary<int, CurrencyModel> currencies,
+                                       double value,
+                                       bool keepEmptyValues)
+        {
+            var isValueEmpty = (long) value == 0;
+
+            if (UsePercent)
+            {
+                return isValueEmpty && keepEmptyValues ? "0%" : $"#{DigitGroupingChar}###{GetFloating()}%";
+            }
+
+            if (UseCurrencySymbol && currencies != null)
+            {
+                if (isValueEmpty && !keepEmptyValues)
+                {
+                    return "#";
+                }
+
+                var currency = currencies.GetValueOrDefault(CurrencySymbol);
+                if (currency != null)
+                {
+                    var symbol = currency.CurrencySymbol;
+                    if (string.IsNullOrWhiteSpace(symbol) && !CurrencyCodes.TryGetValue(currency.Code, out symbol))
+                    {
+                        symbol = "";
+                    }
+
+                    var format = isValueEmpty 
+                                     ? "0" 
+                                     : $"#{DigitGroupingChar}###{GetFloating()}";
+
+                    return CurrencySymbolAlign == "right"
+                               ? $"{format}{symbol}"
+                               : $"{symbol}{format}";
+                }
+            }
+
+            return isValueEmpty && keepEmptyValues ? "0" : $"#{DigitGroupingChar}###{GetFloating()}";
+        }
+
+        private string GetFloating()
+        {
+            if (FloatingPointAccuracy <= 0)
+            {
+                return "";
+            }
+
+            var numbers = string.Join("", Enumerable.Repeat("0", FloatingPointAccuracy));
+            return $"0.{numbers}";
+        }
     }
 }

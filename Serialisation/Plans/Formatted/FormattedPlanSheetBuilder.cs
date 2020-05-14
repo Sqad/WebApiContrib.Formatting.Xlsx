@@ -61,8 +61,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             _flightsTableWidth = flightsTablePainter.DrawFlightsTable(_chartData);
 
             FillCalendarHeader(worksheet);
-            FillFormulas(worksheet);
             FillGrid(worksheet);
+            FillFormulas(worksheet);
             FillCaptions(worksheet);
             FillShapes(worksheet);
 
@@ -403,7 +403,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             column.Style.Fill.BackgroundColor.SetColor(holiday
                                                            ? Colors.HolidayColumnBackgroundColor
                                                            : Color.White);
-            column.Width = 8.58;
+            column.Width = 5.71;
         }
     }
 }

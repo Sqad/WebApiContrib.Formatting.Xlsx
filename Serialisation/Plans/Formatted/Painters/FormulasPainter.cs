@@ -90,7 +90,43 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     startColumnIndex = _columnsLookup[formula.StartDate.Date];
                     var endColumnIndex = _columnsLookup[formula.EndDate.AddDays(-1).Date];
 
-                    var range = _worksheet.Cells[rowDefinition.PrimaryExcelRowIndex, startColumnIndex, rowDefinition.PrimaryExcelRowIndex, endColumnIndex];
+                    var ranges = new List<ExcelRange>();
+
+                    var previousStartColumn = startColumnIndex;
+                    for (var columnIndex = startColumnIndex; columnIndex <= endColumnIndex; columnIndex++)
+                    {
+                        var excelCell = _worksheet.Cells[rowDefinition.PrimaryExcelRowIndex, columnIndex];
+                        if (!excelCell.Merge)
+                        {
+                            if (endColumnIndex == columnIndex)
+                            {
+                                ranges.Add(_worksheet.Cells[rowDefinition.PrimaryExcelRowIndex,
+                                                            previousStartColumn,
+                                                            rowDefinition.PrimaryExcelRowIndex,
+                                                            columnIndex]);
+                            }
+
+                            continue;
+                        }
+
+                        if (previousStartColumn == columnIndex)
+                        {
+                            previousStartColumn++;
+                            continue;
+                        }
+
+                        ranges.Add(_worksheet.Cells[rowDefinition.PrimaryExcelRowIndex,
+                                                    previousStartColumn,
+                                                    rowDefinition.PrimaryExcelRowIndex,
+                                                    columnIndex - 1]);
+
+                        previousStartColumn = columnIndex + 1;
+                    }
+
+                    if (!ranges.Any())
+                    {
+                        continue;
+                    }
 
                     Appearance subtotalRowAppearance = null;
                     if (formula.SubtotalId.HasValue)
@@ -100,18 +136,19 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     }
 
                     var appearance = AppearanceHelper.GetAppearance(formula.Appearance, subtotalRowAppearance);
+                    appearance.FillValue(cell.Value.Value, ranges.First(), _currencies);
 
-                    var centralCell = (endColumnIndex - startColumnIndex) / 2 + startColumnIndex;
-
-                    appearance.FillValue(cell.Value.Value, _worksheet.Cells[rowDefinition.PrimaryExcelRowIndex, centralCell], _currencies);
-
-                    ApplyAppearance(range, appearance);
+                    foreach (var range in ranges)
+                    {
+                        ApplyAppearance(range, appearance);
+                    }
                 }
             }
         }
 
         private static void ApplyAppearance(ExcelRange range, CellsAppearance appearance)
         {
+            range.Merge = true;
             range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
             foreach (var cell in range)

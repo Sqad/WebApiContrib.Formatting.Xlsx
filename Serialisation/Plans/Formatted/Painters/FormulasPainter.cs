@@ -62,8 +62,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             }
 
 
-            var formulasLookup = chartData.Objects
-                                    .Formulas
+            var formulasLookup = (chartData.Objects
+                                    .Formulas ?? new List<Formula>())
                                     .Where(x => x.FormulaType == formulaType)
                                     .GroupBy(x => x.RowIndex * ROW_MULTIPLIER + HEADER_ROW_INDEX)
                                     .ToDictionary(x => x.Key,
@@ -180,7 +180,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
         {
             var subtotalCells = new Dictionary<int, List<SubtotalCellAddress>>();
 
-            foreach (var cell in chartData.Cells)
+            foreach (var cell in chartData.Cells ?? new List<TextValue>())
             {
                 var cellAddress = new SubtotalCellAddress(cell.Key, _columnsOffset, _viewMode);
                 if (!cellAddress.IsSubtotalCellAddress)

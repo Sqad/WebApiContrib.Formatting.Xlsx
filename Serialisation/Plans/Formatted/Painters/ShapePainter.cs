@@ -6,19 +6,19 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Xml;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
+using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Models;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 {
     internal class ShapePainter
     {
-        private const int RowMultiplier = 3;
         private const string LineType = "SHAPE_LINE";
 
         private static readonly Dictionary<string, eShapeStyle> ShapesMap;
 
         private readonly ExcelWorksheet _worksheet;
-        private readonly int _rowsOffset;
         private readonly Dictionary<DateTime, int> _columnsLookup;
+        private readonly Dictionary<int, RowDefinition> _planRows;
 
         static ShapePainter()
         {
@@ -34,25 +34,30 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                         };
         }
 
-        public ShapePainter(ExcelWorksheet worksheet, int rowsOffset, Dictionary<DateTime, int> columnsLookup)
+        public ShapePainter(ExcelWorksheet worksheet,
+                            Dictionary<DateTime, int> columnsLookup,
+                            Dictionary<int, RowDefinition> planRows)
         {
             _worksheet = worksheet;
-            _rowsOffset = rowsOffset;
             _columnsLookup = columnsLookup;
+            _planRows = planRows;
         }
 
-        public int DrawShape(Shape shapeObject)
+        public void DrawShape(Shape shapeObject)
         {
             if (!ShapesMap.TryGetValue(shapeObject.ShapeType, out var shapeType))
             {
-                return 0;
+                return;
             }
 
             var startColumnIndex = _columnsLookup[shapeObject.StartDate.Date] - 1;
             var endColumnIndex = _columnsLookup[shapeObject.EndDate.AddDays(-1).Date];
 
-            var startRowIndex = shapeObject.RowStart * RowMultiplier + _rowsOffset - 3;
-            var endRowIndex = shapeObject.RowEnd * RowMultiplier + _rowsOffset;
+            var startRow = _planRows[shapeObject.RowStart];
+            var endRow = _planRows[shapeObject.RowEnd];
+
+            var startRowIndex = startRow.StartExcelRowIndex - 1;
+            var endRowIndex = endRow.EndExcelRowIndex;
 
             if (shapeType == ShapesMap[LineType])
             {
@@ -70,8 +75,6 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             var appearance = AppearanceHelper.GetAppearance(shapeObject.Appearance);
             FormatShape(shape, appearance);
             SetRotation(_worksheet.Drawings.DrawingXml, appearance);
-
-            return endRowIndex;
         }
 
         private static void FormatShape(ExcelShape shape, CellsAppearance appearance)

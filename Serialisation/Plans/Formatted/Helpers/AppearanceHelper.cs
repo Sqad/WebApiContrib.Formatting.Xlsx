@@ -158,6 +158,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             }
 
             cellsAppearance.FloatingPointAccuracy = appearance.FloatingPointAccuracy ?? 0;
+            cellsAppearance.UseImageFillSizing = appearance.UseImageFillSizing ?? false;
 
             return cellsAppearance;
         }
@@ -215,6 +216,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             target.UsePercent = source.UsePercent ?? target.UsePercent;
             target.DigitGroupingChar = source.DigitGroupingChar ?? target.DigitGroupingChar;
             target.FloatingPointAccuracy = source.FloatingPointAccuracy ?? target.FloatingPointAccuracy;
+            target.UseImageFillSizing = source.UseImageFillSizing ?? target.UseImageFillSizing;
         }
     }
 
@@ -278,6 +280,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
         public bool UsePercent { get; set; }
         public string DigitGroupingChar { get; set; }
         public int FloatingPointAccuracy { get; set; }
+
+        public bool UseImageFillSizing { get; set; }
 
         public void FillValue(object value,
                               ExcelRange range,

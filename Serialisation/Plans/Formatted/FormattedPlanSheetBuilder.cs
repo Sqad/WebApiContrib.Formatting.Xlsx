@@ -11,6 +11,7 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
+using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Models;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
@@ -26,6 +27,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
 
         private Dictionary<DateTime, int> _columnsLookup;
         private int _flightsTableWidth;
+
+        private readonly Dictionary<int, RowDefinition> _planRows;
 
         public FormattedPlanSheetBuilder(string sheetName, ExportPlanRequest exportPlanRequest)
             : base(sheetName)
@@ -46,35 +49,38 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                                                                       MissingMemberHandling =
                                                                           MissingMemberHandling.Ignore
                                                                   });
+
+            _planRows = new Dictionary<int, RowDefinition>();
         }
 
         protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
         {
-            var flightsTablePainter = new FlightsTablePainter(worksheet, _exportPlanRequest.Currencies);
-            var indexes = flightsTablePainter.DrawFlightsTable(_chartData);
-            _flightsTableWidth = indexes.maxColumnIndex;
+            RowHeightsHelper.FillRowHeights(_planRows, _chartData);
+
+            var flightsTablePainter = new FlightsTablePainter(worksheet, _exportPlanRequest.Currencies, _planRows);
+            _flightsTableWidth = flightsTablePainter.DrawFlightsTable(_chartData);
 
             FillCalendarHeader(worksheet);
-            var maxFormulaRowIndex = FillFormulas(worksheet);
-            var maxFlightIndex = FillGrid(worksheet);
-            var maxCaptionIndex = FillCaptions(worksheet);
-            var maxShapeIndex = FillShapes(worksheet);
-            int maxPictureIndex = 0;
-            // temporary commented out while find how to paint picture properly correspoinding to aspect ratio
-            var picturesPainter = new PicturesPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
-            if (_chartData.Objects.Pictures != null)
+            FillFormulas(worksheet);
+            FillGrid(worksheet);
+            FillCaptions(worksheet);
+            FillShapes(worksheet);
+
+            flightsTablePainter.FillRowNumbers(_flightsTableWidth);
+
+            for (var rowIndex = HEADER_HEIGHT + 1; rowIndex <= worksheet.Dimension.Rows; rowIndex++)
             {
-                maxPictureIndex = picturesPainter.DrawPictures(_chartData.Objects.Pictures, _viewMode);
+                var row = worksheet.Row(rowIndex);
+                var firstCell = worksheet.Cells[rowIndex, 1];
+                if (firstCell.Merge)
+                {
+                    continue;
+                }
+
+                row.Height = 30;
             }
 
-            var maxRowIndex = GetMax(indexes.maxRowIndex,
-                                     maxFlightIndex,
-                                     maxCaptionIndex,
-                                     maxShapeIndex,
-                                     maxPictureIndex,
-                                     maxFormulaRowIndex);
-
-            flightsTablePainter.FillRowNumbers(maxRowIndex, _flightsTableWidth);
+            FillPictures(worksheet);
         }
 
         private void FillCalendarHeader(ExcelWorksheet worksheet)
@@ -142,22 +148,22 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             worksheet.View.FreezePanes(HEADER_HEIGHT + 1, 1);
         }
 
-        private int FillFormulas(ExcelWorksheet worksheet)
+        private void FillFormulas(ExcelWorksheet worksheet)
         {
             var formulasPainter = new FormulasPainter(worksheet,
                                                       _flightsTableWidth,
                                                       _viewMode,
                                                       _exportPlanRequest.Currencies,
-                                                      _columnsLookup);
-            return formulasPainter.DrawFormulas(_chartData);
+                                                      _columnsLookup,
+                                                      _planRows);
+            formulasPainter.DrawFormulas(_chartData);
         }
 
-        private int FillGrid(ExcelWorksheet worksheet)
+        private void FillGrid(ExcelWorksheet worksheet)
         {
-            int? maxRowIndex = 0;
             int? mRowIndex = 0;
 
-            var flightPainter = new FlightPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
+            var flightPainter = new FlightPainter(worksheet, _columnsLookup, _planRows);
             
             if (_chartData.Objects.Flights != null)
             {
@@ -306,55 +312,32 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                     {
                         flightRowIndex = flightPainter.DrawFlight(new FlightHelper(flight), vehicle);
                     }
-
-                    if (maxRowIndex < flightRowIndex)
-                    {
-                        maxRowIndex = flightRowIndex;
-                    }
                 }
             }
-
-            return maxRowIndex ?? default(int);
         }
 
-        private int FillCaptions(ExcelWorksheet worksheet)
+        private void FillCaptions(ExcelWorksheet worksheet)
         {
-            var maxRowIndex = 0;
-            var captionPainter = new CaptionPainter(worksheet, HEADER_HEIGHT, _columnsLookup);
-            if (_chartData.Objects.Texts != null)
+            var captionPainter = new CaptionPainter(worksheet, _columnsLookup, _planRows);
+            foreach (var caption in _chartData.Objects.Texts ?? new List<Text>())
             {
-                foreach (var caption in _chartData.Objects.Texts)
-                {
-                    var rowIndex = captionPainter.DrawCaption(caption);
-
-                    if (maxRowIndex < rowIndex)
-                    {
-                        maxRowIndex = rowIndex;
-                    }
-                }
+                captionPainter.DrawCaption(caption);
             }
-
-            return maxRowIndex;
         }
 
-        private int FillShapes(ExcelWorksheet worksheet)
+        private void FillShapes(ExcelWorksheet worksheet)
         {
-            var maxRowIndex = 0;
-            var shapePainter = new ShapePainter(worksheet, HEADER_HEIGHT, _columnsLookup);
-            if (_chartData.Objects.Shapes != null)
+            var shapePainter = new ShapePainter(worksheet, _columnsLookup, _planRows);
+            foreach (var shape in _chartData.Objects.Shapes ?? new List<Shape>())
             {
-                foreach (var shape in _chartData.Objects.Shapes)
-                {
-                    var rowIndex = shapePainter.DrawShape(shape);
-
-                    if (maxRowIndex < rowIndex)
-                    {
-                        maxRowIndex = rowIndex;
-                    }
-                }
+                shapePainter.DrawShape(shape);
             }
+        }
 
-            return maxRowIndex;
+        private void FillPictures(ExcelWorksheet worksheet)
+        {
+            var picturesPainter = new PicturesPainter(worksheet, _columnsLookup, _planRows);
+            picturesPainter.DrawPictures(_chartData.Objects.Pictures ?? new List<Picture>(), _viewMode);
         }
 
         private static void FormatMonthCells(ExcelRangeBase cells)
@@ -421,11 +404,6 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                                                            ? Colors.HolidayColumnBackgroundColor
                                                            : Color.White);
             column.Width = 8.58;
-        }
-
-        private static int GetMax(params int[] indexes)
-        {
-            return indexes.Max();
         }
     }
 }

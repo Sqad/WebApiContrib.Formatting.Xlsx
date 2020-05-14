@@ -34,7 +34,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Formulas
 
             foreach (var flightCaption in flight.FlightCaption.Inside)
             {
-                captionBuilder.Append(GetValueFromFormula(flightCaption.Text, flight));
+                captionBuilder.Append(flightCaption.Text);
+                //captionBuilder.Append(GetValueFromFormula(flightCaption.Text, flight));
                 captionBuilder.Append(" ");
             }
 

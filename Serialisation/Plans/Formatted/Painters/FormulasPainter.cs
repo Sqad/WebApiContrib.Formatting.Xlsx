@@ -4,39 +4,39 @@ using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using SQAD.MTNext.Business.Models.FlowChart.Enums;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using OfficeOpenXml.Drawing;
 using SQAD.MTNext.Business.Models.Core.Currency;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
+using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Models;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 {
     internal class FormulasPainter
     {
-        private const int HEADER_ROW_INDEX = 2;
-        private const int ROW_MULTIPLIER = 3;
-
         private readonly ExcelWorksheet _worksheet;
         private readonly int _columnsOffset;
         private readonly FormattedPlanViewMode _viewMode;
         private readonly Dictionary<int, CurrencyModel> _currencies;
         private readonly Dictionary<DateTime, int> _columnsLookup;
+        private readonly Dictionary<int, RowDefinition> _planRows;
 
         public FormulasPainter(ExcelWorksheet worksheet,
-                                  int columnsOffset,
-                                  FormattedPlanViewMode viewMode,
-                                  Dictionary<int, CurrencyModel> currencies,
-                                  Dictionary<DateTime, int> columnsLookup)
+                               int columnsOffset,
+                               FormattedPlanViewMode viewMode,
+                               Dictionary<int, CurrencyModel> currencies,
+                               Dictionary<DateTime, int> columnsLookup,
+                               Dictionary<int, RowDefinition> planRows)
         {
             _worksheet = worksheet;
             _columnsOffset = columnsOffset;
             _viewMode = viewMode;
             _currencies = currencies;
             _columnsLookup = columnsLookup;
+            _planRows = planRows;
         }
 
-        public int DrawFormulas(ChartData chartData)
+        public void DrawFormulas(ChartData chartData)
         {
             var subtotalRowsLookup = (chartData.Objects
                                               .SubtotalRows ?? new List<SubtotalRow>())
@@ -58,23 +58,22 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
             if (formulaType == null)
             {
-                return 0;
+                return;
             }
 
 
             var formulasLookup = (chartData.Objects
                                     .Formulas ?? new List<Formula>())
                                     .Where(x => x.FormulaType == formulaType)
-                                    .GroupBy(x => x.RowIndex * ROW_MULTIPLIER + HEADER_ROW_INDEX)
+                                    .GroupBy(x => x.RowIndex)
                                     .ToDictionary(x => x.Key,
                                                   x => x.GroupBy(y => y.ColumnIndex + _columnsOffset)
                                                         .ToDictionary(y => y.Key, y => y.First()));
 
-            var maxRowIndex = 0;
             foreach (var currentCells in cellsLookup)
             {
                 var rowIndex = currentCells.Key;
-                maxRowIndex = rowIndex;
+                var rowDefinition = _planRows.GetValueOrDefault(rowIndex);
 
                 var cells = currentCells.Value;
 
@@ -91,7 +90,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     startColumnIndex = _columnsLookup[formula.StartDate.Date];
                     var endColumnIndex = _columnsLookup[formula.EndDate.AddDays(-1).Date];
 
-                    var range = _worksheet.Cells[rowIndex - 1, startColumnIndex, rowIndex + 1, endColumnIndex];
+                    var range = _worksheet.Cells[rowDefinition.PrimaryExcelRowIndex, startColumnIndex, rowDefinition.PrimaryExcelRowIndex, endColumnIndex];
 
                     Appearance subtotalRowAppearance = null;
                     if (formula.SubtotalId.HasValue)
@@ -104,13 +103,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
                     var centralCell = (endColumnIndex - startColumnIndex) / 2 + startColumnIndex;
 
-                    appearance.FillValue(cell.Value.Value, _worksheet.Cells[rowIndex, centralCell], _currencies);
+                    appearance.FillValue(cell.Value.Value, _worksheet.Cells[rowDefinition.PrimaryExcelRowIndex, centralCell], _currencies);
 
                     ApplyAppearance(range, appearance);
                 }
             }
-
-            return maxRowIndex;
         }
 
         private static void ApplyAppearance(ExcelRange range, CellsAppearance appearance)
@@ -225,7 +222,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     return;
                 }
 
-                RowIndex = (int.Parse(rawAddress[1]) + 1) * ROW_MULTIPLIER + HEADER_ROW_INDEX;
+                RowIndex = int.Parse(rawAddress[1]) + 1;
                 ColumnIndex = int.Parse(rawAddress[2]) + columnsOffset;
             }
 

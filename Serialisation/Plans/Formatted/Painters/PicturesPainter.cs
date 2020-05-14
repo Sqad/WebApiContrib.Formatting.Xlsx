@@ -1,6 +1,5 @@
 ﻿using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
-using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using SQAD.MTNext.Business.Models.FlowChart.Enums;
 using System;
@@ -11,29 +10,30 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Xml;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
+using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Models;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 {
     internal class PicturesPainter
     {
-        private const int RowMultiplier = 3;
-
         private readonly ExcelWorksheet _worksheet;
-        private readonly int _rowsOffset;
         private readonly Dictionary<DateTime, int> _columnsLookup;
+        private readonly Dictionary<int, RowDefinition> _planRows;
 
-        public PicturesPainter(ExcelWorksheet worksheet, int rowsOffset, Dictionary<DateTime, int> columnsLookup)
+        public PicturesPainter(ExcelWorksheet worksheet,
+                               Dictionary<DateTime, int> columnsLookup,
+                               Dictionary<int, RowDefinition> planRows)
         {
             _worksheet = worksheet;
-            _rowsOffset = rowsOffset;
             _columnsLookup = columnsLookup;
+            _planRows = planRows;
         }
 
-        public int DrawPictures(List<Picture> pictures, FormattedPlanViewMode viewMode)
+        public void DrawPictures(List<Picture> pictures, FormattedPlanViewMode viewMode)
         {
             if (!pictures.Any())
             {
-                return 0;
+                return;
             }
 
             var imagesLookup = DownloadAllImages(pictures);
@@ -44,8 +44,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                 var startColumnIndex = _columnsLookup[picture.StartDate.Date] - 1;
                 var endColumnIndex = _columnsLookup[picture.EndDate.AddDays(-1).Date];
 
-                var startRowIndex = picture.RowStart * RowMultiplier + _rowsOffset - 3;
-                var endRowIndex = picture.RowEnd * RowMultiplier + _rowsOffset;
+                var startRow = _planRows[picture.RowStart];
+                var endRow = _planRows[picture.RowEnd];
+
+                var startRowIndex = startRow.StartExcelRowIndex - 1;
+                var endRowIndex = endRow.StartExcelRowIndex;
 
                 if (!imagesLookup.TryGetValue(picture.ImageUrl, out var image))
                 {
@@ -54,63 +57,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
                 var shape = _worksheet.Drawings.AddPicture(picture.ID.ToString(), image);
 
-                shape.From.Row = startRowIndex;
-                shape.From.Column = startColumnIndex;
-
-                double newWidth = 0;
-                double newHeight = 0;
-                double coeff = 6.5;
-                for (int i = startColumnIndex; i <= endColumnIndex; i++)
-                {
-                    newWidth += _worksheet.Column(i).Width;
-                }
-                for (int i = startRowIndex; i <= endRowIndex; i++)
-                {
-                    newHeight += _worksheet.Row(i).Height;
-                }
-
-                newWidth *= coeff;
-                
-                if ((newWidth > image.Width) || (newHeight > image.Height))
-                {
-                    if (newWidth > image.Width)
-                    {
-                        double widthOffset = (newWidth - image.Width) / 2.0;
-                        double currWidth = 0;
-                        int i;
-                        for (i = startColumnIndex; i <= endColumnIndex; i++)
-                        {
-                            if (widthOffset <= _worksheet.Column(i).Width*coeff + currWidth)
-                            {
-                                break;
-                            }
-                            currWidth += _worksheet.Column(i).Width*coeff;
-                        }
-                        shape.From.Column = i;
-
-                    }
-
-                    if (newHeight > image.Height)
-                    {
-                        double heightOffset = (newHeight - image.Height) / 2.0;
-                        double currHeight = 0;
-                        int i;
-                        for (i = startRowIndex; i <= endRowIndex; i++)
-                        {
-                            if (heightOffset <= _worksheet.Row(i).Height + currHeight)
-                            {
-                                break;
-                            }
-                            currHeight += _worksheet.Row(i).Height;
-                        }
-                        shape.From.Row = i;
-                    }
-                }
-
-                shape.SetSize(image.Width, image.Height);
-                
-
                 var appearance = AppearanceHelper.GetAppearance(picture.Appearance);
+                CalculateSize(shape, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex, image, appearance);
+
                 FormatPicture(shape, appearance);
                 SetTransparency(_worksheet.Drawings.DrawingXml, appearance);
 
@@ -119,8 +68,111 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     maxRowIndex = endRowIndex;
                 }
             }
+        }
 
-            return maxRowIndex;
+        private void CalculateSize(ExcelPicture shape,
+                                   int startRowIndex,
+                                   int endRowIndex,
+                                   int startColumnIndex,
+                                   int endColumnIndex,
+                                   Image image,
+                                   CellsAppearance appearance)
+        {
+            if (appearance.UseImageFillSizing)
+            {
+                shape.From.Row = startRowIndex;
+                shape.From.Column = startColumnIndex;
+                shape.To.Row = endRowIndex;
+                shape.To.Column = endColumnIndex;
+
+                return;
+            }
+
+            shape.From.Row = startRowIndex;
+            shape.From.Column = startColumnIndex;
+
+            const double columnCoefficient = 5;
+
+            var targetWidth = 0;
+            var targetHeight = 0;
+            for (var i = startColumnIndex; i < endColumnIndex; i++)
+            {
+                targetWidth += (int)(_worksheet.Column(i).Width * columnCoefficient);
+            }
+
+            for (var i = startRowIndex; i <= endRowIndex; i++)
+            {
+                targetHeight += (int)_worksheet.Row(i).Height;
+            }
+
+            var sourceWidth = image.Width;
+            var sourceHeight = image.Height;
+
+            var percentW = targetWidth / (float)sourceWidth;
+            var percentH = targetHeight / (float)sourceHeight;
+
+            var percent = percentH < percentW ? percentH : percentW;
+
+            var newWidth = (int)(sourceWidth * percent);
+            var newHeight = (int)(sourceHeight * percent);
+
+            shape.SetSize(newWidth, newHeight);
+
+            //note: temporary fix since it doesn't works with some images
+            //shape.From.Row = startRowIndex;
+            //shape.From.Column = startColumnIndex;
+
+            //double newWidth = 0;
+            //double newHeight = 0;
+            //double coeff = 6.5;
+            //for (int i = startColumnIndex; i <= endColumnIndex; i++)
+            //{
+            //    newWidth += _worksheet.Column(i).Width;
+            //}
+            //for (int i = startRowIndex; i <= endRowIndex; i++)
+            //{
+            //    newHeight += _worksheet.Row(i).Height;
+            //}
+
+            //newWidth *= coeff;
+
+            //if ((newWidth > image.Width) || (newHeight > image.Height))
+            //{
+            //    if (newWidth > image.Width)
+            //    {
+            //        double widthOffset = (newWidth - image.Width) / 2.0;
+            //        double currWidth = 0;
+            //        int i;
+            //        for (i = startColumnIndex; i <= endColumnIndex; i++)
+            //        {
+            //            if (widthOffset <= _worksheet.Column(i).Width * coeff + currWidth)
+            //            {
+            //                break;
+            //            }
+            //            currWidth += _worksheet.Column(i).Width * coeff;
+            //        }
+            //        shape.From.Column = i;
+
+            //    }
+
+            //    if (newHeight > image.Height)
+            //    {
+            //        double heightOffset = (newHeight - image.Height) / 2.0;
+            //        double currHeight = 0;
+            //        int i;
+            //        for (i = startRowIndex; i <= endRowIndex; i++)
+            //        {
+            //            if (heightOffset <= _worksheet.Row(i).Height + currHeight)
+            //            {
+            //                break;
+            //            }
+            //            currHeight += _worksheet.Row(i).Height;
+            //        }
+            //        shape.From.Row = i;
+            //    }
+            //}
+
+            //shape.SetSize(image.Width, image.Height);
         }
 
         private static void FormatPicture(ExcelPicture shape, CellsAppearance appearance)

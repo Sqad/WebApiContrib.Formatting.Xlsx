@@ -5,31 +5,35 @@ using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
+using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Models;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 {
     internal class CaptionPainter
     {
-        private const int ROW_MULTIPLIER = 3;
-
         private readonly ExcelWorksheet _worksheet;
-        private readonly int _rowsOffset;
         private readonly Dictionary<DateTime, int> _columnsLookup;
+        private readonly Dictionary<int, RowDefinition> _planRows;
 
-        public CaptionPainter(ExcelWorksheet worksheet, int rowsOffset, Dictionary<DateTime, int> columnsLookup)
+        public CaptionPainter(ExcelWorksheet worksheet,
+                              Dictionary<DateTime, int> columnsLookup,
+                              Dictionary<int, RowDefinition> planRows)
         {
             _worksheet = worksheet;
-            _rowsOffset = rowsOffset;
             _columnsLookup = columnsLookup;
+            _planRows = planRows;
         }
 
-        public int DrawCaption(Text caption)
+        public void DrawCaption(Text caption)
         {
             var startColumnIndex = _columnsLookup[caption.StartDate.Date] - 1;
             var endColumnIndex = _columnsLookup[caption.EndDate.AddDays(-1).Date];
 
-            var startRowIndex = caption.RowStart * ROW_MULTIPLIER + _rowsOffset - 3;
-            var endRowIndex = caption.RowEnd * ROW_MULTIPLIER + _rowsOffset;
+            var startRow = _planRows[caption.RowStart];
+            var endRow = _planRows[caption.RowEnd];
+
+            var startRowIndex = startRow.StartExcelRowIndex - 1;
+            var endRowIndex = endRow.EndExcelRowIndex;
 
             var shape = _worksheet.Drawings.AddShape(caption.ID.ToString(), eShapeStyle.Rect);
 
@@ -42,8 +46,6 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
             var appearance = AppearanceHelper.GetAppearance(caption.Appearance);
             FormatCaption(shape, appearance);
-
-            return endRowIndex;
         }
 
         private static void FormatCaption(ExcelShape captionShape, CellsAppearance appearance)

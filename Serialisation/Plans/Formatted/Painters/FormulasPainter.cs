@@ -149,6 +149,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
         private static void ApplyAppearance(ExcelRange range, CellsAppearance appearance)
         {
             range.Merge = true;
+            range.Style.ShrinkToFit = true;
             range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
             foreach (var cell in range)

@@ -148,6 +148,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                 //    row.Height = neededHeight;
                 //}
                 cells.Merge = true;
+                cells.Style.ShrinkToFit = true;
                 cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
 
                 current++;
@@ -158,6 +159,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
         private static void ApplyAppearance(ExcelRange cells, CellsAppearance appearance)
         {
             cells.Merge = true;
+            cells.Style.ShrinkToFit = true;
 
             switch (appearance.TextAlignment)
             {

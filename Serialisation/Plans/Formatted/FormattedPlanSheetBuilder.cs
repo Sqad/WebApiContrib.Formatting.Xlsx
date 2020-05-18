@@ -94,55 +94,81 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             const int weekRowIndex = monthRowIndex + 2;
 
             var monthColumnStartIndex = _flightsTableWidth + 1;
+            var currentMonthColumnIndex = monthColumnStartIndex;
+            DateTime? lastMonth = null;
+
             var weekColumnStartIndex = monthColumnStartIndex;
             var dayColumnIndex = weekColumnStartIndex;
-            foreach (var month in calendarSpans)
+
+            foreach (var week in calendarSpans)
             {
-                worksheet.Cells[monthRowIndex, monthColumnStartIndex].Value = month.Name;
+                worksheet.Cells[weekRowIndex, weekColumnStartIndex].Value = week.Name;
 
-                foreach (var week in month.Spans)
+                var days = _viewMode == FormattedPlanViewMode.Daily ? week.Spans : week.Spans.Take(1);
+                foreach (var day in days)
                 {
-                    worksheet.Cells[weekRowIndex, weekColumnStartIndex].Value = week.Name;
+                    _columnsLookup.Add(day.StartDate, dayColumnIndex);
 
-                    var days = _viewMode == FormattedPlanViewMode.Daily ? week.Spans : week.Spans.Take(1);
-                    foreach (var day in days)
-                    {
-                        _columnsLookup.Add(day.StartDate, dayColumnIndex);
+                    var dayCell = worksheet.Cells[dayRowIndex, dayColumnIndex];
+                    dayCell.Value = day.Day;
 
-                        var dayCell = worksheet.Cells[dayRowIndex, dayColumnIndex];
-                        dayCell.Value = day.Day;
+                    var isHoliday = _viewMode == FormattedPlanViewMode.Daily
+                                    && (day.StartDate.DayOfWeek == DayOfWeek.Saturday
+                                        || day.StartDate.DayOfWeek == DayOfWeek.Sunday);
+                    FormatColumn(worksheet.Column(dayColumnIndex), isHoliday);
+                    FormatDayCells(dayCell, isHoliday);
 
-                        var isHoliday = (_viewMode == FormattedPlanViewMode.Daily)
-                                        && (day.StartDate.DayOfWeek == DayOfWeek.Saturday
-                                            || day.StartDate.DayOfWeek == DayOfWeek.Sunday);
-                        FormatColumn(worksheet.Column(dayColumnIndex), isHoliday);
-                        FormatDayCells(dayCell, isHoliday);
-
-                        dayColumnIndex++;
-                    }
-
-                    if (_viewMode != FormattedPlanViewMode.Daily)
-                    {
-                        foreach (var day in week.Spans.Skip(1))
-                        {
-                            _columnsLookup.Add(day.StartDate, dayColumnIndex - 1);
-                        }
-                    }
-
-                    FormatWeekCells(worksheet.Cells[weekRowIndex,
-                                                    weekColumnStartIndex,
-                                                    weekRowIndex,
-                                                    dayColumnIndex - 1]);
-
-                    weekColumnStartIndex = dayColumnIndex;
+                    dayColumnIndex++;
                 }
 
-                FormatMonthCells(worksheet.Cells[monthRowIndex,
+                if (_viewMode != FormattedPlanViewMode.Daily)
+                {
+                    foreach (var day in week.Spans.Skip(1))
+                    {
+                        _columnsLookup.Add(day.StartDate, dayColumnIndex - 1);
+                    }
+                }
+
+                FormatWeekCells(worksheet.Cells[weekRowIndex,
+                                                weekColumnStartIndex,
+                                                weekRowIndex,
+                                                dayColumnIndex - 1]);
+                weekColumnStartIndex = dayColumnIndex;
+
+                var currentMonth = new DateTime(week.EndDate.Year, week.EndDate.Month, 1);
+                if (lastMonth == null)
+                {
+                    lastMonth = currentMonth;
+                    continue;
+                }
+
+                if (currentMonth == lastMonth)
+                {
+                    currentMonthColumnIndex = dayColumnIndex;
+                    continue;
+                }
+
+                var monthCells = worksheet.Cells[monthRowIndex,
                                                  monthColumnStartIndex,
                                                  monthRowIndex,
-                                                 dayColumnIndex - 1]);
+                                                 currentMonthColumnIndex - 1];
+                monthCells.Value = $"{lastMonth.Value:MMMM} {lastMonth.Value.Year}";
+                
+                FormatMonthCells(monthCells);
 
-                monthColumnStartIndex = dayColumnIndex;
+                lastMonth = currentMonth;
+                monthColumnStartIndex = currentMonthColumnIndex;
+            }
+
+            if (lastMonth != null)
+            {
+                var monthCells = worksheet.Cells[monthRowIndex,
+                                                 monthColumnStartIndex,
+                                                 monthRowIndex,
+                                                 currentMonthColumnIndex - 1];
+                monthCells.Value = $"{lastMonth.Value:MMMM} {lastMonth.Value.Year}";
+
+                FormatMonthCells(monthCells);
             }
 
             worksheet.View.FreezePanes(HEADER_HEIGHT + 1, 1);
@@ -346,6 +372,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
             cells.Style.Font.Size = 14;
 
+            cells.Style.Fill.PatternType = ExcelFillStyle.None;
+
             cells.Style.Border.Left.Style = ExcelBorderStyle.Thin;
             cells.Style.Border.Left.Color.SetColor(Colors.WeekHeaderBorderColor);
 
@@ -379,6 +407,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             cells.Merge = true;
             cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
             cells.Style.Font.Color.SetColor(Colors.WeekHeaderFontColor);
+
+            cells.Style.Fill.PatternType = ExcelFillStyle.None;
 
             cells.Style.Border.Left.Style = ExcelBorderStyle.Thin;
             cells.Style.Border.Left.Color.SetColor(Colors.WeekHeaderBorderColor);

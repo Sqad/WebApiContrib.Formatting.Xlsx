@@ -16,7 +16,6 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
     internal class FlightsTablePainter
     {
         private const int HEADER_ROW_INDEX = 2;
-        private const int ROW_MULTIPLIER = 3;
         private const string DEFAULT_COLUMN_NAME = "No Formula";
         private readonly Dictionary<int, CurrencyModel> _currencies;
         private readonly Dictionary<int, RowDefinition> _planRows;
@@ -34,18 +33,31 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
         public int DrawFlightsTable(ChartData chartData)
         {
+            try
+            {
+                return DrawFlightsTableUnsafe(chartData);
+            }
+            catch
+            {
+                return 1;
+            }
+        }
+
+        private int DrawFlightsTableUnsafe(ChartData chartData)
+        {
             var maxColumnIndex = 0;
             var maxRowIndex = 0;
 
             var columnsLookup = chartData.LeftTableColumns.ToDictionary(x => int.Parse(x.Key) + 2);
-            columnsLookup.Add(1, new TextValue
-                                 {
-                                     Label = "#",
-                                     Appearances = new Appearance
-                                                   {
-                                                       TextAlign = ""
-                                                   }
-                                 });
+            columnsLookup.Add(1,
+                              new TextValue
+                              {
+                                  Label = "#",
+                                  Appearances = new Appearance
+                                                {
+                                                    TextAlign = ""
+                                                }
+                              });
 
             var separateCells = new Dictionary<string, CellAddress>();
             foreach (var cell in chartData.Objects.Cell ?? new List<ObjectCell>())
@@ -91,11 +103,14 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
                 var startRowIndex = rowDefinition.StartExcelRowIndex;
                 var endRowIndex = rowDefinition.EndExcelRowIndex;
-                var cell = _worksheet.Cells[startRowIndex, cellAddress.ColumnIndex, endRowIndex,
+                var cell = _worksheet.Cells[startRowIndex,
+                                            cellAddress.ColumnIndex,
+                                            endRowIndex,
                                             cellAddress.ColumnIndex];
 
                 var column = columnsLookup.GetValueOrDefault(cellAddress.ColumnIndex);
-                var objectCell = separateCells.GetValueOrDefault($"{cellAddress.RowIndex}-{cellAddress.ColumnIndex}")?.Cell;
+                var objectCell = separateCells.GetValueOrDefault($"{cellAddress.RowIndex}-{cellAddress.ColumnIndex}")
+                                              ?.Cell;
 
                 var cellAppearance = GetAppearance(column, objectCell);
 
@@ -133,17 +148,32 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
         public void FillRowNumbers(int maxColumnIndex)
         {
+            try
+            {
+                FillRowNumbersUnsafe(maxColumnIndex);
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+
+        private void FillRowNumbersUnsafe(int maxColumnIndex)
+        {
             var estimatedNumberColumnWidth = 5.0;
             var maxRow = _planRows.Keys.Max();
 
             for (var columnIndex = 1; columnIndex <= maxColumnIndex; columnIndex++)
             {
                 var rowNumber = 1;
-                for (var rowIndex = 1; rowIndex <= maxRow; rowIndex ++)
+                for (var rowIndex = 1; rowIndex <= maxRow; rowIndex++)
                 {
                     var rowDefinition = _planRows.GetValueOrDefault(rowIndex);
 
-                    var cells = _worksheet.Cells[rowDefinition.StartExcelRowIndex, columnIndex, rowDefinition.EndExcelRowIndex, columnIndex];
+                    var cells = _worksheet.Cells[rowDefinition.StartExcelRowIndex,
+                                                 columnIndex,
+                                                 rowDefinition.EndExcelRowIndex,
+                                                 columnIndex];
                     if (cells.Count() > 1)
                     {
                         cells.Merge = true;
@@ -289,7 +319,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                 if (column.Options?.GetValueOrDefault("currency") is long currency)
                 {
                     appearance.UseCurrencySymbol = true;
-                    appearance.CurrencySymbol = (int)currency;
+                    appearance.CurrencySymbol = (int) currency;
                     appearance.FloatingPointAccuracy = 2;
                 }
             }

@@ -37,37 +37,42 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             }
 
             var imagesLookup = DownloadAllImages(pictures);
-
-            var maxRowIndex = 0;
             foreach (var picture in pictures)
             {
-                var startColumnIndex = _columnsLookup[picture.StartDate.Date] - 1;
-                var endColumnIndex = _columnsLookup[picture.EndDate.AddDays(-1).Date];
-
-                var startRow = _planRows[picture.RowStart];
-                var endRow = _planRows[picture.RowEnd];
-
-                var startRowIndex = startRow.StartExcelRowIndex - 1;
-                var endRowIndex = endRow.StartExcelRowIndex;
-
-                if (!imagesLookup.TryGetValue(picture.ImageUrl, out var image))
+                try
                 {
-                    continue;
+                    DrawPicture(picture, imagesLookup);
                 }
-
-                var shape = _worksheet.Drawings.AddPicture(picture.ID.ToString(), image);
-
-                var appearance = AppearanceHelper.GetAppearance(picture.Appearance);
-                CalculateSize(shape, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex, image, appearance);
-
-                FormatPicture(shape, appearance);
-                SetTransparency(_worksheet.Drawings.DrawingXml, appearance);
-
-                if (endRowIndex > maxRowIndex)
+                catch
                 {
-                    maxRowIndex = endRowIndex;
+                    // ignored
                 }
             }
+        }
+
+        private void DrawPicture(Picture picture, Dictionary<string, Image> imagesLookup)
+        {
+            var startColumnIndex = _columnsLookup[picture.StartDate.Date] - 1;
+            var endColumnIndex = _columnsLookup[picture.EndDate.AddDays(-1).Date];
+
+            var startRow = _planRows[picture.RowStart];
+            var endRow = _planRows[picture.RowEnd];
+
+            var startRowIndex = startRow.StartExcelRowIndex - 1;
+            var endRowIndex = endRow.StartExcelRowIndex;
+
+            if (!imagesLookup.TryGetValue(picture.ImageUrl, out var image))
+            {
+                return;
+            }
+
+            var shape = _worksheet.Drawings.AddPicture(picture.ID.ToString(), image);
+
+            var appearance = AppearanceHelper.GetAppearance(picture.Appearance);
+            CalculateSize(shape, startRowIndex, endRowIndex, startColumnIndex, endColumnIndex, image, appearance);
+
+            FormatPicture(shape, appearance);
+            SetTransparency(_worksheet.Drawings.DrawingXml, appearance);
         }
 
         private void CalculateSize(ExcelPicture shape,
@@ -97,24 +102,24 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             var targetHeight = 0;
             for (var i = startColumnIndex; i < endColumnIndex; i++)
             {
-                targetWidth += (int)(_worksheet.Column(i).Width * columnCoefficient);
+                targetWidth += (int) (_worksheet.Column(i).Width * columnCoefficient);
             }
 
             for (var i = startRowIndex; i <= endRowIndex; i++)
             {
-                targetHeight += (int)_worksheet.Row(i).Height;
+                targetHeight += (int) _worksheet.Row(i).Height;
             }
 
             var sourceWidth = image.Width;
             var sourceHeight = image.Height;
 
-            var percentW = targetWidth / (float)sourceWidth;
-            var percentH = targetHeight / (float)sourceHeight;
+            var percentW = targetWidth / (float) sourceWidth;
+            var percentH = targetHeight / (float) sourceHeight;
 
             var percent = percentH < percentW ? percentH : percentW;
 
-            var newWidth = (int)(sourceWidth * percent);
-            var newHeight = (int)(sourceHeight * percent);
+            var newWidth = (int) (sourceWidth * percent);
+            var newHeight = (int) (sourceHeight * percent);
 
             shape.SetSize(newWidth, newHeight);
 
@@ -198,7 +203,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             var blipFillNode = xdrNode.ChildNodes[1];
             var blipNode = blipFillNode.ChildNodes[0];
 
-            var alphaModFixNode = xml.CreateNode(XmlNodeType.Element, 
+            var alphaModFixNode = xml.CreateNode(XmlNodeType.Element,
                                                  "a:alphaModFix",
                                                  "http://schemas.openxmlformats.org/drawingml/2006/main");
             alphaModFixNode = blipNode.AppendChild(alphaModFixNode);

@@ -23,51 +23,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
                 {
                     var vehicle = vehicles.GetValueOrDefault(flight.VehicleID.Value);
 
-                    if (vehicle != null)
-                    {
-                        if (flight.FlightCaption == null)
-                        {
-                            flight.FlightCaption = new FlightCaption();
-                        }
-
-                        if (flight.FlightCaption.Above == null)
-                        {
-                            flight.FlightCaption.Above = new List<FlightCaptionPosition>();
-                        }
-
-                        if (flight.FlightCaption.Below == null)
-                        {
-                            flight.FlightCaption.Below = new List<FlightCaptionPosition>();
-                        }
-
-                        if (flight.FlightCaption.Inside == null)
-                        {
-                            flight.FlightCaption.Inside = new List<FlightCaptionPosition>();
-                        }
-
-                        if (flight.OverwrittenCaptions == null)
-                        {
-                            flight.OverwrittenCaptions = new List<Guid>();
-                        }
-
-                        var above = (vehicle.FlightCaption?.Above ?? new List<FlightCaptionPosition>())
-                            .ToDictionary(x => x.ID);
-                        var below = (vehicle.FlightCaption?.Below ?? new List<FlightCaptionPosition>())
-                            .ToDictionary(x => x.ID);
-                        var inside = (vehicle.FlightCaption?.Inside ?? new List<FlightCaptionPosition>())
-                            .ToDictionary(x => x.ID);
-
-                        foreach (var overwrite in flight.OverwrittenCaptions)
-                        {
-                            above.Remove(overwrite);
-                            below.Remove(overwrite);
-                            inside.Remove(overwrite);
-                        }
-
-                        flight.FlightCaption.Above.AddRange(above.Values);
-                        flight.FlightCaption.Below.AddRange(below.Values);
-                        flight.FlightCaption.Inside.AddRange(inside.Values);
-                    }
+                    MergeCaptions(flight, vehicle);
                 }
 
                 var flightRowIndex = flight.RowIndex ?? 0;
@@ -146,6 +102,57 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
         private static int GetMax(params int[] indexes)
         {
             return indexes.Max();
+        }
+
+        private static void MergeCaptions(Flight flight, VehicleModel vehicle)
+        {
+            if (vehicle == null)
+            {
+                return;
+            }
+
+            if (flight.FlightCaption == null)
+            {
+                flight.FlightCaption = new FlightCaption();
+            }
+
+            if (flight.FlightCaption.Above == null)
+            {
+                flight.FlightCaption.Above = new List<FlightCaptionPosition>();
+            }
+
+            if (flight.FlightCaption.Below == null)
+            {
+                flight.FlightCaption.Below = new List<FlightCaptionPosition>();
+            }
+
+            if (flight.FlightCaption.Inside == null)
+            {
+                flight.FlightCaption.Inside = new List<FlightCaptionPosition>();
+            }
+
+            if (flight.OverwrittenCaptions == null)
+            {
+                flight.OverwrittenCaptions = new List<Guid>();
+            }
+
+            var above = (vehicle.FlightCaption?.Above ?? new List<FlightCaptionPosition>())
+                .ToDictionary(x => x.ID);
+            var below = (vehicle.FlightCaption?.Below ?? new List<FlightCaptionPosition>())
+                .ToDictionary(x => x.ID);
+            var inside = (vehicle.FlightCaption?.Inside ?? new List<FlightCaptionPosition>())
+                .ToDictionary(x => x.ID);
+
+            foreach (var overwrite in flight.OverwrittenCaptions)
+            {
+                above.Remove(overwrite);
+                below.Remove(overwrite);
+                inside.Remove(overwrite);
+            }
+
+            flight.FlightCaption.Above.AddRange(above.Values);
+            flight.FlightCaption.Below.AddRange(below.Values);
+            flight.FlightCaption.Inside.AddRange(inside.Values);
         }
     }
 }

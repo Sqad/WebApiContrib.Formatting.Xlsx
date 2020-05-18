@@ -45,6 +45,18 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
         public void DrawShape(Shape shapeObject)
         {
+            try
+            {
+                DrawShapeUnsafe(shapeObject);
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+
+        private void DrawShapeUnsafe(Shape shapeObject)
+        {
             if (!ShapesMap.TryGetValue(shapeObject.ShapeType, out var shapeType))
             {
                 return;
@@ -104,7 +116,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             var xdrNode = shapeNode.ChildNodes[2];
             var spPrNode = xdrNode.ChildNodes[1];
 
-            var xfrmNode = xml.CreateNode(XmlNodeType.Element, 
+            var xfrmNode = xml.CreateNode(XmlNodeType.Element,
                                           "a:xfrm",
                                           "http://schemas.openxmlformats.org/drawingml/2006/main");
             xfrmNode = spPrNode.PrependChild(xfrmNode);

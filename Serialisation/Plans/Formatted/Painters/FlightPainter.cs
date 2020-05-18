@@ -4,6 +4,7 @@ using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using System;
 using System.Collections.Generic;
+using SQAD.MTNext.Business.Models.Core.Currency;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Formulas;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Models;
@@ -15,15 +16,18 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
         private readonly ExcelWorksheet _worksheet;
         private readonly Dictionary<DateTime, int> _columnsLookup;
         private readonly Dictionary<int, RowDefinition> _planRows;
+        private readonly Dictionary<int, CurrencyModel> _currencies;
         private readonly FormulaParser _formulaParser;
 
         public FlightPainter(ExcelWorksheet worksheet,
                              Dictionary<DateTime, int> columnsLookup,
-                             Dictionary<int, RowDefinition> planRows)
+                             Dictionary<int, RowDefinition> planRows,
+                             Dictionary<int, CurrencyModel> currencies)
         {
             _worksheet = worksheet;
             _columnsLookup = columnsLookup;
             _planRows = planRows;
+            _currencies = currencies;
 
             _formulaParser = new FormulaParser();
         }
@@ -31,7 +35,20 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
         public int DrawFlight(FlightHelper flightHelper,
                               VehicleModel vehicle)
         {
-            Flight flight = flightHelper.Flight;
+            try
+            {
+                return DrawFlightUnsafe(flightHelper, vehicle);
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+        }
+
+        private int DrawFlightUnsafe(FlightHelper flightHelper,
+                                     VehicleModel vehicle)
+        {
+            var flight = flightHelper.Flight;
             var rowDefinition = _planRows.GetValueOrDefault(flight.RowIndex ?? 0);
 
             var startDate = flight.StartDate.Date;
@@ -79,7 +96,6 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             var startRowNumber = rowDefinition.StartExcelRowIndex
                                  + (rowDefinition.AboveCount - flight.FlightCaption.Above?.Count ?? 0);
             DrawCaptions(flight.FlightCaption.Above,
-                         flight,
                          startRowNumber,
                          startColumn,
                          endColumn,
@@ -94,7 +110,6 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                                        CellsAppearance appearance)
         {
             DrawCaptions(flight.FlightCaption.Below,
-                         flight,
                          rowDefinition.PrimaryExcelRowIndex + 1,
                          startColumn,
                          endColumn,
@@ -103,7 +118,6 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
         }
 
         private void DrawCaptions(IReadOnlyCollection<FlightCaptionPosition> captions,
-                                  Flight flight,
                                   int startRowNumber,
                                   int startColumn,
                                   int endColumn,
@@ -119,6 +133,24 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             {
                 var cells = _worksheet.Cells[current, startColumn, current, endColumn];
                 cells.Style.WrapText = true;
+
+                var captionAppearance = AppearanceHelper.GetAppearance(caption.Appearance);
+                if (captionAppearance.UseBackColor)
+                {
+                    cells.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    cells.Style.Fill.BackgroundColor.SetColor(captionAppearance.BackgroundColor);
+                }
+
+                cells.Style.Font.Bold = captionAppearance.Bold;
+                cells.Style.Font.Italic = captionAppearance.Italic;
+                if (captionAppearance.Underline)
+                {
+                    cells.Style.Font.UnderLine = true;
+                    cells.Style.Font.UnderLineType = ExcelUnderLineType.Single;
+                }
+
+                cells.Style.Font.Color.SetColor(captionAppearance.TextColor);
+                cells.Style.Font.Size = captionAppearance.FontSize;
 
                 cells.Style.Border.Right.Style = ExcelBorderStyle.Thin;
                 cells.Style.Border.Right.Color.SetColor(appearance.CellBorderColor);
@@ -137,16 +169,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     cells.Style.Border.Bottom.Color.SetColor(appearance.CellBorderColor);
                 }
 
-                var value = caption.Text;//_formulaParser.GetValueFromFormula(caption.Text, flight);
+                captionAppearance.FillValue(caption.Text, cells, _currencies);
 
-                cells.Value = value;
-
-                //var row = _worksheet.Row(current);
-                //var neededHeight = 15.0 * values.Count;
-                //if (row.Height < neededHeight)
-                //{
-                //    row.Height = neededHeight;
-                //}
                 cells.Merge = true;
                 cells.Style.ShrinkToFit = true;
                 cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;

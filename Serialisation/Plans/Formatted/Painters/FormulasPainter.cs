@@ -38,6 +38,18 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
         public void DrawFormulas(ChartData chartData)
         {
+            try
+            {
+                DrawFormulasUnsafe(chartData);
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+
+        private void DrawFormulasUnsafe(ChartData chartData)
+        {
             var subtotalRowsLookup = (chartData.Objects
                                               .SubtotalRows ?? new List<SubtotalRow>())
                                               .GroupBy(x => x.Id)
@@ -151,12 +163,6 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             range.Merge = true;
             range.Style.ShrinkToFit = true;
             range.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-
-            foreach (var cell in range)
-            {
-                cell.Style.Border.Left.Style = ExcelBorderStyle.None;
-                cell.Style.Border.Right.Style = ExcelBorderStyle.None;
-            }
 
             var backColor = appearance.UseBackColor
                                 ? appearance.BackgroundColor 

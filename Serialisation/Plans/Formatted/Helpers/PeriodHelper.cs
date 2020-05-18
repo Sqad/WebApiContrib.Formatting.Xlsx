@@ -67,10 +67,14 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 
             var years = _calendarStructure.Items.Where(x => _planStartDate >= x.StartDate
                                                             && _planEndDate <= x.EndDate);
+            var useIdAsYear = _calendarStructure.Id == STANDARD_CALENDAR_ID 
+                              || _calendarStructure.Id == BROADCAST_CALENDAR_ID;
 
             var weekNumber = 1;
             foreach (var year in years)
             {
+                var yearNumber = useIdAsYear ? year.Id : year.FiscalYear;
+
                 foreach (var quarter in year.Items)
                 {
                     foreach (var month in quarter.Items)
@@ -83,11 +87,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 
                         var monthSpan = new CalendarSpan
                                         {
-                                            Year = year.Id,
+                                            Year = yearNumber,
                                             Month = month.Id,
                                             StartDate = month.StartDate.Value,
                                             EndDate = month.EndDate.Value,
-                                            Name = $"{new DateTime(year.Id, month.Id, 1):MMMM} {year.Id}"
+                                            Name = $"{new DateTime(yearNumber, month.Id, 1):MMMM} {yearNumber}"
                                         };
                         monthSpan.Spans = BuildWeeks(monthSpan, ref weekNumber);
 

@@ -163,7 +163,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
         {
             int? mRowIndex = 0;
 
-            var flightPainter = new FlightPainter(worksheet, _columnsLookup, _planRows);
+            var flightPainter = new FlightPainter(worksheet, _columnsLookup, _planRows, _exportPlanRequest.Currencies);
             
             if (_chartData.Objects.Flights != null)
             {

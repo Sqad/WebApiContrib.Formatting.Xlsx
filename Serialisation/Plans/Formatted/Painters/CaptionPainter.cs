@@ -26,6 +26,18 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
         public void DrawCaption(Text caption)
         {
+            try
+            {
+                DrawCaptionUnsafe(caption);
+            }
+            catch
+            {
+                // ignored
+            }
+        }
+
+        private void DrawCaptionUnsafe(Text caption)
+        {
             var startColumnIndex = _columnsLookup[caption.StartDate.Date] - 1;
             var endColumnIndex = _columnsLookup[caption.EndDate.AddDays(-1).Date];
 

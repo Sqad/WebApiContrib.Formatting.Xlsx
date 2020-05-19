@@ -36,7 +36,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             _exportPlanRequest = exportPlanRequest;
             _periodHelper = new PeriodHelper(exportPlanRequest.Chart.Plan,
                                              exportPlanRequest.ClientCalendarType,
-                                             exportPlanRequest.CalendarStructure);
+                                             exportPlanRequest.CalendarStructures);
 
             _viewMode = exportPlanRequest.ViewMode;
 

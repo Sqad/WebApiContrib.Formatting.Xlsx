@@ -1,10 +1,10 @@
-﻿using SQAD.MTNext.Business.Models.Core.Calendar;
+﻿using SQAD.MTNext.Business.Models.Common.Enums;
+using SQAD.MTNext.Business.Models.Core.Calendar;
 using SQAD.MTNext.Business.Models.FlowChart.Plan;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
-using SQAD.MTNext.Business.Models.Common.Enums;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 {
@@ -15,23 +15,25 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 
         private readonly DateTime _planStartDate;
         private readonly DateTime _planEndDate;
-        private readonly bool _useIdAsYear;
 
+        private readonly List<CalendarStructureModel> _calendarStructures;
         private readonly CalendarStructureModel _calendarStructure;
         private readonly int _fiscalPeriodId;
 
         private readonly CustomPeriodsType? _calendarType;
         private readonly WeekLabel _weekLabel;
+        private readonly int _customWeekLabel;
 
         public PeriodHelper(PlanModel plan,
                             ClientCalendarTypeModel calendarType,
-                            CalendarStructureModel calendarStructure)
+                            List<CalendarStructureModel> calendarStructures)
         {
             _planStartDate = plan.StartDate;
             _planEndDate = _planStartDate.AddDays(plan.Duration);
             _fiscalPeriodId = plan.FiscalPeriodID ?? 0;
 
-            _calendarStructure = calendarStructure;
+            _calendarStructures = calendarStructures;
+            _calendarStructure = _calendarStructures.FirstOrDefault(x => x.Id == plan.CalendarTypeID);
 
             switch (plan.WeekLabel)
             {
@@ -40,9 +42,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
                     break;
                 case "CRWC":
                     _weekLabel = WeekLabel.CustomRunningWeekCount;
+                    _customWeekLabel = plan.CustomWeekLabelNumber == 0 ? 1 : plan.CustomWeekLabelNumber;
                     break;
                 case "RWC":
                     _weekLabel = WeekLabel.DefaultRunningWeekCount;
+                    _customWeekLabel = 1;
                     break;
             }
 
@@ -50,21 +54,15 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             {
                 case BROADCAST_CALENDAR_ID:
                     _calendarType = CustomPeriodsType.Broadcast;
-                    _useIdAsYear = true;
                     break;
                 case STANDARD_CALENDAR_ID:
                     _calendarType = CustomPeriodsType.Standard;
-                    _useIdAsYear = true;
                     break;
                 default:
                 {
                     if (plan.CalendarTypeID.HasValue)
                     {
                         _calendarType = (CustomPeriodsType) calendarType.CustomPeriods;
-                    }
-                    else
-                    {
-                        _useIdAsYear = true;
                     }
 
                     break;
@@ -74,75 +72,27 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 
         public ICollection<CalendarSpan> Build()
         {
-            //if (!_calendarType.HasValue)
-            //{
-            //    var result = new List<CalendarSpan>();
-
-            //    var currentDate = _planStartDate;
-            //    var currentMonth = new CalendarSpan
-            //                       {
-            //                           Year = currentDate.Year,
-            //                           Month = currentDate.Month,
-            //                           StartDate = currentDate,
-            //                           Spans = new List<CalendarSpan>(),
-            //                           Name = $"{new DateTime(currentDate.Year, currentDate.Month, 1):MMMM} {currentDate.Year}"
-            //                       };
-            //    do
-            //    {
-            //        var month = currentDate.Month;
-            //        if (currentMonth.Month != month)
-            //        {
-            //            currentMonth.EndDate = currentDate.AddDays(-1);
-            //            result.Add(currentMonth);
-
-            //            currentMonth = new CalendarSpan
-            //                           {
-            //                               Year = currentDate.Year,
-            //                               Month = currentDate.Month,
-            //                               StartDate = currentDate,
-            //                               Spans = new List<CalendarSpan>(),
-            //                               Name = $"{new DateTime(currentDate.Year, currentDate.Month, 1):MMMM} {currentDate.Year}"
-            //                           };
-            //        }
-
-            //        currentDate = currentDate.AddDays(1);
-            //    } while (currentDate <= _planEndDate);
-
-            //    currentMonth.EndDate = currentDate.AddDays(-1);
-            //    result.Add(currentMonth);
-
-            //    var weekNumber = 1;
-            //    foreach (var month in result)
-            //    {
-            //        month.Spans = BuildStandardWeeks(month, ref weekNumber);
-            //    }
-
-            //    return result;
-            //}
-
             switch (_calendarStructure?.Id)
             {
                 case null:
-                    return BuildStandardWeeks(_planStartDate, _planEndDate);
                 case STANDARD_CALENDAR_ID:
                 case BROADCAST_CALENDAR_ID:
-                    var result = new List<CalendarSpan>();
-                    var years = _calendarStructure.Items.Where(x => _planStartDate >= x.StartDate
-                                                                    && _planEndDate <= x.EndDate);
-                    foreach (var year in years)
-                    {
-                        if (!year.StartDate.HasValue
-                            || !year.EndDate.HasValue)
-                        {
-                            continue;
-                        }
+                    return BuildWeeks(_planStartDate, _planEndDate);
+                    //var result = new List<CalendarSpan>();
+                    //var years = _calendarStructure.Items.Where(x => _planStartDate >= x.StartDate
+                    //                                                && _planEndDate <= x.EndDate);
+                    //foreach (var year in years)
+                    //{
+                    //    if (!year.StartDate.HasValue
+                    //        || !year.EndDate.HasValue)
+                    //    {
+                    //        continue;
+                    //    }
 
-                        result.AddRange(_calendarStructure.Id == STANDARD_CALENDAR_ID
-                                            ? BuildStandardWeeks(year.StartDate.Value, year.EndDate.Value)
-                                            : BuildBroadcastWeeks(year.StartDate.Value, year.EndDate.Value));
-                    }
+                    //    result.AddRange(BuildWeeks(year.StartDate.Value, year.EndDate.Value));
+                    //}
 
-                    return result;
+                    //return result;
             }
 
             return BuildCalendar();
@@ -157,87 +107,42 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             }
 
             var startDate = period.StartDate.Value;
-            var endDate = period.EndDate.Value;
+            var endDate = period.EndDate.Value.AddDays(-1);
 
-            switch (_calendarType)
-            {
-                case CustomPeriodsType.Broadcast:
-                    return BuildBroadcastWeeks(startDate, endDate);
-                case CustomPeriodsType.Standard:
-                    return BuildStandardWeeks(startDate, endDate);
-            }
+            //switch (_calendarType)
+            //{
+            //    case CustomPeriodsType.Broadcast:
+            //        return BuildBroadcastWeeks(startDate, endDate);
+            //    case CustomPeriodsType.Standard:
+            //        return BuildStandardWeeks(startDate, endDate);
+            //}
 
-            return BuildStandardWeeks(startDate, endDate);
+            return BuildWeeks(startDate, endDate);
         }
-
-        //private ICollection<CalendarSpan> BuildMonths()
-        //{
-        //    var result = new List<CalendarSpan>();
-
-        //    var years = _calendarStructure.Items.Where(x => _planStartDate >= x.StartDate
-        //                                                    && _planEndDate <= x.EndDate);
-
-        //    var weekNumber = 1;
-        //    foreach (var year in years)
-        //    {
-        //        var yearNumber = _useIdAsYear ? year.Id : year.FiscalYear;
-
-        //        foreach (var quarter in year.Items)
-        //        {
-        //            foreach (var month in quarter.Items)
-        //            {
-        //                if (!month.StartDate.HasValue
-        //                    || !month.EndDate.HasValue)
-        //                {
-        //                    continue;
-        //                }
-
-        //                var monthSpan = new CalendarSpan
-        //                                {
-        //                                    Year = yearNumber,
-        //                                    Month = month.Id,
-        //                                    StartDate = month.StartDate.Value,
-        //                                    EndDate = month.EndDate.Value,
-        //                                    Name = $"{new DateTime(yearNumber, month.Id, 1):MMMM} {yearNumber}"
-        //                                };
-        //                monthSpan.Spans = BuildWeeks(monthSpan, ref weekNumber);
-
-        //                result.Add(monthSpan);
-        //            }
-        //        }
-        //    }
-
-        //    return result;
-        //}
-
-        //private List<CalendarSpan> BuildWeeks(CalendarSpan month, ref int weekNumber)
-        //{
-        //    var result = new List<CalendarSpan>();
-
-        //    switch (_calendarType)
-        //    {
-        //        case CustomPeriodsType.Broadcast:
-        //            return BuildBroadcastWeeks(month, ref weekNumber);
-        //        case CustomPeriodsType.Standard:
-        //            return BuildStandardWeeks(month, ref weekNumber);
-        //        //case CustomPeriodsType.Custom://todo
-        //        //    break;
-        //        //case CustomPeriodsType.Freeform://todo
-        //        //    break;
-        //        default:
-        //            throw new InvalidEnumArgumentException(
-        //                $"{nameof(CustomPeriodsType)} has invalid value: {_calendarType}");
-        //    }
-
-        //    return result;
-        //}
 
         private List<CalendarSpan> BuildBroadcastWeeks(DateTime startDate, DateTime endDate)
         {
             var result = new List<CalendarSpan>();
 
+            var currentWeekLabel = _customWeekLabel;
+            if (_weekLabel == WeekLabel.CalendarWeek)
+            {
+                var startOfYear = new DateTime(startDate.Year, 1, 1);
+                while (startOfYear.DayOfWeek != DayOfWeek.Monday)
+                {
+                    startOfYear = startOfYear.AddDays(-1);
+                }
+
+                var startOfCurrentWeek = startDate;
+                while (startOfYear.DayOfWeek != DayOfWeek.Monday)
+                {
+                    startOfCurrentWeek = startOfCurrentWeek.AddDays(-1);
+                }
+
+                currentWeekLabel = (int) (startOfCurrentWeek - startOfYear).TotalDays / 7 + 1;
+            }
+
             var previousStartDate = startDate;
-            var weekNumber = 1;
             for (var currentDate = startDate; currentDate <= endDate; currentDate = currentDate.AddDays(1))
             {
                 if (currentDate.DayOfWeek != DayOfWeek.Sunday)
@@ -249,17 +154,107 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
                            {
                                Year = currentDate.Year,
                                Month = currentDate.Month,
-                               Week = weekNumber,
+                               Week = currentWeekLabel,
                                StartDate = previousStartDate,
                                EndDate = currentDate,
-                               Name = $"{weekNumber} W"
+                               Name = $"{currentWeekLabel} W"
                            };
                 week.Spans = BuildDays(week);
 
                 result.Add(week);
 
-                weekNumber++;
+                currentWeekLabel++;
                 previousStartDate = currentDate.AddDays(1);
+            }
+
+            return result;
+        }
+
+        private List<CalendarSpan> BuildWeeks(DateTime startDate, DateTime endDate)
+        {
+            var result = new List<CalendarSpan>();
+
+            var currentWeekLabel = _customWeekLabel;
+            if (_weekLabel == WeekLabel.CalendarWeek)
+            {
+                if (_calendarType == CustomPeriodsType.Broadcast)
+                {
+                    var defaultBroadcast = _calendarStructures.First(x => x.Id == BROADCAST_CALENDAR_ID);
+                    var currentYear = defaultBroadcast.Items
+                                                      .FirstOrDefault(x => startDate >= x.StartDate
+                                                                           && startDate <= x.EndDate);
+
+                    var startOfYear = currentYear?.StartDate ?? startDate;
+
+                    var startOfCurrentWeek = startDate;
+                    while (startOfCurrentWeek.DayOfWeek != DayOfWeek.Monday)
+                    {
+                        startOfCurrentWeek = startOfCurrentWeek.AddDays(-1);
+                    }
+
+                    currentWeekLabel = (int)(startOfCurrentWeek - startOfYear).TotalDays / 7 + 1;
+                }
+                else
+                {
+                    var calendar = new GregorianCalendar(GregorianCalendarTypes.USEnglish);
+                    currentWeekLabel = calendar.GetWeekOfYear(startDate, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+                }
+                //var calendar = new GregorianCalendar(GregorianCalendarTypes.USEnglish);
+                //currentWeekLabel = calendar.GetWeekOfYear(startDate, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+            }
+
+            if (_weekLabel == WeekLabel.CalendarWeek)
+            {
+                var previousStartDate = startDate;
+                for (var currentDate = startDate; currentDate <= endDate; currentDate = currentDate.AddDays(1))
+                {
+                    //var endOfWeek = _calendarType == CustomPeriodsType.Broadcast
+                    //                    ? DayOfWeek.Sunday
+                    //                    : DayOfWeek.Saturday;
+                    
+                    if (currentDate.DayOfWeek != DayOfWeek.Sunday && currentDate != endDate)
+                    {
+                        continue;
+                    }
+                    
+                    var week = new CalendarSpan
+                               {
+                                   Year = currentDate.Year,
+                                   Month = currentDate.Month,
+                                   Week = currentWeekLabel,
+                                   StartDate = previousStartDate,
+                                   EndDate = currentDate,
+                                   Name = $"{currentWeekLabel} W"
+                               };
+                    week.Spans = BuildDays(week);
+
+                    result.Add(week);
+
+                    currentWeekLabel++;
+                    previousStartDate = currentDate.AddDays(1);
+                }
+            }
+            else
+            {
+                for (var currentDate = startDate; currentDate <= endDate; currentDate = currentDate.AddDays(7))
+                {
+                    var currentEndDate = currentDate.AddDays(6);
+                    currentEndDate = currentEndDate > endDate ? endDate : currentEndDate;
+
+                    var week = new CalendarSpan
+                               {
+                                   Year = currentDate.Year,
+                                   Month = currentDate.Month,
+                                   Week = currentWeekLabel,
+                                   StartDate = currentDate,
+                                   EndDate = currentEndDate,
+                                   Name = $"{currentWeekLabel} W"
+                               };
+                    week.Spans = BuildDays(week);
+                    result.Add(week);
+
+                    currentWeekLabel++;
+                }
             }
 
             return result;
@@ -269,8 +264,14 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
         {
             var result = new List<CalendarSpan>();
 
+            var currentWeekLabel = _customWeekLabel;
+            if (_weekLabel == WeekLabel.CalendarWeek)
+            {
+                var calendar = new GregorianCalendar(GregorianCalendarTypes.USEnglish);
+                currentWeekLabel = calendar.GetWeekOfYear(startDate, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+            }
+
             var previousStartDate = startDate;
-            var weekNumber = 1;
             for (var currentDate = startDate; currentDate <= endDate; currentDate = currentDate.AddDays(1))
             {
                 if (currentDate.DayOfWeek != DayOfWeek.Saturday)
@@ -282,83 +283,21 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
                            {
                                Year = currentDate.Year,
                                Month = currentDate.Month,
-                               Week = weekNumber,
+                               Week = currentWeekLabel,
                                StartDate = previousStartDate,
                                EndDate = currentDate,
-                               Name = $"{weekNumber} W"
+                               Name = $"{currentWeekLabel} W"
                            };
                 week.Spans = BuildDays(week);
 
                 result.Add(week);
 
-                weekNumber++;
+                currentWeekLabel++;
                 previousStartDate = currentDate.AddDays(1);
             }
 
             return result;
         }
-
-        //private List<CalendarSpan> BuildBroadcastWeeks(CalendarSpan month, ref int weekNumber)
-        //{
-        //    var result = new List<CalendarSpan>();
-
-        //    var currentStartDate = month.StartDate;
-        //    var currentEndDate = currentStartDate.AddDays(6);
-        //    while (currentEndDate <= month.EndDate)
-        //    {
-        //        var week = new CalendarSpan
-        //                   {
-        //                       Year = month.Year,
-        //                       Month = month.Month,
-        //                       Week = weekNumber,
-        //                       StartDate = currentStartDate,
-        //                       EndDate = currentEndDate,
-        //                       Name = $"{weekNumber} W"
-        //                   };
-
-        //        week.Spans = BuildDays(week);
-        //        result.Add(week);
-
-        //        weekNumber++;
-        //        currentStartDate = currentEndDate.AddDays(1);
-        //        currentEndDate = currentStartDate.AddDays(6);
-        //    }
-
-        //    return result;
-        //}
-
-        //private List<CalendarSpan> BuildStandardWeeks(CalendarSpan month, ref int weekNumber)
-        //{
-        //    var result = new List<CalendarSpan>();
-
-        //    var currentDate = month.StartDate;
-
-        //    var startWeekDate = currentDate;
-        //    while (currentDate <= month.EndDate)
-        //    {
-        //        if (currentDate.DayOfWeek == DayOfWeek.Sunday || currentDate == month.EndDate)
-        //        {
-        //            var week = new CalendarSpan
-        //                       {
-        //                           Year = month.Year,
-        //                           Month = month.Month,
-        //                           Week = weekNumber, //todo
-        //                           StartDate = startWeekDate,
-        //                           EndDate = currentDate,
-        //                           Name = $"{weekNumber} W"
-        //                       };
-        //            week.Spans = BuildDays(week);
-        //            result.Add(week);
-
-        //            weekNumber++;
-        //            startWeekDate = currentDate.AddDays(1);
-        //        }
-
-        //        currentDate = currentDate.AddDays(1);
-        //    }
-
-        //    return result;
-        //}
 
         private List<CalendarSpan> BuildDays(CalendarSpan week)
         {

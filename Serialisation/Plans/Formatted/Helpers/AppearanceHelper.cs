@@ -302,6 +302,56 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             }
         }
 
+        public string GetValue(object value,
+                                Dictionary<int, CurrencyModel> currencies)
+        {
+            var numericValue = value as double? ?? value as long?;
+            if (numericValue.HasValue)
+            {
+                var numberFormat = (NumberFormatInfo)CultureInfo.InvariantCulture.NumberFormat.Clone();
+                numberFormat.NumberGroupSeparator = DigitGroupingChar;
+                numberFormat.CurrencyGroupSeparator = DigitGroupingChar;
+                numberFormat.PercentGroupSeparator = DigitGroupingChar;
+
+                numberFormat.NumberDecimalDigits = FloatingPointAccuracy;
+                numberFormat.CurrencyDecimalDigits = FloatingPointAccuracy;
+                numberFormat.PercentDecimalDigits = FloatingPointAccuracy;
+
+                if (UsePercent)
+                {
+                    return numericValue.Value.ToString("P");
+                }
+
+                if (UseCurrencySymbol)
+                {
+                    var currency = currencies.GetValueOrDefault(CurrencySymbol);
+                    if (currency != null)
+                    {
+                        var symbol = currency.CurrencySymbol;
+                        if (string.IsNullOrWhiteSpace(symbol) && !CurrencyCodes.TryGetValue(currency.Code, out symbol))
+                        {
+                            symbol = "";
+                        }
+
+                        var formatted = numericValue.Value.ToString("N");
+
+                        return CurrencySymbolAlign == "right"
+                                   ? $"{formatted}{symbol}"
+                                   : $"{symbol}{formatted}";
+                    }
+                }
+
+                return numericValue.Value.ToString("N");
+            }
+
+            if (value is DateTime dateTime)
+            {
+                return dateTime.ToString("MM/dd/yyyy");
+            }
+
+            return value.ToString();
+        }
+
         private string GetFormatString(IReadOnlyDictionary<int, CurrencyModel> currencies,
                                        double value,
                                        bool keepEmptyValues)

@@ -21,7 +21,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
         private const int HEADER_HEIGHT = 3;
 
         private readonly ExportPlanRequest _exportPlanRequest;
+        private readonly ColumnsHelper _columnsHelper;
         private readonly PeriodHelper _periodHelper;
+        private readonly bool _isNewFlow;
         private readonly FormattedPlanViewMode _viewMode;
         private readonly ChartData _chartData;
 
@@ -34,10 +36,6 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             : base(sheetName)
         {
             _exportPlanRequest = exportPlanRequest;
-            _periodHelper = new PeriodHelper(exportPlanRequest.Chart.Plan,
-                                             exportPlanRequest.ClientCalendarType,
-                                             exportPlanRequest.CalendarStructures);
-
             _viewMode = exportPlanRequest.ViewMode;
 
             _chartData = JsonConvert.DeserializeObject<ChartData>(exportPlanRequest.Chart.Version.JsonData,
@@ -49,6 +47,18 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                                                                       MissingMemberHandling =
                                                                           MissingMemberHandling.Ignore
                                                                   });
+
+            _isNewFlow = exportPlanRequest.IsNewFlow;
+            if (_isNewFlow)
+            {
+                _columnsHelper = new ColumnsHelper(_viewMode, exportPlanRequest.Columns);
+            }
+            else
+            {
+                _periodHelper = new PeriodHelper(_chartData.Plan, 
+                                                 exportPlanRequest.ClientCalendarType,
+                                                 exportPlanRequest.CalendarStructures);
+            }
 
             _planRows = new Dictionary<int, RowDefinition>();
         }
@@ -85,7 +95,15 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
 
         private void FillCalendarHeader(ExcelWorksheet worksheet)
         {
-            var calendarSpans = _periodHelper.Build();
+            ICollection<CalendarSpan> calendarSpans;
+            if (_isNewFlow)
+            {
+                calendarSpans = _columnsHelper.Build();
+            }
+            else
+            {
+                calendarSpans = _periodHelper.Build();
+            }
 
             _columnsLookup = new Dictionary<DateTime, int>();
 
@@ -135,7 +153,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                                                 dayColumnIndex - 1]);
                 weekColumnStartIndex = dayColumnIndex;
 
-                var currentMonth = new DateTime(week.EndDate.Year, week.EndDate.Month, 1);
+                var currentMonth = new DateTime(week.Year, week.Month, 1);
                 if (lastMonth == null)
                 {
                     lastMonth = currentMonth;

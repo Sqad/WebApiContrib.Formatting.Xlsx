@@ -60,10 +60,14 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             var maxShapeIndex = chartData.Objects.Shapes?.Max(x => x.RowEnd) ?? 0;
             var maxPictureIndex = chartData.Objects.Pictures?.Max(x => x.RowEnd) ?? 0;
             var maxTextIndex = chartData.Objects.Texts?.Max(x => x.RowEnd) ?? 0;
-            var maxLeftTableCellIndex = (chartData.Cells ?? new List<TextValue>())
-                                        .Select(x => new CellAddress(x.Key))
-                                        .Where(x => x.IsFlightsTableAddress)
-                                        .Max(x => x.RowIndex);
+
+            var cells = (chartData.Cells ?? new List<TextValue>())
+                        .Select(x => new CellAddress(x.Key))
+                        .Where(x => x.IsFlightsTableAddress)
+                        .Select(x => x.RowIndex);
+            var maxLeftTableCellIndex = cells.Any()
+                                            ? cells.Max()
+                                            : 0;
 
             maxRowIndex = GetMax(maxRowIndex,
                                  maxFormulaIndex,
@@ -106,6 +110,43 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 
         private static void MergeCaptions(Flight flight, VehicleModel vehicle)
         {
+            if (flight.FlightCaption == null)
+            {
+                flight.FlightCaption = new FlightCaption();
+            }
+
+            if (flight.FlightCaption.Above == null)
+            {
+                flight.FlightCaption.Above = new List<FlightCaptionPosition>();
+            }
+
+            if (flight.FlightCaption.Below == null)
+            {
+                flight.FlightCaption.Below = new List<FlightCaptionPosition>();
+            }
+
+            if (flight.FlightCaption.Inside == null)
+            {
+                flight.FlightCaption.Inside = new List<FlightCaptionPosition>();
+            }
+
+            foreach (var caption in flight.InheritedCaptions?.Above ?? new List<FlightCaptionPosition>())
+            {
+                flight.FlightCaption.Above.Insert(0, caption);
+            }
+
+            foreach (var caption in flight.InheritedCaptions?.Below ?? new List<FlightCaptionPosition>())
+            {
+                flight.FlightCaption.Below.Insert(0, caption);
+            }
+
+            foreach (var caption in flight.InheritedCaptions?.Inside ?? new List<FlightCaptionPosition>())
+            {
+                flight.FlightCaption.Inside.Insert(0, caption);
+            }
+
+            return;
+
             if (vehicle == null)
             {
                 return;

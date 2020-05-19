@@ -5,9 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using SQAD.MTNext.Business.Models.FlowChart.Export;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 {
+    //NOTE: not used - client calendar structure is dirty, so use pre-computed periods from PlanCreator
     internal class PeriodHelper
     {
         private const int STANDARD_CALENDAR_ID = -1;

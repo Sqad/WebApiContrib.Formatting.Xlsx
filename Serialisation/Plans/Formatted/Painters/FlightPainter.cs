@@ -4,6 +4,7 @@ using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using SQAD.MTNext.Business.Models.Core.Currency;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Formulas;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
@@ -75,7 +76,14 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
             FormatFlight(flightCells, appearance);
 
-            flightCells.Value = _formulaParser.GetInsideCaption(flight);
+            var insideCaptions = flight.FlightCaption.Inside ?? new List<FlightCaptionPosition>();
+            var captions = insideCaptions.Select(x =>
+                                                 {
+                                                     var a = AppearanceHelper.GetAppearance(x.Appearance);
+                                                     return a.GetValue(x.FormattedValue, _currencies);
+                                                 });
+
+            flightCells.Value = string.Join(' ', captions);
 
             return rowDefinition.EndExcelRowIndex;
         }
@@ -169,7 +177,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     cells.Style.Border.Bottom.Color.SetColor(appearance.CellBorderColor);
                 }
 
-                captionAppearance.FillValue(caption.Text, cells, _currencies);
+                captionAppearance.FillValue(caption.FormattedValue, cells, _currencies);
 
                 cells.Merge = true;
                 cells.Style.ShrinkToFit = true;

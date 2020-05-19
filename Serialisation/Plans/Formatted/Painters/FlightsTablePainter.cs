@@ -117,7 +117,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                 cell.Merge = true;
                 cell.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
 
-                cellAppearance.FillValue(tableCell.Value, cell, _currencies, false);
+                var firstCell = _worksheet.Cells[cell.Start.Address];
+
+                cellAppearance.FillValue(tableCell.Value, firstCell, _currencies, false);
             }
 
             for (var headerColumnIndex = 1; headerColumnIndex <= maxColumnIndex; headerColumnIndex++)

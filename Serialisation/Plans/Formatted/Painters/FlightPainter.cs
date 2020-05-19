@@ -177,7 +177,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     cells.Style.Border.Bottom.Color.SetColor(appearance.CellBorderColor);
                 }
 
-                captionAppearance.FillValue(caption.FormattedValue, cells, _currencies);
+                var firstCell = _worksheet.Cells[cells.Start.Address];
+
+                captionAppearance.FillValue(caption.FormattedValue, firstCell, _currencies);
 
                 cells.Merge = true;
                 cells.Style.ShrinkToFit = true;

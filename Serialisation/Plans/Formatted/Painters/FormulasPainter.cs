@@ -148,7 +148,12 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     }
 
                     var appearance = AppearanceHelper.GetAppearance(formula.Appearance, subtotalRowAppearance);
-                    appearance.FillValue(cell.Value.Value, ranges.First(), _currencies);
+
+                    var firstRange = ranges.First();
+                    var firstCellAddress = firstRange.Address;
+                    var firstCell = _worksheet.Cells[firstCellAddress];
+
+                    appearance.FillValue(cell.Value.Value, firstCell, _currencies);
 
                     foreach (var range in ranges)
                     {

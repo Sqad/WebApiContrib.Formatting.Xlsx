@@ -107,14 +107,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
 
         private void ObtainMeasuresCount(ExcelWorksheet worksheet)
         {
-            var measuresCount = 0;
             var isStartFound = false;
             for (var rowIndex = _headerRowsCount + 1; rowIndex < worksheet.Dimension.Rows; rowIndex++)
             {
                 if (WorksheetHelpers.IsDataRow(worksheet, rowIndex) && !isStartFound)
                 {
                     isStartFound = true;
-                    measuresCount++;
+                    _measuresCount++;
                     continue;
                 }
 
@@ -127,11 +126,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                     || WorksheetHelpers.IsGroupRow(worksheet, rowIndex, _totalColumnIndexes)
                     || WorksheetHelpers.IsTotalRow(worksheet, rowIndex, _leftPaneWidth + 1))
                 {
-                    _measuresCount = measuresCount;
                     break;
                 }
 
-                measuresCount++;
+                _measuresCount++;
             }
 
             _isMeasureColumnExists = _leftPaneWidth >= WorksheetHelpers.RowMeasureColumnIndex;

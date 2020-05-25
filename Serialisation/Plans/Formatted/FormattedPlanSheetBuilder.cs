@@ -22,8 +22,6 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
 
         private readonly ExportPlanRequest _exportPlanRequest;
         private readonly ColumnsHelper _columnsHelper;
-        private readonly PeriodHelper _periodHelper;
-        private readonly bool _isNewFlow;
         private readonly FormattedPlanViewMode _viewMode;
         private readonly ChartData _chartData;
 
@@ -48,17 +46,12 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                                                                           MissingMemberHandling.Ignore
                                                                   });
 
-            _isNewFlow = exportPlanRequest.IsNewFlow;
-            if (_isNewFlow)
+            if (_chartData.Columns == null)
             {
-                _columnsHelper = new ColumnsHelper(_viewMode, exportPlanRequest.Columns);
+                throw new ApplicationException("Please re-save plan before export");
             }
-            else
-            {
-                _periodHelper = new PeriodHelper(_chartData.Plan, 
-                                                 exportPlanRequest.ClientCalendarType,
-                                                 exportPlanRequest.CalendarStructures);
-            }
+
+            _columnsHelper = new ColumnsHelper(_viewMode, _chartData.Columns);
 
             _planRows = new Dictionary<int, RowDefinition>();
         }
@@ -95,15 +88,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
 
         private void FillCalendarHeader(ExcelWorksheet worksheet)
         {
-            ICollection<CalendarSpan> calendarSpans;
-            if (_isNewFlow)
-            {
-                calendarSpans = _columnsHelper.Build();
-            }
-            else
-            {
-                calendarSpans = _periodHelper.Build();
-            }
+            var calendarSpans = _columnsHelper.Build();
 
             _columnsLookup = new Dictionary<DateTime, int>();
 

@@ -1,5 +1,5 @@
-﻿using SQAD.MTNext.Business.Models.FlowChart.Enums;
-using SQAD.MTNext.Business.Models.FlowChart.Export;
+﻿using SQAD.MTNext.Business.Models.FlowChart.DataModels;
+using SQAD.MTNext.Business.Models.FlowChart.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,9 +9,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
     internal class ColumnsHelper
     {
         private readonly FormattedPlanViewMode _viewMode;
-        private readonly List<ColumnModel> _columns;
+        private readonly List<HeaderColumn> _columns;
 
-        public ColumnsHelper(FormattedPlanViewMode viewMode, ColumnsModel columns)
+        public ColumnsHelper(FormattedPlanViewMode viewMode, HeaderColumns columns)
         {
             _viewMode = viewMode;
 

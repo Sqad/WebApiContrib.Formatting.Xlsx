@@ -154,7 +154,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                 var monthCells = worksheet.Cells[monthRowIndex,
                                                  monthColumnStartIndex,
                                                  monthRowIndex,
-                                                 currentMonthColumnIndex - 1];
+                                                 currentMonthColumnIndex
+                                                 - ((monthColumnStartIndex >= currentMonthColumnIndex) ? 0 : 1)];
                 monthCells.Value = $"{lastMonth.Value:MMMM} {lastMonth.Value.Year}";
                 
                 FormatMonthCells(monthCells);

@@ -33,6 +33,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
     {
         private readonly SerializerType _serializerType;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly bool _isExportJsonToXls;
 
         #region Properties
 
@@ -96,7 +97,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                                       Action<ExcelStyle> cellStyle = null,
                                       Action<ExcelStyle> headerStyle = null,
                                       IExportHelpersRepository staticValuesResolver = null,
-                                      SerializerType serializerType = SerializerType.Default)
+                                      SerializerType serializerType = SerializerType.Default,
+                                      bool isExportJsonToXls = false)
         {
             SupportedMediaTypes.Clear();
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
@@ -110,11 +112,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             HeaderStyle = headerStyle;
 
             _serializerType = serializerType;
-
+            _isExportJsonToXls = isExportJsonToXls;
             // Initialise serialisers.
             Serialisers = new List<IXlsxSerialiser>
                           {
-                              new SQADPlanXlsSerialiser(staticValuesResolver, modelMetadataProvider),
+                              new SQADPlanXlsSerialiser(staticValuesResolver, modelMetadataProvider, isExportJsonToXls: _isExportJsonToXls),
                               new SqadFormattedViewXlsxSerializer(),
                               new SqadUnformattedViewXlsxSerializer(),
                               new SqadSummaryPlanXlsxSerializer(),
@@ -221,7 +223,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                 break;
             }
 
-            serialiser.Serialise(itemType, value, document, null, null, null);
+             serialiser.Serialise(itemType, value, document, null, null, null);
 
             if (!document.IsVBA)
             {

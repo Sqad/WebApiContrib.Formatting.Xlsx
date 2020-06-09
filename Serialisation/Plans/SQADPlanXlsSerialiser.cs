@@ -819,7 +819,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             else if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false)
             {
                 _resolveTables.TryGetValue(info.ExcelColumnAttribute.ResolveFromTable, out columntResolveTable);
-                if (columntResolveTable == default(DataTable))
+                if (columntResolveTable == null)
                 {
                     columntResolveTable = _staticValuesResolver.GetRecordsByTableName(info.ExcelColumnAttribute.ResolveFromTable);
                     if (columntResolveTable != null)

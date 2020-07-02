@@ -44,7 +44,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
                     break;
                 case "CRWC":
                     _weekLabel = WeekLabel.CustomRunningWeekCount;
-                    _customWeekLabel = plan.CustomWeekLabelNumber == 0 ? 1 : plan.CustomWeekLabelNumber;
+                    _customWeekLabel = plan.CustomWeekLabel == 0 ? 1 : plan.CustomWeekLabel;
                     break;
                 case "RWC":
                     _weekLabel = WeekLabel.DefaultRunningWeekCount;

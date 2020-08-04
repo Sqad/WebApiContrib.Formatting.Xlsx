@@ -37,7 +37,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             {
                 return DrawFlightsTableUnsafe(chartData);
             }
-            catch
+            catch (Exception ex)
             {
                 return 1;
             }
@@ -45,6 +45,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
         private int DrawFlightsTableUnsafe(ChartData chartData)
         {
+            var pCount = _planRows.Count;
+            chartData.Objects.Cell.RemoveAll(c => CellAddress.GetRowIndexByCoords(c.Coordinates) > pCount);
             var maxColumnIndex = 0;
             var maxRowIndex = 0;
 
@@ -360,9 +362,20 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                 return;
             }
 
-            RowIndex = coords.StartY + 1;
-            ColumnIndex = coords.X + 2;
+            RowIndex = GetRowIndexByCoords(coords);//coords.StartY + 1;
+            ColumnIndex = GetColIndexByCoords(coords);//coords.X + 2;
         }
+
+        public static int GetRowIndexByCoords(Coordinates coords)
+        {
+            return coords.StartY + 1;
+        }
+
+        public static int GetColIndexByCoords(Coordinates coords)
+        {
+            return coords.X + 2;
+        }
+
 
         public bool IsFlightsTableAddress { get; }
 

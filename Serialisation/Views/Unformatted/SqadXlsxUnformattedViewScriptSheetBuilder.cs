@@ -65,12 +65,44 @@ Private Sub Workbook_Open()
     End If
     
     {dataScript}
+    
+    InitQueryTable
+
     {pivotScript}
 
     tmpSheet.Visible = xlSheetVeryHidden
 End Sub
 
-{refreshDataScript}
+Private Sub InitQueryTable()
+    
+    Dim sheet As Worksheet
+    Set sheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
+
+
+    Dim qt As QueryTable
+    If sheet.QueryTables.Count = 0 Then
+      Set qt = sheet.QueryTables.Add(Connection:= ""URL;"" & ExportUrl, Destination:= sheet.Range(""A1""))
+    Else
+      Set qt = sheet.QueryTables(1)
+    End If
+
+    qt.AdjustColumnWidth = True
+    qt.RefreshStyle = xlOverwriteCells
+    qt.RefreshOnFileOpen = True
+    qt.BackgroundQuery = False
+
+    qt.Name = ""{RefreshDataQueryTableName}""
+    qt.WebPreFormattedTextToColumns = True
+    qt.WebFormatting = xlWebFormattingNone
+    qt.WebConsecutiveDelimitersAsOne = True
+    qt.WebDisableRedirections = False
+    qt.WebSingleBlockTextImport = False
+    qt.WebDisableDateRecognition = False
+    qt.WebSelectionType = xlEntirePage
+
+End Sub
+
+{ refreshDataScript}
 ";
             worksheet.Workbook.CodeModule.Code = code;
         }
@@ -113,27 +145,6 @@ End Sub
         .Caption = ""Refresh Data""
         .OnAction = ""ThisWorkbook.RefreshButtonClick""
     End With
-
-    Dim sheet As Worksheet
-    Set sheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
-
-    Dim qt As QueryTable
-    Set qt = sheet.QueryTables.Add(Connection:=""URL;"" & ExportUrl, Destination:=sheet.Range(""{worksheet.Dimension.Address}""))
-
-    qt.AdjustColumnWidth = False
-    qt.RefreshStyle = xlOverwriteCells
-    qt.BackgroundQuery = False
-
-    qt.Name = ""{RefreshDataQueryTableName}""
-    qt.WebPreFormattedTextToColumns = True
-    qt.WebFormatting = xlWebFormattingNone
-    qt.WebConsecutiveDelimitersAsOne = True
-    qt.WebDisableRedirections = False
-    qt.WebSingleBlockTextImport = False
-    qt.WebDisableDateRecognition = False
-    qt.WebSelectionType = xlEntirePage
-
-    sheet.Range(""{worksheet.Dimension.Address}"").Font.Bold = False
 ";
         }
 
@@ -143,11 +154,10 @@ End Sub
 Sub RefreshButtonClick()
     Dim sheet As Worksheet
     Set sheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
-
+    InitQueryTable
     Dim qt As QueryTable
     Set qt = sheet.QueryTables(1)
     qt.Refresh
-
     MsgBox ""Data was updated""
     sheet.Activate
 End Sub

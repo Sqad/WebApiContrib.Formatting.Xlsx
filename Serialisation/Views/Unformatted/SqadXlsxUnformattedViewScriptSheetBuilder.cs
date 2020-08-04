@@ -47,6 +47,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             var pivotScript = string.Empty;
             if (_needCreatePivotSheet)
             {
+                if (dataSheet.Dimension == null)
+                {
+                    dataSheet.Cells[1,1].Value = "";
+                }
                 pivotScript = GetPivotScript(dataSheet.Dimension.ToString());
             }
 

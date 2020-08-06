@@ -154,6 +154,7 @@ End Sub
 Sub RefreshButtonClick()
     Dim sheet As Worksheet
     Set sheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
+    sheet.Cells.Clear
     InitQueryTable
     Dim qt As QueryTable
     Set qt = sheet.QueryTables(1)

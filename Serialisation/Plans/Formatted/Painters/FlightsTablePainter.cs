@@ -46,7 +46,10 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
         private int DrawFlightsTableUnsafe(ChartData chartData)
         {
             var pCount = _planRows.Count;
-            chartData.Objects.Cell.RemoveAll(c => CellAddress.GetRowIndexByCoords(c.Coordinates) > pCount);
+            if (chartData.Objects.Cell != null)
+            {
+                chartData.Objects.Cell.RemoveAll(c => CellAddress.GetRowIndexByCoords(c.Coordinates) > pCount);
+            }
             var maxColumnIndex = 0;
             var maxRowIndex = 0;
 

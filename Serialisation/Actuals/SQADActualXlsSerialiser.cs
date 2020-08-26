@@ -682,6 +682,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
             foreach (var item in export.Sheets)
             {
                 var sheet = new SqadXlsxPlanSheetBuilder(item.MediaType.Name);
+                sheet.ExternalActualsLabel = export.ExternalActualsLabel;
                 sheet.ActualRow = true;
                 sheet.ColNames = PopulateNameCollection(item);
                 // get offset

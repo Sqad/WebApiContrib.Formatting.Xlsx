@@ -12,11 +12,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
     {
         private const string InstructionsTableName = "Instructions";
         private const string PivotTableName = "Pivot";
-        private const string DataTableName = "Data";
+        private readonly string _dataTableName = ExportViewConstants.UnformattedViewDataSheetName;
         private const string SettingsTableName = "_settings";
 
         public SerializerType SerializerType => SerializerType.Default;
 
+        public SqadUnformattedViewXlsxSerializer(string viewLabel = null)
+        {
+            _dataTableName = string.IsNullOrEmpty(viewLabel)
+                ? ExportViewConstants.UnformattedViewDataSheetName : viewLabel;
+        }
         public bool CanSerialiseType(Type valueType, Type itemType)
         {
             return valueType == typeof(DataSet);
@@ -36,17 +41,23 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
             var tables = dataSet.Tables;
 
+            if (!string.Equals(_dataTableName, ExportViewConstants.UnformattedViewDataSheetName))
+            {
+                var dataTable = tables[ExportViewConstants.UnformattedViewDataSheetName];
+                dataTable.TableName = _dataTableName;
+            }
+
             ProcessInstructionsSheet(document, tables);
 
             var settings = GetSettings(tables);
             ProcessDataSheet(document, tables);
 
             var needCreatePivotSheet = tables.Contains(PivotTableName);
-            var scriptBuilder = new SqadXlsxUnformattedViewScriptSheetBuilder(settings, needCreatePivotSheet);
+            var scriptBuilder = new SqadXlsxUnformattedViewScriptSheetBuilder(settings, needCreatePivotSheet, _dataTableName);
             document.AppendSheet(scriptBuilder);
         }
 
-        private static void ProcessInstructionsSheet(IXlsxDocumentBuilder document, DataTableCollection tables)
+        private void ProcessInstructionsSheet(IXlsxDocumentBuilder document, DataTableCollection tables)
         {
             if (!tables.Contains(InstructionsTableName))
             {
@@ -61,20 +72,20 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
             AppendColumnsAndRows(instructionsSheetBuilder, instructionsDataTable);
         }
 
-        private static void ProcessDataSheet(IXlsxDocumentBuilder document,
+        private void ProcessDataSheet(IXlsxDocumentBuilder document,
                                              DataTableCollection tables)
         {
-            if (!tables.Contains(DataTableName))
+            if (!tables.Contains(_dataTableName))
             {
                 return;
             }
 
-            var dataTable = tables[DataTableName];
+            var dataTable = tables[_dataTableName];
 
             //note: dirty fix, remove dummy row for JSON deserialization
             dataTable.Rows.RemoveAt(0);
 
-            var dataSheetBuilder = new SqadXlsxUnformattedViewDataSheetBuilder();
+            var dataSheetBuilder = new SqadXlsxUnformattedViewDataSheetBuilder(_dataTableName);
             document.AppendSheet(dataSheetBuilder);
 
             AppendColumnsAndRows(dataSheetBuilder, dataTable);

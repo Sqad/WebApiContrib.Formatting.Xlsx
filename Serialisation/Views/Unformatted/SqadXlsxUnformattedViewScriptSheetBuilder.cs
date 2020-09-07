@@ -10,14 +10,18 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
     {
         private const string RefreshDataQueryTableName = "RefreshDataQueryTable";
 
+        private readonly string _dataSheetName;
         private readonly UnformattedExportSettings _settings;
         private readonly bool _needCreatePivotSheet;
 
-        public SqadXlsxUnformattedViewScriptSheetBuilder(UnformattedExportSettings settings, bool needCreatePivotSheet)
+        public SqadXlsxUnformattedViewScriptSheetBuilder(UnformattedExportSettings settings, bool needCreatePivotSheet
+              , string dataSheetName = null)
             : base(ExportViewConstants.ScriptSheetName, shouldAutoFit: false)
         {
             _settings = settings;
             _needCreatePivotSheet = needCreatePivotSheet;
+            _dataSheetName = string.IsNullOrEmpty(dataSheetName)
+                 ? ExportViewConstants.UnformattedViewDataSheetName : dataSheetName;
         }
 
         protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
@@ -33,7 +37,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 
             var dataSheet = worksheet.Workbook
                                      .Worksheets
-                                     .First(x => x.Name == ExportViewConstants.UnformattedViewDataSheetName);
+                                     .First(x => x.Name == _dataSheetName);
             
             if (_settings != null)
             {
@@ -76,7 +80,7 @@ End Sub
 Private Sub InitQueryTable()
     
     Dim sheet As Worksheet
-    Set sheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
+    Set sheet = Sheets(""{_dataSheetName}"")
 
 
     Dim qt As QueryTable
@@ -148,12 +152,12 @@ End Sub
 ";
         }
 
-        private static string GetQueryTableRefreshDataScript()
+        private string GetQueryTableRefreshDataScript()
         {
             return $@"
 Sub RefreshButtonClick()
     Dim sheet As Worksheet
-    Set sheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
+    Set sheet = Sheets(""{_dataSheetName}"")
     sheet.Cells.Clear
     InitQueryTable
     Dim qt As QueryTable
@@ -344,7 +348,7 @@ End Sub
 ";
         }
 
-        private static string GetPivotScript(string dataDimension)
+        private string GetPivotScript(string dataDimension)
         {
             return $@"
     On Error Resume Next
@@ -357,7 +361,7 @@ End Sub
     Set pivotSheet = Sheets(""{ExportViewConstants.UnformattedViewPivotSheetName}"")
     
     Dim dataSheet As Worksheet
-    Set dataSheet = Sheets(""{ExportViewConstants.UnformattedViewDataSheetName}"")
+    Set dataSheet = Sheets(""{_dataSheetName}"")
 
     Set PRange = dataSheet.Range(""{dataDimension}"").CurrentRegion
 

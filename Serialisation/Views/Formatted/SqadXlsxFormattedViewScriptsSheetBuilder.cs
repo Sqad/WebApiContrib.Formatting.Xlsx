@@ -7,9 +7,11 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted
 {
     internal class SqadXlsxFormattedViewScriptsSheetBuilder : SqadXlsxSheetBuilderBase
     {
-        public SqadXlsxFormattedViewScriptsSheetBuilder()
+        private readonly string _viewLabel;
+        public SqadXlsxFormattedViewScriptsSheetBuilder(string viewLabel = null)
             : base(ExportViewConstants.ScriptSheetName, shouldAutoFit: false)
         {
+            _viewLabel = viewLabel;
         }
 
         // note: tricky solution to force Excel auto-format
@@ -19,7 +21,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted
             {
                 worksheet.Workbook.CreateVBAProject();
             }
-
+            string formattedViewSheetName = string.IsNullOrEmpty(_viewLabel)
+                  ? ExportViewConstants.FormattedViewSheetName : _viewLabel;
             var code = $@"
 Private Sub Workbook_Open()
     Dim tmpSheet As Worksheet
@@ -28,7 +31,7 @@ Private Sub Workbook_Open()
         Exit Sub
     End If
     
-    Sheets(""{ExportViewConstants.FormattedViewSheetName}"").UsedRange.Cells.Value = Sheets(""{ExportViewConstants.FormattedViewSheetName}"").UsedRange.Cells.Value
+    Sheets(""{formattedViewSheetName}"").UsedRange.Cells.Value = Sheets(""{formattedViewSheetName}"").UsedRange.Cells.Value
 
     tmpSheet.Visible = xlSheetVeryHidden
 End Sub";

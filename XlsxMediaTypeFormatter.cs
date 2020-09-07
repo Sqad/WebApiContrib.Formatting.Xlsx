@@ -23,6 +23,10 @@ using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Internal;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted;
+using SQAD.MTNext.Data.EntityFramework.Core.MTEntities;
+using Microsoft.Extensions.DependencyInjection;
+using SQAD.MTNext.Services.Auth.Factories;
+using System.Linq;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -113,12 +117,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
             _serializerType = serializerType;
             _isExportJsonToXls = isExportJsonToXls;
+            string viewLabel = httpContextAccessor.HttpContext?.RequestServices.GetService<MTEntitiesContextWithViews>()
+                ?.DatabaseSettings.Where(x => x.Key.Equals("ViewLabel")).FirstOrDefault()?.Value;
             // Initialise serialisers.
             Serialisers = new List<IXlsxSerialiser>
                           {
                               new SQADPlanXlsSerialiser(staticValuesResolver, modelMetadataProvider, isExportJsonToXls: _isExportJsonToXls),
-                              new SqadFormattedViewXlsxSerializer(),
-                              new SqadUnformattedViewXlsxSerializer(),
+                              new SqadFormattedViewXlsxSerializer(viewLabel),
+                              new SqadUnformattedViewXlsxSerializer(viewLabel),
                               new SqadSummaryPlanXlsxSerializer(),
                               new SqadActualXlsSerialiser(),
                               new SqadCostSourceXlsxSerializer(),

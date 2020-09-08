@@ -24,6 +24,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
         public bool ShouldAddHeaderRow { private get; set; }
         public bool ActualRow { get; set; } = false;
+        public string ExternalActualsLabel { get; set; }
 
         public Dictionary<string, Tuple<string, bool>> ColNames { get; set; } = new Dictionary<string, Tuple<string, bool>>(); 
 
@@ -367,7 +368,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             var cell = worksheet.Cells[1, 2];
             cell.Style.Font.Size = 14;
             cell.Style.Font.Bold = true;
-            cell.Value = worksheet.Name;
+            cell.Value = !string.IsNullOrWhiteSpace(ExternalActualsLabel) 
+                ? $"{ worksheet.Name} - {ExternalActualsLabel}" 
+                : worksheet.Name;
 
         }
         private int StartRow(ExcelWorksheet worksheet)

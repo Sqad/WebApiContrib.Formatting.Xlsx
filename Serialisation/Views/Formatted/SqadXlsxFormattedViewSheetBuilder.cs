@@ -12,8 +12,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
         private readonly int _headerRowsCount;
         private int _leftPaneWidth;
 
-        public SqadXlsxFormattedViewSheetBuilder(int headerRowsCount)
-            : base(ExportViewConstants.FormattedViewSheetName)
+        public SqadXlsxFormattedViewSheetBuilder(int headerRowsCount, string optionFormattedViewSheetName = null)
+            : base(string.IsNullOrEmpty(optionFormattedViewSheetName) 
+                   ? ExportViewConstants.FormattedViewSheetName : optionFormattedViewSheetName)
         {
             _headerRowsCount = headerRowsCount;
         }

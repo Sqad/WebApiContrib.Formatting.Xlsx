@@ -8,8 +8,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformat
 {
     public class SqadXlsxUnformattedViewDataSheetBuilder : SqadXlsxSheetBuilderBase
     {
-        public SqadXlsxUnformattedViewDataSheetBuilder()
-            : base(ExportViewConstants.UnformattedViewDataSheetName, shouldAutoFit: false)
+        public SqadXlsxUnformattedViewDataSheetBuilder(string viewLabel = null)
+            : base(string.IsNullOrEmpty(viewLabel) 
+                   ? ExportViewConstants.UnformattedViewDataSheetName : viewLabel, shouldAutoFit: false)
         {
         }
 

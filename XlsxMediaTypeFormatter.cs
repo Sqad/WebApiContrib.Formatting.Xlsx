@@ -38,6 +38,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         private readonly SerializerType _serializerType;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly bool _isExportJsonToXls;
+        private readonly string _fileExtension;
 
         #region Properties
 
@@ -102,7 +103,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                                       Action<ExcelStyle> headerStyle = null,
                                       IExportHelpersRepository staticValuesResolver = null,
                                       SerializerType serializerType = SerializerType.Default,
-                                      bool isExportJsonToXls = false)
+                                      bool isExportJsonToXls = false,
+                                      string fileExtension = null)
         {
             SupportedMediaTypes.Clear();
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
@@ -117,6 +119,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
             _serializerType = serializerType;
             _isExportJsonToXls = isExportJsonToXls;
+            _fileExtension = fileExtension;
             string viewLabel = httpContextAccessor.HttpContext?.RequestServices.GetService<MTEntitiesContextWithViews>()
                 ?.DatabaseSettings.Where(x => x.Key.Equals("ViewLabel")).FirstOrDefault()?.Value;
             // Initialise serialisers.
@@ -177,7 +180,20 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             }
 
             // Add XLSX extension if not present.
-            if (!fileName.EndsWith("xlsm", StringComparison.CurrentCultureIgnoreCase)) fileName += ".xlsm";
+            if (string.IsNullOrEmpty(_fileExtension))
+            {
+                if (!fileName.EndsWith("xlsm", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    fileName += ".xlsm";
+                }
+            }
+            else
+            {
+                if (!fileName.EndsWith(string.Format(".{0}", _fileExtension), StringComparison.CurrentCultureIgnoreCase))
+                {
+                    fileName += string.Format(".{0}", _fileExtension);
+                }
+            }
 
             // Set content disposition to use this file name.
             headers.ContentDisposition = new ContentDispositionHeaderValue("inline")

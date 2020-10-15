@@ -134,7 +134,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                               new SqadDeliverySourceXlsxSerializer(),
                               new SQADApprovalReportXlsSerialiser(),
                               new SqadInternalDatabaseSetupRecordsXlsxSerializer(),
-                              new FormattedPlanSerializer()
+                              new FormattedPlanSerializer(),
+                              new SQADBillingReportXlsSerialiser()
                           };
 
             _httpContextAccessor = httpContextAccessor;

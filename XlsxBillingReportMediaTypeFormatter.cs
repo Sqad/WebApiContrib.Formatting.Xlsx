@@ -33,7 +33,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
     /// <summary>
     /// Class used to send an Excel file to the response.
     /// </summary>
-    public class XlsxMediaTypeFormatter : MediaTypeFormatter
+    public class XlsxBillingReportMediaTypeFormatter : MediaTypeFormatter
     {
         private readonly SerializerType _serializerType;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -93,7 +93,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         /// <param name="cellStyle">An action method that modifies the worksheet cell style.</param>
         /// <param name="headerStyle">An action method that modifies the cell style of the first (header) row in the
         /// worksheet.</param>
-        public XlsxMediaTypeFormatter(IHttpContextAccessor httpContextAccessor,
+        public XlsxBillingReportMediaTypeFormatter(IHttpContextAccessor httpContextAccessor,
                                       IModelMetadataProvider modelMetadataProvider,
                                       bool autoFit = true,
                                       bool autoFilter = false,
@@ -125,16 +125,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             // Initialise serialisers.
             Serialisers = new List<IXlsxSerialiser>
                           {
-                              new SQADPlanXlsSerialiser(staticValuesResolver, modelMetadataProvider, isExportJsonToXls: _isExportJsonToXls),
-                              new SqadFormattedViewXlsxSerializer(viewLabel),
-                              new SqadUnformattedViewXlsxSerializer(viewLabel),
-                              new SqadSummaryPlanXlsxSerializer(),
-                              new SqadActualXlsSerialiser(),
-                              new SqadCostSourceXlsxSerializer(),
-                              new SqadDeliverySourceXlsxSerializer(),
-                              new SQADApprovalReportXlsSerialiser(),
-                              new SqadInternalDatabaseSetupRecordsXlsxSerializer(),
-                              new FormattedPlanSerializer()
+                              new SQADBillingReportXlsSerialiser()
                           };
 
             _httpContextAccessor = httpContextAccessor;

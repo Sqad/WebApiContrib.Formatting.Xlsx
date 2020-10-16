@@ -6,6 +6,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
     internal static class ExportConstants
     {
         internal const string ApprovalReportSheetName = "Approval Report",
+                              BillingReportSheetName = "Billing Report",
                               EvenGroupColumnName= "IsEvenGroup",
                               CurrencySymbolColumnName = "CurrencySymbol",
                               IntExcelFormatTemplate = "#",

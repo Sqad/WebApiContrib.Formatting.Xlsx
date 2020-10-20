@@ -602,7 +602,17 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                     cell.CellHeader = item.ActualizedBy;
                     cell.CellValue = rec.ActualizedBy;
                     row.Add(cell);
+                }
+                else
+                {
+                    cell.CellHeader = item.DateActualized;
+                    cell.CellValue = string.Empty;
+                    row.Add(cell);
 
+                    cell = new ExcelCell();
+                    cell.CellHeader = item.ActualizedBy;
+                    cell.CellValue = string.Empty;
+                    row.Add(cell);
                 }
 
 

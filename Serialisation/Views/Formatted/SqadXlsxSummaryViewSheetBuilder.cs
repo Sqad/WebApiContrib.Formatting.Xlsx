@@ -1,6 +1,7 @@
 ﻿using OfficeOpenXml;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -240,15 +241,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             for (var rowIndex = _headerRowsCount + 1; rowIndex <= sheet.Dimension.Rows; rowIndex++)
             {
                 var nameCellValue = sheet.Cells[rowIndex, WorksheetHelpers.RowNameColumnIndex].Value as string;
+                bool isTotalRow = WorksheetHelpers.IsTotalRow(sheet, rowIndex, _leftPaneWidth + 1);
                 if (WorksheetHelpers.IsGroupRow(sheet, rowIndex, _totalColumnIndexes) &&
-                    !WorksheetHelpers.IsTotalRow(sheet, rowIndex, _leftPaneWidth + 1))
+                    !isTotalRow)
                 {
                     uniqueRowIdBuilder.Add(nameCellValue);
 
                     continue;
                 }
 
-                if (WorksheetHelpers.IsTotalRow(sheet, rowIndex, _leftPaneWidth + 1))
+                if (isTotalRow)
                 {
                     var groupRowKey = string.Join("-", uniqueRowIdBuilder);
 
@@ -389,8 +391,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
             for (var rowIndex = _headerRowsCount + 1; rowIndex <= sheet.Dimension.Rows; rowIndex++)
             {
                 var nameCellValue = sheet.Cells[rowIndex, WorksheetHelpers.RowNameColumnIndex].Value as string;
+                bool isTotalRow = WorksheetHelpers.IsTotalRow(sheet, rowIndex, _leftPaneWidth + 1);
                 if (WorksheetHelpers.IsGroupRow(sheet, rowIndex, _totalColumnIndexes) &&
-                    !WorksheetHelpers.IsTotalRow(sheet, rowIndex, _leftPaneWidth + 1))
+                    !isTotalRow)
                 {
                     uniqueRowIdBuilder.Add(nameCellValue);
 
@@ -399,7 +402,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                     continue;
                 }
 
-                if (WorksheetHelpers.IsTotalRow(sheet, rowIndex, _leftPaneWidth + 1))
+                if (isTotalRow)
                 {
                     var rowKeyPrefix = string.Join("-", uniqueRowIdBuilder);
                     var uniqueMeasures = new Dictionary<string, int>();
@@ -563,7 +566,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
                 var endGroupRowIndex = startGroupRowIndex;
                 var isEndGroupFound = false;
                 var duplicatesCount = 0;
-                for (var i = startGroupRowIndex + 1; i <= sheet.Dimension.Rows; i++)
+                for (var i = startGroupRowIndex + 1; i <= endRowIndex/*sheet.Dimension.Rows*/; i++)
                 {
                     if (isEndGroupFound)
                     {

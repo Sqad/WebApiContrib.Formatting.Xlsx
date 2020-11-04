@@ -210,140 +210,140 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                 }
             
                 FlightHelper lastFlightHelper = null;
-
-                foreach (var flight in flights)
-                {
-                    VehicleModel vehicle = null;
-                    if (flight.VehicleID.HasValue)
+                    foreach (var flight in flights)
                     {
-                        vehicle = _chartData.Vehicles.FirstOrDefault(x => x.ID == flight.VehicleID);
-                    }
-
-                    int flightRowIndex = -1;
-
-                    if (_viewMode == FormattedPlanViewMode.Weekly)
-                    {
-                        if (lastFlightHelper != null)
+                        VehicleModel vehicle = null;
+                        if (flight.VehicleID.HasValue)
                         {
-                            if (flight != lastFlightHelper.Flight)
-                            {
-                                continue;
-                            }
+                            vehicle = _chartData.Vehicles.FirstOrDefault(x => x.ID == flight.VehicleID);
                         }
 
-                        int index = flights.IndexOf(flight);
-                        Flight nextFlight = flights.ElementAtOrDefault(index + 1);
-                        int currIndex = 0;
-                        int nextIndex = 0;
-                        while ((nextFlight != null) && (nextFlight.RowIndex == mRowIndex) && (currIndex == nextIndex))
-                        {
-                            currIndex = _columnsLookup[flight.EndDate.AddDays(-1).Date];
-                            nextIndex = _columnsLookup[nextFlight.StartDate];
-                            if (currIndex == nextIndex)
-                            {
-                                if (!intersectFlights.Any())
-                                {
-                                    var firstFlightHelper = new FlightHelper(flight);
-                                    if (lastFlightHelper != null)
-                                    {
-                                        firstFlightHelper.StartCorrection = lastFlightHelper.StartCorrection;
-                                        firstFlightHelper.EndCorrection = lastFlightHelper.EndCorrection;
-                                    }
-                                        intersectFlights.Add(firstFlightHelper);
-                                    
-                                }
-                                intersectFlights.Add(new FlightHelper(nextFlight));
-                            }
-                            index += 1;
-                            nextFlight = flights.ElementAtOrDefault(index + 1);
-                        }
+                        int flightRowIndex = -1;
 
-                        if ((nextFlight != null) && (nextFlight.RowIndex > mRowIndex))
-                        {
-                            mRowIndex = nextFlight.RowIndex;
-                        }
-
-                        if (intersectFlights.Any())
-                        {
-                            int daysInWeek = 0;
-                            int flightIndex = 0;
-                            int maxDaysFlightIndex = 0;
-                            
-                            foreach (var fl in intersectFlights)
-                            {
-                                int currDaysInWeek = 1;
-                                int weekNumber = 0;
-                                
-                                if (flightIndex == 0)
-                                {
-                                    weekNumber = _columnsLookup[fl.Flight.EndDate.AddDays(-1).Date];
-                                    DateTime dateTime = fl.Flight.EndDate.AddDays(-1 * currDaysInWeek - 1).Date;
-                                    while ((_columnsLookup[dateTime] == weekNumber) && (dateTime >= fl.Flight.StartDate))
-                                    {
-                                        currDaysInWeek += 1;
-                                        dateTime = fl.Flight.EndDate.AddDays(-1 * currDaysInWeek - 1).Date;
-                                    }
-                                    currDaysInWeek -= 1;
-                                }
-                                else
-                                {
-                                    weekNumber = _columnsLookup[fl.Flight.StartDate.Date];
-                                    DateTime dateTime = fl.Flight.StartDate.AddDays(currDaysInWeek).Date;
-                                    while ((_columnsLookup[dateTime] == weekNumber) && (dateTime <= fl.Flight.EndDate.AddDays(-1).Date))
-                                    {
-                                        currDaysInWeek += 1;
-                                        dateTime = fl.Flight.StartDate.AddDays(currDaysInWeek).Date;
-                                    }
-                                }
-                                if (daysInWeek < currDaysInWeek)
-                                {
-                                    daysInWeek = currDaysInWeek;
-                                    maxDaysFlightIndex = flightIndex;
-                                }
-
-                                flightIndex += 1;
-                                
-                            }
-                            foreach (var fl in intersectFlights)
-                            {
-                                if (intersectFlights.IndexOf(fl) < maxDaysFlightIndex)
-                                {
-                                    fl.EndCorrection -= 1;
-                                }
-
-                                if (intersectFlights.IndexOf(fl) > maxDaysFlightIndex)
-                                {
-                                    fl.StartCorrection += 1;
-                                }
-
-                                if (fl != intersectFlights.Last())
-                                {
-                                    flightRowIndex = flightPainter.DrawFlight(fl, vehicle);
-                                }
-                            }
-                            lastFlightHelper = intersectFlights.Last();
-                            currIndex = 0;
-                            nextIndex = 0;
-                            intersectFlights.Clear();
-                        }
-                        else 
+                        if (_viewMode == FormattedPlanViewMode.Weekly)
                         {
                             if (lastFlightHelper != null)
                             {
-                                flightRowIndex = flightPainter.DrawFlight(lastFlightHelper, vehicle);
-                                lastFlightHelper = null;
+                                if (flight != lastFlightHelper.Flight)
+                                {
+                                    continue;
+                                }
+                            }
+
+                            int index = flights.IndexOf(flight);
+                            Flight nextFlight = flights.ElementAtOrDefault(index + 1);
+                            int currIndex = 0;
+                            int nextIndex = 0;
+                            while ((nextFlight != null) && (nextFlight.RowIndex == mRowIndex) && (currIndex == nextIndex))
+                            {
+                                currIndex = _columnsLookup[flight.EndDate.AddDays(-1).Date];
+                                nextIndex = _columnsLookup[nextFlight.StartDate];
+                                if (currIndex == nextIndex && nextFlight.RowIndex == flight.RowIndex)
+                                {
+                                    if (!intersectFlights.Any())
+                                    {
+                                        var firstFlightHelper = new FlightHelper(flight);
+                                        if (lastFlightHelper != null)
+                                        {
+                                            firstFlightHelper.StartCorrection = lastFlightHelper.StartCorrection;
+                                            firstFlightHelper.EndCorrection = lastFlightHelper.EndCorrection;
+                                        }
+                                        intersectFlights.Add(firstFlightHelper);
+
+                                    }
+                                    intersectFlights.Add(new FlightHelper(nextFlight));
+                                }
+                                index += 1;
+                                nextFlight = flights.ElementAtOrDefault(index + 1);
+                            }
+
+                            if ((nextFlight != null) && (nextFlight.RowIndex > mRowIndex))
+                            {
+                                mRowIndex = nextFlight.RowIndex;
+                            }
+
+                            if (intersectFlights.Any())
+                            {
+                                int daysInWeek = 0;
+                                int flightIndex = 0;
+                                int maxDaysFlightIndex = 0;
+
+                                foreach (var fl in intersectFlights)
+                                {
+                                    int currDaysInWeek = 1;
+                                    int weekNumber = 0;
+
+                                    if (flightIndex == 0)
+                                    {
+                                        weekNumber = _columnsLookup[fl.Flight.EndDate.AddDays(-1).Date];
+                                        DateTime dateTime = fl.Flight.EndDate.AddDays(-1 * currDaysInWeek - 1).Date;
+                                        while ((_columnsLookup[dateTime] == weekNumber) && (dateTime >= fl.Flight.StartDate))
+                                        {
+                                            currDaysInWeek += 1;
+                                            dateTime = fl.Flight.EndDate.AddDays(-1 * currDaysInWeek - 1).Date;
+                                        }
+                                        currDaysInWeek -= 1;
+                                    }
+                                    else
+                                    {
+                                        weekNumber = _columnsLookup[fl.Flight.StartDate.Date];
+                                        DateTime dateTime = fl.Flight.StartDate.AddDays(currDaysInWeek).Date;
+                                            while ((currDaysInWeek < 7)
+                                             && (_columnsLookup[dateTime] == weekNumber) && (dateTime <= fl.Flight.EndDate.AddDays(-1).Date))
+                                            {
+                                                currDaysInWeek += 1;
+                                                dateTime = fl.Flight.StartDate.AddDays(currDaysInWeek).Date;
+                                            }
+                                    }
+                                    if (daysInWeek < currDaysInWeek)
+                                    {
+                                        daysInWeek = currDaysInWeek;
+                                        maxDaysFlightIndex = flightIndex;
+                                    }
+
+                                    flightIndex += 1;
+
+                                }
+                                foreach (var fl in intersectFlights)
+                                {
+                                    if (intersectFlights.IndexOf(fl) < maxDaysFlightIndex)
+                                    {
+                                        fl.EndCorrection -= 1;
+                                    }
+
+                                    if (intersectFlights.IndexOf(fl) > maxDaysFlightIndex)
+                                    {
+                                        fl.StartCorrection += 1;
+                                    }
+
+                                    if (fl != intersectFlights.Last())
+                                    {
+                                        flightRowIndex = flightPainter.DrawFlight(fl, vehicle);
+                                    }
+                                }
+                                lastFlightHelper = intersectFlights.Last();
+                                currIndex = 0;
+                                nextIndex = 0;
+                                intersectFlights.Clear();
                             }
                             else
                             {
-                               flightRowIndex = flightPainter.DrawFlight(new FlightHelper(flight), vehicle);
+                                if (lastFlightHelper != null)
+                                {
+                                    flightRowIndex = flightPainter.DrawFlight(lastFlightHelper, vehicle);
+                                    lastFlightHelper = null;
+                                }
+                                else
+                                {
+                                    flightRowIndex = flightPainter.DrawFlight(new FlightHelper(flight), vehicle);
+                                }
                             }
                         }
+                        else
+                        {
+                            flightRowIndex = flightPainter.DrawFlight(new FlightHelper(flight), vehicle);
+                        }
                     }
-                    else
-                    {
-                        flightRowIndex = flightPainter.DrawFlight(new FlightHelper(flight), vehicle);
-                    }
-                }
             }
         }
 

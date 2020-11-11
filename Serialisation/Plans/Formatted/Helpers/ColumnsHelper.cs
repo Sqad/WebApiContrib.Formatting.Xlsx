@@ -67,10 +67,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
         private ICollection<CalendarSpan> BuildDaily()
         {
             var result = new List<CalendarSpan>();
-
-            foreach (var weekGroup in _columns.GroupBy(x => x.Week).OrderBy(x => x.Key))
+            foreach (var weekGroup in _columns.GroupBy(x => new { x.Year, x.Week} ).OrderBy(x => x.Key.Year).ThenBy(x => x.Key.Week))
             {
-                var weekNumber = weekGroup.Key;
+                var weekNumber = weekGroup.Key.Week;
                 var start = weekGroup.First();
                 var end = weekGroup.Last();
 

@@ -154,7 +154,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     var firstCell = _worksheet.Cells[firstCellAddress];
 
                     appearance.FillValue(cell.Value.FormattedValue != null? cell.Value.FormattedValue : cell.Value.Value
-                           , firstCell, _currencies);
+                           , firstCell, _currencies, onlyFirstInRangeValue: true);
 
                     foreach (var range in ranges)
                     {

@@ -124,7 +124,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
                 var firstCell = _worksheet.Cells[cell.Start.Address];
 
-                cellAppearance.FillValue(tableCell.Value, firstCell, _currencies, false);
+                cellAppearance.FillValue(tableCell.FormattedValue != null ? tableCell.FormattedValue : tableCell.Value, firstCell, _currencies, false);
             }
 
             for (var headerColumnIndex = 1; headerColumnIndex <= maxColumnIndex; headerColumnIndex++)

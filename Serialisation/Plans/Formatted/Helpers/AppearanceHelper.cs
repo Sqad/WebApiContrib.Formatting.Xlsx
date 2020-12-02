@@ -286,9 +286,30 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
         public void FillValue(object value,
                               ExcelRange range,
                               Dictionary<int, CurrencyModel> currencies,
-                              bool keepEmptyValues = true)
+                              bool keepEmptyValues = true,
+                              bool onlyFirstInRangeValue = false)
         {
-            range.Value = value;
+            if (range?.Value != null)
+            {
+                if (onlyFirstInRangeValue)
+                {
+                    var rangeAddresses = range.ToString().Split(':');
+                    if (rangeAddresses != null && rangeAddresses.Length > 0)
+                    {
+                        var r = range[string.Format("{0}:{1}", rangeAddresses[0], rangeAddresses[0])];
+                        r.Value = value;
+                    }
+                }
+                else
+                {
+                    range.Value = value;
+                }
+            }
+            else
+            {
+                range.Value = value;
+            }
+
 
             var numericValue = value as double? ?? value as long?;
             if (numericValue.HasValue)

@@ -1,14 +1,12 @@
 ﻿using OfficeOpenXml;
-using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.FileProviders;
+using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
-using System.Globalization;
-using OfficeOpenXml.Style;
 using System;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans

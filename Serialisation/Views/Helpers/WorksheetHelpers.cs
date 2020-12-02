@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Drawing;
+using System.Diagnostics;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
-using System.Drawing;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Helpers
 {
@@ -55,19 +56,29 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Helpers
 
         public static void FormatRows(ExcelWorksheet sheet, int firstDataRowIndex, int leftPaneWidth)
         {
-            var allDataCells = sheet.Cells[firstDataRowIndex, 1, sheet.Dimension.Rows, sheet.Dimension.Columns];
-            allDataCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
-            allDataCells.Style.Fill.BackgroundColor.SetColor(Color.White);
-            allDataCells.Style.Border.BorderAround(ExcelBorderStyle.None);
+            int rows = sheet.Dimension.Rows;
+            int cols = sheet.Dimension.Columns;
+            
+         //   var allDataCells = sheet.Cells[firstDataRowIndex, 1, rows, cols];
+            Stopwatch sw = Stopwatch.StartNew();
+            sheet.Cells.Style.Fill.PatternType = ExcelFillStyle.Solid;
+         //   allDataCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
+            sw.Stop();
+            sw = Stopwatch.StartNew();
+            sheet.Cells.Style.Fill.BackgroundColor.SetColor(Color.White);
+         //   allDataCells.Style.Fill.BackgroundColor.SetColor(Color.White);
+            sw.Stop();
+          //  sheet.Cells.Style.Border.BorderAround(ExcelBorderStyle.Medium);
+          //  allDataCells.Style.Border.BorderAround(ExcelBorderStyle.None);
 
-            var leftPaneCells = sheet.Cells[firstDataRowIndex, 1, sheet.Dimension.Rows, leftPaneWidth];
+            var leftPaneCells = sheet.Cells[firstDataRowIndex, 1, rows, leftPaneWidth];
             leftPaneCells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
 
-            var percentsCells = sheet.Cells[firstDataRowIndex, 1, sheet.Dimension.Rows, 1];
+            var percentsCells = sheet.Cells[firstDataRowIndex, 1, rows, 1];
             percentsCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
             percentsCells.Style.Fill.BackgroundColor.SetColor(DataTotalsBackgroundColor);
 
-            var beginningCells = sheet.Cells[firstDataRowIndex, leftPaneWidth, sheet.Dimension.Rows, leftPaneWidth];
+            var beginningCells = sheet.Cells[firstDataRowIndex, leftPaneWidth, rows, leftPaneWidth];
             FormatNumbers(beginningCells);
 
             if (sheet.Dimension.Columns <= leftPaneWidth)
@@ -75,9 +86,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Helpers
                 return;
             }
 
-            var dataCells = sheet.Cells[firstDataRowIndex, leftPaneWidth + 1, sheet.Dimension.Rows,
-                                        sheet.Dimension.Columns];
-            FormatNumbers(dataCells);
+          //  var dataCells = sheet.Cells[firstDataRowIndex, leftPaneWidth + 1, rows, cols];
+            sw = Stopwatch.StartNew();
+            sheet.Cells.Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+            sw.Stop();
+         //   FormatNumbers(dataCells);
         }
 
         public static void FormatHeader(ExcelWorksheet sheet, int headerRowsCount, ICollection<int> totalColumnIndexes)

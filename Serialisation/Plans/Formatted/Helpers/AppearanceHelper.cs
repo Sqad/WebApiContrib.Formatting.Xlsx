@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using OfficeOpenXml.Drawing;
-using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using OfficeOpenXml;
+using OfficeOpenXml.Drawing;
 using SQAD.MTNext.Business.Models.Core.Currency;
+using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 {

@@ -5,28 +5,31 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Security.Permissions;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using OfficeOpenXml.Style;
+
 using SQAD.MTNext.Business.Models.Attributes;
-using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.Services.Repositories.Export;
+using SQAD.MTNext.Data.EntityFramework.Core.MTEntities;
+
+using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.CostSources;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.DeliverySources;
-//using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.DeliverySources;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Internal;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted;
-using SQAD.MTNext.Data.EntityFramework.Core.MTEntities;
+
 using Microsoft.Extensions.DependencyInjection;
-using SQAD.MTNext.Services.Auth.Factories;
-using System.Linq;
+
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -244,8 +247,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                 serialiser = s;
                 break;
             }
-
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
              serialiser.Serialise(itemType, value, document, null, null, null);
+            sw.Stop();
+            var eTime = sw.Elapsed.ToString();
 
             if (!document.IsVBA)
             {

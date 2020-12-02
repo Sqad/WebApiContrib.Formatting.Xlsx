@@ -1,10 +1,11 @@
-﻿using OfficeOpenXml;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Helpers;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
+using OfficeOpenXml;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
+using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Helpers;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted
 {
@@ -29,27 +30,71 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatte
 
         protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
         {
+            Dictionary<string, TimeSpan> stats = new Dictionary<string, TimeSpan>();
+            Stopwatch sw = new Stopwatch();
             if (table.Rows.Count == 0)
             {
                 return;
             }
-
+            sw = Stopwatch.StartNew();
             WorksheetDataHelper.FillData(worksheet, table, false);
+            sw.Stop();
+            stats.Add("WorksheetDataHelper.FillData", sw.Elapsed);
 
+            sw = Stopwatch.StartNew();
             ObtainLeftPaneWidth(worksheet);
+            sw.Stop();
+            stats.Add("ObtainLeftPaneWidth", sw.Elapsed);
+
+            sw = Stopwatch.StartNew();
             ObtainMeasuresCount(worksheet);
+            sw.Stop();
+            stats.Add("ObtainMeasuresCount", sw.Elapsed);
+
+            sw = Stopwatch.StartNew();
             ObtainTotalColumns(worksheet);
+            sw.Stop();
+            stats.Add("ObtainTotalColumns", sw.Elapsed);
 
+            sw = Stopwatch.StartNew();
             FillHeaderData(worksheet);
+            sw.Stop();
+            stats.Add("FillHeaderData", sw.Elapsed);
+
+            sw = Stopwatch.StartNew();
             RemoveTotalColumns(worksheet);
+            sw.Stop();
+            stats.Add("RemoveTotalColumns", sw.Elapsed);
+
+            sw = Stopwatch.StartNew();
             MergeHeaderCells(worksheet);
+            sw.Stop();
+            stats.Add("MergeHeaderCells", sw.Elapsed);
+
+            sw = Stopwatch.StartNew();
             AppendCalculatedTotalColumns(worksheet);
+            sw.Stop();
+            stats.Add("AppendCalculatedTotalColumns", sw.Elapsed);
 
+            sw = Stopwatch.StartNew();
             WorksheetHelpers.FormatRows(worksheet, _headerRowsCount + 1, _leftPaneWidth);
-            WorksheetHelpers.FormatDataRows(worksheet, _headerRowsCount + 1, _totalColumnIndexes, _leftPaneWidth + 1);
-            WorksheetHelpers.FormatHeader(worksheet, _headerRowsCount, _totalColumnIndexes);
+            sw.Stop();
+            stats.Add("WorksheetHelpers.FormatRows", sw.Elapsed);
 
+            sw = Stopwatch.StartNew();
+            WorksheetHelpers.FormatDataRows(worksheet, _headerRowsCount + 1, _totalColumnIndexes, _leftPaneWidth + 1);
+            sw.Stop();
+            stats.Add("WorksheetHelpers.FormatDataRows", sw.Elapsed);
+
+            sw = Stopwatch.StartNew();
+            WorksheetHelpers.FormatHeader(worksheet, _headerRowsCount, _totalColumnIndexes);
+            sw.Stop();
+            stats.Add("WorksheetHelpers.FormatHeader", sw.Elapsed);
+
+            sw = Stopwatch.StartNew();
             FormatSummaryRows(worksheet);
+            sw.Stop();
+            stats.Add("FormatSummaryRows", sw.Elapsed);
         }
 
         private void FillHeaderData(ExcelWorksheet worksheet)

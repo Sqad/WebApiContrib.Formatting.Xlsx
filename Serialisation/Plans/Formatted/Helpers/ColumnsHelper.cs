@@ -1,8 +1,8 @@
-﻿using SQAD.MTNext.Business.Models.FlowChart.DataModels;
-using SQAD.MTNext.Business.Models.FlowChart.Enums;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using SQAD.MTNext.Business.Models.FlowChart.DataModels;
+using SQAD.MTNext.Business.Models.FlowChart.Enums;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 {

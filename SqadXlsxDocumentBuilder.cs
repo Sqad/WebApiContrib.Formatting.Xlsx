@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -72,13 +73,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                                              {
                                                  templateStream?.Dispose();
                                              }
-
+                                             Stopwatch sw = new Stopwatch();
+                                             sw.Start();
                                              foreach (var sheet in _sheets.OrderBy(o => o.IsReferenceSheet))
                                              {
                                                  sheet.CompileSheet(excelPackage);
                                              }
 
                                              excelPackage.SaveAs(_stream);
+                                             sw.Stop();
+                                             string eTime = sw.Elapsed.ToString();
 
                                              return excelPackage;
                                          });

@@ -1,8 +1,8 @@
-﻿using OfficeOpenXml;
+﻿using System;
+using System.Data;
+using OfficeOpenXml;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
-using System;
-using System.Data;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted
 {

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
+﻿using System.Data;
 using System.Drawing;
-using System.Text;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;

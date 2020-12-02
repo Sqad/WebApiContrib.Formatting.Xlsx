@@ -9,8 +9,6 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-//using WebApiContrib.Formatting.Xlsx.Serialisation.Actuals;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 {

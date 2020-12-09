@@ -9,7 +9,7 @@ using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using SQAD.MTNext.Business.Models.FlowChart.Enums;
 using SQAD.MTNext.Business.Models.FlowChart.Plan;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
+using SQAD.XlsxExportImport.Base.Builders;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Models;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters;

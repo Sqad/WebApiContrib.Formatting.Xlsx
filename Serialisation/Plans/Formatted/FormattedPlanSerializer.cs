@@ -1,7 +1,7 @@
 ﻿using SQAD.MTNext.Business.Models.FlowChart.Plan;
-using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
+using SQAD.XlsxExportImport.Base.Builders;
+using SQAD.XlsxExportImport.Base.Interfaces;
+using SQAD.XlsxExportImport.Base.Serialization;
 using System;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
@@ -20,7 +20,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                               IXlsxDocumentBuilder document,
                               string sheetName,
                               string columnPrefix,
-                              SqadXlsxPlanSheetBuilder sheetBuilderOverride)
+                              SqadXlsxSheetBuilder sheetBuilderOverride)
         {
             if (!(value is ExportPlanRequest exportPlanRequest))
             {

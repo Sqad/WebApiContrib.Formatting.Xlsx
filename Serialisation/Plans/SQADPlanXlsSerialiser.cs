@@ -4,12 +4,14 @@ using System.Data;
 using System.Linq;
 using System.Reflection;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using SQAD.MTNext.Business.Models.Attributes;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using SQAD.MTNext.Services.Repositories.Export;
 using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
+using SQAD.XlsxExportImport.Base.Models;
+using SQAD.XlsxExportImport.Base.Interfaces;
+using SQAD.XlsxExportImport.Base.Serialization;
+using SQAD.XlsxExportImport.Base.Attributes;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 {
@@ -50,11 +52,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             return valueType == typeof(ChartData);
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName = null, string columnPrefix = null, SqadXlsxPlanSheetBuilder sheetBuilderOverride = null)
+        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName = null, string columnPrefix = null, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetBuilderOverride = null)
         {
             ExcelColumnInfoCollection columnInfo = _columnResolver.GetExcelColumnInfo(itemType, value, sheetName);
 
-            SqadXlsxPlanSheetBuilder sheetBuilder = null;
+            XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetBuilder = null;
 
             if (sheetName == null)
             {
@@ -65,13 +67,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             if (columnInfo.Any())
             {
                 if (sheetBuilderOverride == null)
-                    sheetBuilder = document.GetSheetByName(sheetName) as SqadXlsxPlanSheetBuilder;
+                    sheetBuilder = document.GetSheetByName(sheetName) as XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder;
                 else
                     sheetBuilder = sheetBuilderOverride;
 
                 if (sheetBuilder == null)
                 {
-                    sheetBuilder = new SqadXlsxPlanSheetBuilder(sheetName);
+                    sheetBuilder = new XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder(sheetName);
                     //Move this to attribute hidden property
                     if (new List<string>() { "Formulas", "LeftTableColumn", "Cells" }.Contains(sheetName))
                     {
@@ -232,7 +234,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
             if (sheetName != null && sheetBuilder == null)
             {
-                sheetBuilder = (SqadXlsxPlanSheetBuilder)document.GetSheetByName(sheetName);
+                sheetBuilder = (XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder)document.GetSheetByName(sheetName);
             }
 
             //adding rows data
@@ -264,7 +266,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
         }
 
-        private void PopulateRows(List<string> columns, object value, SqadXlsxPlanSheetBuilder sheetBuilder, ExcelColumnInfoCollection columnInfo = null, IXlsxDocumentBuilder document = null, List<ExcelCell> rowOverride = null)
+        private void PopulateRows(List<string> columns, object value, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetBuilder, ExcelColumnInfoCollection columnInfo = null, IXlsxDocumentBuilder document = null, List<ExcelCell> rowOverride = null)
         {
 
             if (sheetBuilder == null)
@@ -541,7 +543,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 sheetBuilder.AppendRow(row.ToList());
         }
 
-        private void PopulateReferenceSheet(SqadXlsxPlanSheetBuilder referenceSheet, DataTable ReferenceSheet)
+        private void PopulateReferenceSheet(XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder referenceSheet, DataTable ReferenceSheet)
         {
             //SqadXlsxSheetBuilder sb = new SqadXlsxSheetBuilder(ReferenceSheet.TableName, true);
             referenceSheet.AppendColumns(ReferenceSheet.Columns);
@@ -839,11 +841,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                     cell.DataValidationSheet = columntResolveTable.TableName;
 
-                    var referenceSheet = document.GetReferenceSheet() as SqadXlsxPlanSheetBuilder;
+                    var referenceSheet = document.GetReferenceSheet() as XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder;
 
                     if (referenceSheet == null)
                     {
-                        referenceSheet = new SqadXlsxPlanSheetBuilder(cell.DataValidationSheet, true);
+                        referenceSheet = new XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder(cell.DataValidationSheet, true);
                         document.AppendSheet(referenceSheet);
                     }
                     else
@@ -874,11 +876,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         {
             string _PreservationSheetName_ = "PreservationSheet";
 
-            var preservationSheet = document.GetPreservationSheet() as SqadXlsxPlanSheetBuilder;
+            var preservationSheet = document.GetPreservationSheet() as XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder;
 
             if (preservationSheet == null)
             {
-                preservationSheet = new SqadXlsxPlanSheetBuilder(_PreservationSheetName_, false, true, true);
+                preservationSheet = new XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder(_PreservationSheetName_, false, true, true);
                 document.AppendSheet(preservationSheet);
             }
             else

@@ -2,9 +2,9 @@
 using System.Data;
 using System.Linq;
 using SQAD.MTNext.Business.Models.Core.DeliverySource;
-using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
+using SQAD.XlsxExportImport.Base.Builders;
+using SQAD.XlsxExportImport.Base.Interfaces;
+using SQAD.XlsxExportImport.Base.Serialization;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.DeliverySources
 {
@@ -22,7 +22,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.DeliverySource
                               IXlsxDocumentBuilder document,
                               string sheetName,
                               string columnPrefix,
-                              SqadXlsxPlanSheetBuilder sheetbuilderOverride)
+                              XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetbuilderOverride)
         {
             if (!(value is DeliverySourceExportDataModel exportData))
             {

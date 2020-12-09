@@ -2,7 +2,7 @@
 using System.Drawing;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
+using SQAD.XlsxExportImport.Base.Builders;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.CostSources
 {

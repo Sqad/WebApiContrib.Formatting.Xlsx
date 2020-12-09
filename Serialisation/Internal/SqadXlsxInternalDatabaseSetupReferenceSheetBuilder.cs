@@ -9,7 +9,7 @@ using OfficeOpenXml;
 using SQAD.MTNext.Business.Models.Internal.DatabaseSetup.Parsing.Attributes;
 using SQAD.MTNext.Business.Models.Internal.DatabaseSetup.Parsing.Base;
 using SQAD.MTNext.Business.Models.Internal.DatabaseSetup.Result;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
+using SQAD.XlsxExportImport.Base.Builders;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
 {

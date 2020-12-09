@@ -2,10 +2,10 @@ using System;
 using System.Collections.Generic;
 using SQAD.MTNext.Business.Models.Internal.DatabaseSetup.Parsing.Base;
 using SQAD.MTNext.Business.Models.Internal.DatabaseSetup.Result;
-using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
-using WebApiContrib.Formatting.Xlsx.Models;
+using SQAD.XlsxExportImport.Base.Builders;
+using SQAD.XlsxExportImport.Base.Interfaces;
+using SQAD.XlsxExportImport.Base.Models;
+using SQAD.XlsxExportImport.Base.Serialization;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
 {
@@ -24,7 +24,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
                               IXlsxDocumentBuilder document,
                               string sheetName,
                               string columnPrefix,
-                              SqadXlsxPlanSheetBuilder sheetBuilderOverride)
+                              SqadXlsxSheetBuilder sheetBuilderOverride)
         {
             if (!(value is IEnumerable<ExportResultItem<ExcelRowBase>> exportResults))
             {

@@ -12,24 +12,21 @@ using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using OfficeOpenXml.Style;
 
-using SQAD.MTNext.Business.Models.Attributes;
 using SQAD.MTNext.Services.Repositories.Export;
 using SQAD.MTNext.Data.EntityFramework.Core.MTEntities;
-
-using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.CostSources;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.DeliverySources;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Formatted;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views.Unformatted;
+using SQAD.XlsxExportView.Formatted;
+using SQAD.XlsxExportView.Unformatted;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Internal;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted;
-
 using Microsoft.Extensions.DependencyInjection;
-
+using SQAD.XlsxExportImport.Base.Interfaces;
+using SQAD.XlsxExportImport.Base.Serialization;
+using SQAD.XlsxExportImport.Base.Attributes;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {
@@ -131,7 +128,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                               new SQADPlanXlsSerialiser(staticValuesResolver, modelMetadataProvider, isExportJsonToXls: _isExportJsonToXls),
                               new SqadFormattedViewXlsxSerializer(viewLabel),
                               new SqadUnformattedViewXlsxSerializer(viewLabel),
-                              new SqadSummaryPlanXlsxSerializer(),
+                              new SqadSummaryViewXlsxSerializer(),
                               new SqadActualXlsSerialiser(),
                               new SqadCostSourceXlsxSerializer(),
                               new SqadDeliverySourceXlsxSerializer(),

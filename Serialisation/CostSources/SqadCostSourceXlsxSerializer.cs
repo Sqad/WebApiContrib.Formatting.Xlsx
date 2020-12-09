@@ -4,9 +4,9 @@ using System.Data;
 using System.Linq;
 using SQAD.MTNext.Business.Models.Core.CostSource;
 using SQAD.MTNext.Business.Models.Core.Demo;
-using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
+using SQAD.XlsxExportImport.Base.Builders;
+using SQAD.XlsxExportImport.Base.Interfaces;
+using SQAD.XlsxExportImport.Base.Serialization;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.CostSources
 {
@@ -24,7 +24,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.CostSources
                               IXlsxDocumentBuilder document,
                               string sheetName,
                               string columnPrefix,
-                              SqadXlsxPlanSheetBuilder sheetbuilderOverride)
+                              XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetbuilderOverride)
         {
             if (!(value is CostSourceExportDataModel exportData))
             {

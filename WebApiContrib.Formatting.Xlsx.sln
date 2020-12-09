@@ -1,9 +1,19 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.645
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30002.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebApiContrib.Formatting.Xlsx", "WebApiContrib.Formatting.Xlsx.csproj", "{95BFDB75-F8A9-42E4-93C7-E57FC91D8CAF}"
+	ProjectSection(ProjectDependencies) = postProject
+		{3B2C138C-22AD-4BB9-8CED-0B2DA815CC68} = {3B2C138C-22AD-4BB9-8CED-0B2DA815CC68}
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SQAD.XlsxExportView", "SQAD.XlsxExportView\SQAD.XlsxExportView.csproj", "{3B2C138C-22AD-4BB9-8CED-0B2DA815CC68}"
+	ProjectSection(ProjectDependencies) = postProject
+		{64BC3820-B301-4B41-9458-90A0855675F2} = {64BC3820-B301-4B41-9458-90A0855675F2}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SQAD.XlsxExportImport.Base", "SQAD.XlsxExportImport.Base\SQAD.XlsxExportImport.Base.csproj", "{64BC3820-B301-4B41-9458-90A0855675F2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +25,14 @@ Global
 		{95BFDB75-F8A9-42E4-93C7-E57FC91D8CAF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{95BFDB75-F8A9-42E4-93C7-E57FC91D8CAF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{95BFDB75-F8A9-42E4-93C7-E57FC91D8CAF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3B2C138C-22AD-4BB9-8CED-0B2DA815CC68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B2C138C-22AD-4BB9-8CED-0B2DA815CC68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B2C138C-22AD-4BB9-8CED-0B2DA815CC68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B2C138C-22AD-4BB9-8CED-0B2DA815CC68}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64BC3820-B301-4B41-9458-90A0855675F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64BC3820-B301-4B41-9458-90A0855675F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64BC3820-B301-4B41-9458-90A0855675F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64BC3820-B301-4B41-9458-90A0855675F2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

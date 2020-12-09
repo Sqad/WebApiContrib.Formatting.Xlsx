@@ -1,4 +1,4 @@
-﻿using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
+﻿using SQAD.XlsxExportImport.Base.Models;
 using System;
 
 namespace SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces

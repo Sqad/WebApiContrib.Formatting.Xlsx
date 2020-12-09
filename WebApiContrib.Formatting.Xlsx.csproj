@@ -3,10 +3,15 @@
     <PropertyGroup>
         <TargetFramework>netcoreapp2.2</TargetFramework>
     </PropertyGroup>
-
+    <PropertyGroup>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    </PropertyGroup>
     <ItemGroup>
+      <Compile Remove="SQAD.XlsxExportImport.Base\**" />
       <Compile Remove="src\**" />
+      <EmbeddedResource Remove="SQAD.XlsxExportImport.Base\**" />
       <EmbeddedResource Remove="src\**" />
+      <None Remove="SQAD.XlsxExportImport.Base\**" />
       <None Remove="src\**" />
     </ItemGroup>
 
@@ -18,14 +23,7 @@
     <ItemGroup>
       <ProjectReference Include="..\SQAD.MTNext.Business\SQAD.MTNext.Business.csproj" />
       <ProjectReference Include="..\SQAD.MTNext.Services.Repositories\SQAD.MTNext.Services.Repositories.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <PackageReference Include="EPPlus" Version="4.5.3.2" />
-      <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
-      <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.2.0" />
-      <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-      <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Json" Version="2.2.0" />
+      <ProjectReference Include="SQAD.XlsxExportView\SQAD.XlsxExportView.csproj" />
     </ItemGroup>
 
 </Project>

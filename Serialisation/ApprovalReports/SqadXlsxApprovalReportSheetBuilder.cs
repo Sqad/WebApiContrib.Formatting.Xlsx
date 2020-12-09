@@ -3,10 +3,10 @@ using System.Data;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.FlowChart.Enums;
-using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports.Helpers;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports.Enums;
+using SQAD.XlsxExportImport.Base.Models;
+using SQAD.XlsxExportImport.Base.Builders;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports
 {

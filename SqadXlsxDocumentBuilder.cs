@@ -5,9 +5,9 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using OfficeOpenXml;
-using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
-using WebApiContrib.Formatting.Xlsx.Models;
+using SQAD.XlsxExportImport.Base.Builders;
+using SQAD.XlsxExportImport.Base.Interfaces;
+using SQAD.XlsxExportImport.Base.Models;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {

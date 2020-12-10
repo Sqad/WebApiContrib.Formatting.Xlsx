@@ -5,30 +5,17 @@ using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Security.Permissions;
 using System.Threading.Tasks;
-using System.Linq;
-using System.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using OfficeOpenXml.Style;
 
-using SQAD.MTNext.Services.Repositories.Export;
-using SQAD.MTNext.Data.EntityFramework.Core.MTEntities;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.CostSources;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.DeliverySources;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
-using SQAD.XlsxExportView.Formatted;
-using SQAD.XlsxExportView.Unformatted;
-using WebApiContrib.Formatting.Xlsx.Serialisation.Internal;
-using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted;
-using Microsoft.Extensions.DependencyInjection;
 using SQAD.XlsxExportImport.Base.Interfaces;
 using SQAD.XlsxExportImport.Base.Serialization;
 using SQAD.XlsxExportImport.Base.Attributes;
+using SQAD.XlsxExportImport.Base.Builders;
 
-namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
+namespace SQAD.XlsxExportImport.Base.Formatters
 {
     /// <summary>
     /// Class used to send an Excel file to the response.
@@ -75,7 +62,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         /// <summary>
         /// Non-default serialisers to be used by this formatter instance.
         /// </summary>
-        public List<IXlsxSerialiser> Serialisers { get; set; }
+        protected List<IXlsxSerialiser> Serializers { get; set; }
 
         #endregion
 
@@ -93,7 +80,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         /// <param name="cellStyle">An action method that modifies the worksheet cell style.</param>
         /// <param name="headerStyle">An action method that modifies the cell style of the first (header) row in the
         /// worksheet.</param>
-        public XlsxMediaTypeFormatter(IHttpContextAccessor httpContextAccessor,
+        public XlsxMediaTypeFormatter(
+                                      IHttpContextAccessor httpContextAccessor,
                                       IModelMetadataProvider modelMetadataProvider,
                                       bool autoFit = true,
                                       bool autoFilter = false,
@@ -101,10 +89,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                                       double? headerHeight = null,
                                       Action<ExcelStyle> cellStyle = null,
                                       Action<ExcelStyle> headerStyle = null,
-                                      IExportHelpersRepository staticValuesResolver = null,
                                       SerializerType serializerType = SerializerType.Default,
                                       bool isExportJsonToXls = false,
-                                      string fileExtension = null)
+                                      string fileExtension = null
+            )
         {
             SupportedMediaTypes.Clear();
             SupportedMediaTypes.Add(new MediaTypeHeaderValue("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
@@ -120,25 +108,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             _serializerType = serializerType;
             _isExportJsonToXls = isExportJsonToXls;
             _fileExtension = fileExtension;
-            string viewLabel = httpContextAccessor.HttpContext?.RequestServices.GetService<MTEntitiesContextWithViews>()
-                ?.DatabaseSettings.Where(x => x.Key.Equals("ViewLabel")).FirstOrDefault()?.Value;
-            // Initialise serialisers.
-            Serialisers = new List<IXlsxSerialiser>
-                          {
-                              new SQADPlanXlsSerialiser(staticValuesResolver, modelMetadataProvider, isExportJsonToXls: _isExportJsonToXls),
-                              new SqadFormattedViewXlsxSerializer(viewLabel),
-                              new SqadUnformattedViewXlsxSerializer(viewLabel),
-                              new SqadSummaryViewXlsxSerializer(),
-                              new SqadActualXlsSerialiser(),
-                              new SqadCostSourceXlsxSerializer(),
-                              new SqadDeliverySourceXlsxSerializer(),
-                              new SQADApprovalReportXlsSerialiser(),
-                              new SqadInternalDatabaseSetupRecordsXlsxSerializer(),
-                              new FormattedPlanSerializer()
-                          };
-
             _httpContextAccessor = httpContextAccessor;
-            //DefaultSerializer = new SqadXlsxSerialiser(staticValuesResolver); //new DefaultXlsxSerialiser();
         }
 
         #endregion
@@ -205,7 +175,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
         public override Task WriteToStreamAsync(Type type,
             object value,
-            System.IO.Stream writeStream,
+            Stream writeStream,
             System.Net.Http.HttpContent content,
             System.Net.TransportContext transportContext)
         {
@@ -219,7 +189,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 
 
             // Get the item type.
-            var itemType = (FormatterUtils.IsSimpleType(valueType))
+            var itemType = FormatterUtils.IsSimpleType(valueType)
                 ? null
                 : FormatterUtils.GetEnumerableItemType(valueType);
 
@@ -227,28 +197,27 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             if (itemType == null)
             {
                 itemType = valueType;
-                //value = new object[] { value };
             }
 
             // Used if no other matching serialiser can be found.
-            IXlsxSerialiser serialiser = null; // new SqadXlsxSerialiser(_staticValuesResolver); //DefaultSerializer;
+            IXlsxSerialiser serializer = null; 
 
             // Determine if a more specific serialiser might apply.
-            foreach (var s in Serialisers)
+            if (Serializers != null)
             {
-                if (!s.CanSerialiseType(valueType, itemType) || s.SerializerType != _serializerType)
+                foreach (var s in Serializers)
                 {
-                    continue;
-                }
+                    if (!s.CanSerialiseType(valueType, itemType) || s.SerializerType != _serializerType)
+                    {
+                        continue;
+                    }
 
-                serialiser = s;
-                break;
+                    serializer = s;
+                    break;
+                }
             }
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
-             serialiser.Serialise(itemType, value, document, null, null, null);
-            sw.Stop();
-            var eTime = sw.Elapsed.ToString();
+           
+            serializer?.Serialise(itemType, value, document, null, null, null);
 
             if (!document.IsVBA)
             {

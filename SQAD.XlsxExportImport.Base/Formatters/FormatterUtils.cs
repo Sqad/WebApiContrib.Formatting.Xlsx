@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
 
-namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
+namespace SQAD.XlsxExportImport.Base.Formatters
 {
     public static class FormatterUtils
     {
@@ -22,7 +22,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                              where a is TAttribute
                              select a;
 
-            return (TAttribute) attributes.FirstOrDefault();
+            return (TAttribute)attributes.FirstOrDefault();
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         /// member. If not found, will default to the `DataMember.Order` value.
         /// </summary>
         /// <param name="member">The member for which to find the `ExcelAttribute.Order` value.</param>
-        public static Int32 MemberOrder(MemberInfo member)
+        public static int MemberOrder(MemberInfo member)
         {
             var excelProperty = GetAttribute<ExcelColumnAttribute>(member);
             if (excelProperty != null && excelProperty._order.HasValue)
@@ -77,7 +77,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         /// <param name="type">The type on which to look for members.</param>
         public static List<string> GetMemberNames(Type type)
         {
-            var memberInfo =  type.GetProperties(PublicInstanceBindingFlags)
+            var memberInfo = type.GetProperties(PublicInstanceBindingFlags)
                                   .OfType<MemberInfo>()
                                   .Union(type.GetFields(PublicInstanceBindingFlags));
 
@@ -171,18 +171,18 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
         /// <param name="name">The name of the field or property we want.</param>
         public static T GetFieldOrPropertyValue<T>(object obj, string name)
         {
-            if (obj == null) return default(T);
+            if (obj == null) return default;
 
             var type = obj.GetType();
             var member = type.GetField(name) ?? type.GetProperty(name) as MemberInfo;
 
-            if (member == null) return default(T);
+            if (member == null) return default;
 
             var value = GetFieldOrPropertyValue(obj, name);
 
             return (T)value;
         }
-        
+
         public static DateTime ConvertFromDateTimeOffset(DateTimeOffset dateTime)
         {
             if (dateTime.Offset.Equals(TimeSpan.Zero))
@@ -224,15 +224,15 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                 Convert.GetTypeCode(type) != TypeCode.Object;
         }
 
-        public  static bool IsExcelSupportedType(object expression)
+        public static bool IsExcelSupportedType(object expression)
         {
-            return expression is String
-                || expression is Int16
-                || expression is Int32
-                || expression is Int64
-                || expression is Decimal
-                || expression is Single
-                || expression is Double
+            return expression is string
+                || expression is short
+                || expression is int
+                || expression is long
+                || expression is decimal
+                || expression is float
+                || expression is double
                 || expression is DateTime;
         }
 

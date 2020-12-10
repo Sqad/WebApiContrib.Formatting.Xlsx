@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx;
 using SQAD.XlsxExportImport.Base.Attributes;
+using SQAD.XlsxExportImport.Base.Formatters;
+using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
 
 namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 {

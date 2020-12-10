@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using OfficeOpenXml;
-using SQAD.XlsxExportImport.Base.Builders;
 using SQAD.XlsxExportImport.Base.Interfaces;
 using SQAD.XlsxExportImport.Base.Models;
+using SQAD.XlsxExportImport.Base.Formatters;
 
-namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
+namespace SQAD.XlsxExportImport.Base.Builders
 {
     public class SqadXlsxDocumentBuilder : IXlsxDocumentBuilder
     {
@@ -51,7 +50,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             _templateInfo = templateInfo;
         }
 
-        public async  Task WriteToStream()
+        public async Task WriteToStream()
         {
             var package = await Task.Run(() =>
                                          {

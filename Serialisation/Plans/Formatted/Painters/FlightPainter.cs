@@ -40,8 +40,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             {
                 return DrawFlightUnsafe(flightHelper, vehicle);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                var msg = ex.Message;
                 return 0;
             }
         }
@@ -76,7 +77,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
             FormatFlight(flightCells, appearance);
 
-            var insideCaptions = flight.FlightCaption.Inside ?? new List<FlightCaptionPosition>();
+            var insideCaptions = flight.FlightCaption?.Inside ?? new List<FlightCaptionPosition>();
             var captions = insideCaptions.Select(x =>
                                                  {
                                                      var a = AppearanceHelper.GetAppearance(x.Appearance);
@@ -102,8 +103,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                                        CellsAppearance appearance)
         {
             var startRowNumber = rowDefinition.StartExcelRowIndex
-                                 + (rowDefinition.AboveCount - flight.FlightCaption.Above?.Count ?? 0);
-            DrawCaptions(flight.FlightCaption.Above,
+                                 + (rowDefinition.AboveCount - flight.FlightCaption?.Above?.Count ?? 0);
+            DrawCaptions(flight.FlightCaption?.Above,
                          startRowNumber,
                          startColumn,
                          endColumn,
@@ -117,7 +118,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                                        int endColumn,
                                        CellsAppearance appearance)
         {
-            DrawCaptions(flight.FlightCaption.Below,
+            DrawCaptions(flight.FlightCaption?.Below,
                          rowDefinition.PrimaryExcelRowIndex + 1,
                          startColumn,
                          endColumn,

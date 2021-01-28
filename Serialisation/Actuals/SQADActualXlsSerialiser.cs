@@ -614,71 +614,71 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                 }
 
 
-                //actual
-                if (rec.Actual == null)
-                {
-                    sheet.AppendRow(row);
-                    continue;
-                }
+                ////actual
+                //if (rec.Actual == null)
+                //{
+                //    sheet.AppendRow(row);
+                //    continue;
+                //}
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualGRPs;
-                cell.CellValue = rec.Actual.GRPs;
+                cell.CellValue = (rec.Actual == null)? 0 : rec.Actual.GRPs;
                 row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualGross;                
-                cell.CellValue = rec.Actual.GrossCost;
+                cell.CellValue = (rec.Actual == null) ? 0 : rec.Actual.GrossCost;
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualGross)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualNet;
-                cell.CellValue = rec.Actual.NetCost;
+                cell.CellValue = (rec.Actual == null) ? 0 : rec.Actual.NetCost;
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualNet)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualProduction;
-                cell.CellValue = rec.Actual.Production;
+                cell.CellValue = (rec.Actual == null) ? 0 : rec.Actual.Production;
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualProduction)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualImpressions;
-                cell.CellValue = rec.Actual.Impressions;
+                cell.CellValue = (rec.Actual == null) ? 0 : rec.Actual.Impressions;
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualImpressions)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualClicks;
-                cell.CellValue = rec.Actual.Clicks;
+                cell.CellValue = (rec.Actual == null) ? 0 : rec.Actual.Clicks;
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualClicks)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualLeads;
-                cell.CellValue = rec.Actual.Leads;
+                cell.CellValue = (rec.Actual == null) ? 0 : rec.Actual.Leads;
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualLeads)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualRichMedia;
-                cell.CellValue = rec.Actual.RichMedia;
+                cell.CellValue = (rec.Actual == null) ? 0 : rec.Actual.RichMedia;
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualRichMedia)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualAdServing;
-                cell.CellValue = rec.Actual.AdServing;
+                cell.CellValue = (rec.Actual == null) ? 0 : rec.Actual.AdServing;
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualAdServing)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualTRPs;
-                cell.CellValue = rec.Actual.TRPs;
+                cell.CellValue = (rec.Actual == null) ? 0 : rec.Actual.TRPs;
                 row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualReach;
-                cell.CellValue = rec.Actual.Reach;
+                cell.CellValue = (rec.Actual == null) ? 0 : rec.Actual.Reach;
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualReach)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualFrequency;
-                cell.CellValue = rec.Actual.Frequency;
+                cell.CellValue = (rec.Actual == null) ? 0 : rec.Actual.Frequency;
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualFrequency)) row.Add(cell);
 
                 sheet.AppendRow(row);

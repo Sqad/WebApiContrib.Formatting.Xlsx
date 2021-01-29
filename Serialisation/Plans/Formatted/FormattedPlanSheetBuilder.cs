@@ -234,6 +234,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                             Flight nextFlight = flights.ElementAtOrDefault(index + 1);
                             int currIndex = 0;
                             int nextIndex = 0;
+                            mRowIndex = flight.RowIndex;
                             while ((nextFlight != null) && (nextFlight.RowIndex == mRowIndex) && (currIndex == nextIndex))
                             {
                                 currIndex = _columnsLookup[flight.EndDate.AddDays(-1).Date];

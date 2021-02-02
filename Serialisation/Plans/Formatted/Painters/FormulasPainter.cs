@@ -182,6 +182,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                                                 ? appearance.CellBorderColor
                                                 : Colors.DefaultFormulaBorderColor);
 
+            AppearanceHelper.SetFromFont(range.Style.Font.SetFromFont, appearance.FontFamily, appearance.FontSize);
             range.Style.Font.Size = appearance.FontSize;
             range.Style.Font.Bold = appearance.Bold;
             range.Style.Font.Italic = appearance.Italic;

@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
+using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.Core.Currency;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 
@@ -73,6 +74,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             cellsAppearance.Bold = appearance.Bold ?? false;
             cellsAppearance.Italic = appearance.Italic ?? false;
             cellsAppearance.Underline = appearance.Underline ?? false;
+            cellsAppearance.FontFamily = appearance.FontFamily?.Split(',')?[0]?.Trim();
 
             const string flexStartValue = "flex-start";
             const string flexEndValue = "flex-end";
@@ -187,6 +189,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 
             target.TextColor = source.TextColor ?? target.TextColor;
             target.FontSize = source.FontSize ?? target.FontSize;
+            target.FontFamily = source.FontFamily ?? target.FontFamily;
             target.Bold = source.Bold ?? target.Bold;
             target.Italic = source.Italic ?? target.Italic;
             target.Underline = source.Underline ?? target.Underline;
@@ -217,6 +220,27 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             target.DigitGroupingChar = source.DigitGroupingChar ?? target.DigitGroupingChar;
             target.FloatingPointAccuracy = source.FloatingPointAccuracy ?? target.FloatingPointAccuracy;
             target.UseImageFillSizing = source.UseImageFillSizing ?? target.UseImageFillSizing;
+        }
+
+        public static bool SetFromFont(Action<Font> setFromFont, string fontName, int fontSize = 8)
+        {
+            bool result = false;
+            Font f;
+            try
+            {
+                if (!string.IsNullOrEmpty(fontName) && setFromFont != null)
+                {
+                    f = new Font(fontName, fontSize);
+                    setFromFont(f);
+                    result = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                var s = ex.Message;
+            }
+
+            return result;
         }
     }
 
@@ -253,6 +277,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 
         public Color TextColor { get; set; }
         public int FontSize { get; set; }
+
+        public string FontFamily { get; set; }
 
         public bool Bold { get; set; }
         public bool Italic { get; set; }

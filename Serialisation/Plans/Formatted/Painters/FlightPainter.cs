@@ -221,7 +221,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     cells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                     break;
             }
-
+            
+            AppearanceHelper.SetFromFont(cells.Style.Font.SetFromFont, appearance.FontFamily, appearance.FontSize);
             cells.Style.Font.Color.SetColor(appearance.TextColor);
             cells.Style.Font.Size = appearance.FontSize;
             cells.Style.Font.Bold = appearance.Bold;

@@ -67,6 +67,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             captionShape.TextAlignment = appearance.TextAlignment;
             captionShape.TextAnchoring = appearance.TextVerticalAlignment;
 
+            AppearanceHelper.SetFromFont(captionShape.Font.SetFromFont, appearance.FontFamily, appearance.FontSize);
             captionShape.Font.Color = appearance.TextColor;
             captionShape.Font.Size = appearance.FontSize;
 

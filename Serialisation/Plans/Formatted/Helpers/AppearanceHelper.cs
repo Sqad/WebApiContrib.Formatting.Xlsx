@@ -182,6 +182,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
         private static void FillAppearance(Appearance target, Appearance source)
         {
             target.UseBackColor = source.UseBackColor ?? target.UseBackColor;
+            target.UseNumberNotationFormat = source.UseNumberNotationFormat ?? target.UseNumberNotationFormat;
             target.BackColor = source.BackColor ?? target.BackColor;
 
             target.UseCellBorderColor = source.UseCellBorderColor ?? target.UseCellBorderColor;

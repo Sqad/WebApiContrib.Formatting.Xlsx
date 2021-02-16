@@ -202,6 +202,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             target.UseFill = source.UseFill ?? target.UseFill;
             target.Fill = source.Fill ?? target.Fill;
 
+            target.UseFillPattern = source.UseFillPattern ?? target.UseFillPattern;
+            target.FillColor = source.FillColor ?? target.FillColor;
+
             target.UseStroke = source.UseStroke ?? target.UseStroke;
             target.Stroke = source.Stroke ?? target.Stroke;
             target.StrokeWidth = source.StrokeWidth ?? target.StrokeWidth;

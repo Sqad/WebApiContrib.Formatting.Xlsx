@@ -55,7 +55,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
             var columnsLookup = chartData.LeftTableColumns.ToDictionary(x => int.Parse(x.Key) + 2);
             columnsLookup.Add(1,
-                              new TextValue
+                              new LeftTableColumnValue
                               {
                                   Label = "#",
                                   Appearances = new Appearance
@@ -209,7 +209,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             column.Width = estimatedNumberColumnWidth;
         }
 
-        private void FormatFlightsTable(int maxColumnIndex, Dictionary<int, TextValue> tableColumns)
+        private void FormatFlightsTable(int maxColumnIndex, Dictionary<int, LeftTableColumnValue> tableColumns)
         {
             var emptyCells = _worksheet.Cells[1, 1, 1, maxColumnIndex];
             emptyCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -316,7 +316,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             }
         }
 
-        private CellsAppearance GetAppearance(TextValue column, ObjectCell cell = null)
+        private CellsAppearance GetAppearance(LeftTableColumnValue column, ObjectCell cell = null)
         {
             Appearance appearance = null;
             if (column != null)

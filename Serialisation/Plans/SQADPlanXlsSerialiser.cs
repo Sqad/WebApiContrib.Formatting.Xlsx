@@ -157,8 +157,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             string listColumnPrefix = col.PropertyName.Replace("_List_", $":{i}");
                             if (FormatterUtils.IsSimpleType(colListValue[i].GetType()))
                             {
-                                col.PropertyName = listColumnPrefix;
-                                sheetBuilder.AppendColumnHeaderRowItem(col);
+                                ExcelColumnInfo colToAppend = (ExcelColumnInfo) col.Clone();
+                                colToAppend.PropertyName = listColumnPrefix;
+                                sheetBuilder.AppendColumnHeaderRowItem(colToAppend);
                             }
                             else
                             {

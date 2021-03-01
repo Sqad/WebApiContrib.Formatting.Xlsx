@@ -199,6 +199,10 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             if (_chartData.Objects.Flights != null)
             {
                 List<Flight> flights = _chartData.Objects.Flights;
+                if (_chartData.Objects.LinkedFlights != null)
+                {
+                    flights.AddRange(_chartData.Objects.LinkedFlights);
+                }
                 List<FlightHelper> intersectFlights = new List<FlightHelper>();
                 if (_viewMode == FormattedPlanViewMode.Weekly)
                 {
@@ -210,9 +214,12 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                 }
             
                 FlightHelper lastFlightHelper = null;
+                int fc = 0;
                     foreach (var flight in flights)
                     {
-                        VehicleModel vehicle = null;
+                    fc++;
+                    VehicleModel vehicle = null;
+                        
                         if (flight.VehicleID.HasValue)
                         {
                             vehicle = _chartData.Vehicles.FirstOrDefault(x => x.ID == flight.VehicleID);

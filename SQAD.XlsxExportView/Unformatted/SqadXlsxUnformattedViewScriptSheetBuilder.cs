@@ -64,17 +64,25 @@ namespace SQAD.XlsxExportView.Unformatted
 Private Sub Workbook_Open()
     Dim tmpSheet As Worksheet
     Set tmpSheet = Sheets(""{ExportViewConstants.ScriptSheetName}"")
-    If tmpSheet.Visible = xlSheetVeryHidden Then
-        Exit Sub
-    End If
-    
-    {dataScript}
-    
+    Dim sheetData As Worksheet
+    Set sheetData = Sheets(""{_dataSheetName}"")
+    For n = sheetData.QueryTables.Count To 1 Step - 1
+      sheetData.QueryTables(n).Delete
+    Next n
+    For n = ThisWorkbook.Connections.Count To 1 Step - 1
+      ThisWorkbook.Connections.Item(n).Delete
+    Next n
+
     InitQueryTable
 
-    {pivotScript}
+    If tmpSheet.Visible <> xlSheetVeryHidden Then
+        
+      {dataScript}
+    
+      {pivotScript}
 
-    tmpSheet.Visible = xlSheetVeryHidden
+      tmpSheet.Visible = xlSheetVeryHidden
+    End If
 End Sub
 
 Private Sub InitQueryTable()
@@ -85,14 +93,14 @@ Private Sub InitQueryTable()
 
     Dim qt As QueryTable
     If sheet.QueryTables.Count = 0 Then
-      Set qt = sheet.QueryTables.Add(Connection:= ""URL;"" & ExportUrl, Destination:= sheet.Range(""A1""))
+      Set qt = sheet.QueryTables.Add(Connection:= ""URL;"" & ExportUrl, Destination:= Sheets(""{_dataSheetName}"").Range(""A1""))
     Else
       Set qt = sheet.QueryTables(1)
     End If
 
     qt.AdjustColumnWidth = True
     qt.RefreshStyle = xlOverwriteCells
-    qt.RefreshOnFileOpen = True
+    qt.RefreshOnFileOpen = False
     qt.BackgroundQuery = False
 
     qt.Name = ""{RefreshDataQueryTableName}""
@@ -103,6 +111,7 @@ Private Sub InitQueryTable()
     qt.WebSingleBlockTextImport = False
     qt.WebDisableDateRecognition = False
     qt.WebSelectionType = xlEntirePage
+    isRefreshed = False
 
 End Sub
 
@@ -115,6 +124,7 @@ End Sub
         {
             var constants = $@"
     Private Const ExportUrl = ""{_settings.ExcelLink}""
+    Private isRefreshed As Boolean
 ";
 
             if (!_settings.UseEmbeddedLogin)
@@ -146,7 +156,7 @@ End Sub
     Set btn = instrSheet.Buttons.Add(position.Left, position.Top, position.Width, position.Height)
     With btn
         .Name = ""RefreshDataButton""
-        .Caption = ""Refresh Data""
+        .Caption = ""Refresh Connection""
         .OnAction = ""ThisWorkbook.RefreshButtonClick""
     End With
 ";
@@ -156,15 +166,39 @@ End Sub
         {
             return $@"
 Sub RefreshButtonClick()
+    If isRefreshed Then
+      MsgBox ""Connection is refreshed.Use 'Edit Query' to update data""
+      Exit Sub
+    End If
+
     Dim sheet As Worksheet
-    Set sheet = Sheets(""{_dataSheetName}"")
-    sheet.Cells.Clear
-    InitQueryTable
+    Dim tempSheet As Worksheet
     Dim qt As QueryTable
+
+    Set sheet = Sheets(""{_dataSheetName}"")
     Set qt = sheet.QueryTables(1)
+    Sheets.Add.Name = ""TempData""
+    Set tempSheet = Sheets(""TempData"")
+    tempSheet.Visible = xlSheetHidden
+    Sheets(""Data"").Range(sheet.UsedRange.Address).Copy (Sheets(""TempData"").Range(sheet.UsedRange.Address))
+    sheet.Cells.Clear
+    On Error Resume Next
     qt.Refresh
-    MsgBox ""Data was updated""
+    sheet.Cells.Clear
+    Sheets(""TempData"").Range(tempSheet.UsedRange.Address).Copy (Sheets(""Data"").Range(tempSheet.UsedRange.Address))
+    Application.DisplayAlerts = False
+    tempSheet.Delete
+    Application.DisplayAlerts = True
+    If Err <> 0 Then
+      MsgBox ""Connection failed. Check service availability""
+      Err.Clear
+      isRefreshed = False
+    Else
+      MsgBox ""Connection is refreshed. Use 'Edit Query' to update data""
+      isRefreshed = True
+    End If
     sheet.Activate
+    
 End Sub
 ";
         }

@@ -43,9 +43,11 @@ namespace SQAD.XlsxExportView.Unformatted
             {
                 dataConstantsScript = GetDataConstantsScript();
                 dataScript = GetDataScript(dataSheet);
-                refreshDataScript = _settings.UseNewVersion && !_settings.UseEmbeddedLogin
-                    ? GetBrowserRefreshDataScript()
-                    : GetQueryTableRefreshDataScript();
+                refreshDataScript = 
+                    //_settings.UseNewVersion && !_settings.UseEmbeddedLogin
+                    //? GetBrowserRefreshDataScript()
+                    //: 
+                    GetQueryTableRefreshDataScript();
             }
 
             var pivotScript = string.Empty;
@@ -180,12 +182,12 @@ Sub RefreshButtonClick()
     Sheets.Add.Name = ""TempData""
     Set tempSheet = Sheets(""TempData"")
     tempSheet.Visible = xlSheetHidden
-    Sheets(""Data"").Range(sheet.UsedRange.Address).Copy (Sheets(""TempData"").Range(sheet.UsedRange.Address))
+    Sheets(""{_dataSheetName}"").Range(sheet.UsedRange.Address).Copy (Sheets(""TempData"").Range(sheet.UsedRange.Address))
     sheet.Cells.Clear
     On Error Resume Next
     qt.Refresh
     sheet.Cells.Clear
-    Sheets(""TempData"").Range(tempSheet.UsedRange.Address).Copy (Sheets(""Data"").Range(tempSheet.UsedRange.Address))
+    Sheets(""TempData"").Range(tempSheet.UsedRange.Address).Copy (Sheets(""{_dataSheetName}"").Range(tempSheet.UsedRange.Address))
     Application.DisplayAlerts = False
     tempSheet.Delete
     Application.DisplayAlerts = True

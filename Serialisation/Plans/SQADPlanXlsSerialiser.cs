@@ -475,6 +475,9 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             if (valuePreservationCell.CellValue != null && valuePreservationCell.CellValue.GetType() == typeof(DateTime))
                             {
                                 valuePreservationCell.CellValue = valuePreservationCell.CellValue.ToString();
+                            }
+                            if (customValueHeaderCell.CellValue != null && customValueHeaderCell.CellValue.GetType() == typeof(DateTime))
+                            {
                                 customValueHeaderCell.CellValue = customValueHeaderCell.CellValue.ToString();
                             }
 

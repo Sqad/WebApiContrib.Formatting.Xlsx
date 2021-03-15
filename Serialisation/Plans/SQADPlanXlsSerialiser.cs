@@ -77,10 +77,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                 {
                     sheetBuilder = new XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder(sheetName);
                     //Move this to attribute hidden property
-                    if (new List<string>() { "Formulas", "LeftTableColumn", "Cells" }.Contains(sheetName))
-                    {
-                        sheetBuilder.IsHidden = true;
-                    }
+                    //if (new List<string>() { "Formulas", "LeftTableColumn", "Cells" }.Contains(sheetName))
+                    //{
+                    //    sheetBuilder.IsHidden = true;
+                    //}
 
                     document.AppendSheet(sheetBuilder);
                 }

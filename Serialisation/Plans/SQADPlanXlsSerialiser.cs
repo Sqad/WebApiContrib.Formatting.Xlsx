@@ -755,6 +755,8 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             {
                                 if(resultsList.Any())
                                 {
+                                    //TODO: Change this to dynamic/generic implementation, because this dictionary can possibly be not only 'Dictionary<int, double>'
+                                    //This fix was done according to https://gitlab.com/SQAD-MT/Web/WEBPro/-/issues/3410
                                     var firstListItem = resultsList[0] as Dictionary<int, double>;
                                     var сastedResult = result as Dictionary<int, double>;
 

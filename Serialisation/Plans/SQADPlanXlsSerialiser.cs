@@ -753,8 +753,21 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         {
                             try
                             {
-                                //if dictionary with outher values it will failure
-                                resultsList.Add(result);
+                                if(resultsList.Any())
+                                {
+                                    var firstListItem = resultsList[0] as Dictionary<int, double>;
+                                    var сastedResult = result as Dictionary<int, double>;
+
+                                    foreach(var item in сastedResult)
+                                    {
+                                        firstListItem[item.Key] = item.Value;
+                                    }
+                                }
+                                else
+                                {
+                                    //if dictionary with outher values it will failure
+                                    resultsList.Add(result);
+                                }
                                 isResultDictionary = true;
                             }
                             catch

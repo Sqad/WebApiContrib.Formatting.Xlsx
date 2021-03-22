@@ -1,13 +1,13 @@
-﻿using OfficeOpenXml;
-using OfficeOpenXml.Drawing;
-using OfficeOpenXml.Style;
-using SQAD.MTNext.Business.Models.Core.Currency;
-using SQAD.MTNext.Business.Models.FlowChart.DataModels;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Drawing;
 using System.Linq;
+using OfficeOpenXml;
+using OfficeOpenXml.Drawing;
+using OfficeOpenXml.Style;
+using SQAD.MTNext.Business.Models.Core.Currency;
+using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Models;
 
@@ -55,7 +55,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
             var columnsLookup = chartData.LeftTableColumns.ToDictionary(x => int.Parse(x.Key) + 2);
             columnsLookup.Add(1,
-                              new TextValue
+                              new LeftTableColumnValue
                               {
                                   Label = "#",
                                   Appearances = new Appearance
@@ -124,7 +124,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
                 var firstCell = _worksheet.Cells[cell.Start.Address];
 
-                cellAppearance.FillValue(tableCell.Value, firstCell, _currencies, false);
+                cellAppearance.FillValue(tableCell.FormattedValue != null ? tableCell.FormattedValue : tableCell.Value, firstCell, _currencies, false);
             }
 
             for (var headerColumnIndex = 1; headerColumnIndex <= maxColumnIndex; headerColumnIndex++)
@@ -209,7 +209,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             column.Width = estimatedNumberColumnWidth;
         }
 
-        private void FormatFlightsTable(int maxColumnIndex, Dictionary<int, TextValue> tableColumns)
+        private void FormatFlightsTable(int maxColumnIndex, Dictionary<int, LeftTableColumnValue> tableColumns)
         {
             var emptyCells = _worksheet.Cells[1, 1, 1, maxColumnIndex];
             emptyCells.Style.Fill.PatternType = ExcelFillStyle.Solid;
@@ -263,6 +263,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
 
         private void FormatRange(ExcelRange range, CellsAppearance appearance)
         {
+            AppearanceHelper.SetFromFont(range.Style.Font.SetFromFont, appearance.FontFamily, appearance.FontSize);
             range.Style.Font.Size = appearance.FontSize;
             range.Style.Font.Bold = appearance.Bold;
             range.Style.Font.Italic = appearance.Italic;
@@ -315,7 +316,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             }
         }
 
-        private CellsAppearance GetAppearance(TextValue column, ObjectCell cell = null)
+        private CellsAppearance GetAppearance(LeftTableColumnValue column, ObjectCell cell = null)
         {
             Appearance appearance = null;
             if (column != null)

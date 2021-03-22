@@ -1,11 +1,11 @@
 ﻿using OfficeOpenXml;
-using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Extensions.FileProviders;
+using SQAD.XlsxExportImport.Base.Models;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
 {

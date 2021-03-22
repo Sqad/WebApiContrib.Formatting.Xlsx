@@ -1,11 +1,11 @@
 ﻿using System;
-using OfficeOpenXml;
-using OfficeOpenXml.Style;
-using SQAD.MTNext.Business.Models.FlowChart.DataModels;
-using SQAD.MTNext.Business.Models.FlowChart.Enums;
 using System.Collections.Generic;
 using System.Linq;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using OfficeOpenXml.Drawing;
+using SQAD.MTNext.Business.Models.FlowChart.DataModels;
+using SQAD.MTNext.Business.Models.FlowChart.Enums;
 using SQAD.MTNext.Business.Models.Core.Currency;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Models;
@@ -154,7 +154,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     var firstCell = _worksheet.Cells[firstCellAddress];
 
                     appearance.FillValue(cell.Value.FormattedValue != null? cell.Value.FormattedValue : cell.Value.Value
-                           , firstCell, _currencies);
+                           , firstCell, _currencies, onlyFirstInRangeValue: true);
 
                     foreach (var range in ranges)
                     {
@@ -182,6 +182,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                                                 ? appearance.CellBorderColor
                                                 : Colors.DefaultFormulaBorderColor);
 
+            AppearanceHelper.SetFromFont(range.Style.Font.SetFromFont, appearance.FontFamily, appearance.FontSize);
             range.Style.Font.Size = appearance.FontSize;
             range.Style.Font.Bold = appearance.Bold;
             range.Style.Font.Italic = appearance.Italic;

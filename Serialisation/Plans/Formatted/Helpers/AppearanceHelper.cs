@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using OfficeOpenXml.Drawing;
-using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using OfficeOpenXml;
+using OfficeOpenXml.Drawing;
+using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.Core.Currency;
+using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 {
@@ -73,6 +74,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             cellsAppearance.Bold = appearance.Bold ?? false;
             cellsAppearance.Italic = appearance.Italic ?? false;
             cellsAppearance.Underline = appearance.Underline ?? false;
+            cellsAppearance.FontFamily = appearance.FontFamily?.Split(',')?[0]?.Trim();
 
             const string flexStartValue = "flex-start";
             const string flexEndValue = "flex-end";
@@ -180,6 +182,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
         private static void FillAppearance(Appearance target, Appearance source)
         {
             target.UseBackColor = source.UseBackColor ?? target.UseBackColor;
+            target.UseNumberNotationFormat = source.UseNumberNotationFormat ?? target.UseNumberNotationFormat;
             target.BackColor = source.BackColor ?? target.BackColor;
 
             target.UseCellBorderColor = source.UseCellBorderColor ?? target.UseCellBorderColor;
@@ -187,6 +190,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 
             target.TextColor = source.TextColor ?? target.TextColor;
             target.FontSize = source.FontSize ?? target.FontSize;
+            target.FontFamily = source.FontFamily ?? target.FontFamily;
             target.Bold = source.Bold ?? target.Bold;
             target.Italic = source.Italic ?? target.Italic;
             target.Underline = source.Underline ?? target.Underline;
@@ -197,6 +201,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
 
             target.UseFill = source.UseFill ?? target.UseFill;
             target.Fill = source.Fill ?? target.Fill;
+
+            target.UseFillPattern = source.UseFillPattern ?? target.UseFillPattern;
+            target.FillColor = source.FillColor ?? target.FillColor;
 
             target.UseStroke = source.UseStroke ?? target.UseStroke;
             target.Stroke = source.Stroke ?? target.Stroke;
@@ -217,6 +224,27 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
             target.DigitGroupingChar = source.DigitGroupingChar ?? target.DigitGroupingChar;
             target.FloatingPointAccuracy = source.FloatingPointAccuracy ?? target.FloatingPointAccuracy;
             target.UseImageFillSizing = source.UseImageFillSizing ?? target.UseImageFillSizing;
+        }
+
+        public static bool SetFromFont(Action<Font> setFromFont, string fontName, int fontSize = 8)
+        {
+            bool result = false;
+            Font f;
+            try
+            {
+                if (!string.IsNullOrEmpty(fontName) && setFromFont != null)
+                {
+                    f = new Font(fontName, fontSize);
+                    setFromFont(f);
+                    result = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                var s = ex.Message;
+            }
+
+            return result;
         }
     }
 
@@ -254,6 +282,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
         public Color TextColor { get; set; }
         public int FontSize { get; set; }
 
+        public string FontFamily { get; set; }
+
         public bool Bold { get; set; }
         public bool Italic { get; set; }
         public bool Underline { get; set; }
@@ -286,9 +316,30 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers
         public void FillValue(object value,
                               ExcelRange range,
                               Dictionary<int, CurrencyModel> currencies,
-                              bool keepEmptyValues = true)
+                              bool keepEmptyValues = true,
+                              bool onlyFirstInRangeValue = false)
         {
-            range.Value = value;
+            if (range?.Value != null)
+            {
+                if (onlyFirstInRangeValue)
+                {
+                    var rangeAddresses = range.ToString().Split(':');
+                    if (rangeAddresses != null && rangeAddresses.Length > 0)
+                    {
+                        var r = range[string.Format("{0}:{1}", rangeAddresses[0], rangeAddresses[0])];
+                        r.Value = value;
+                    }
+                }
+                else
+                {
+                    range.Value = value;
+                }
+            }
+            else
+            {
+                range.Value = value;
+            }
+
 
             var numericValue = value as double? ?? value as long?;
             if (numericValue.HasValue)

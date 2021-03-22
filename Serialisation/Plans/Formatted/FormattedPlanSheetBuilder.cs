@@ -1,15 +1,15 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using Newtonsoft.Json;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using SQAD.MTNext.Business.Models.FlowChart.Enums;
 using SQAD.MTNext.Business.Models.FlowChart.Plan;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Drawing;
-using System.Linq;
+using SQAD.XlsxExportImport.Base.Builders;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Models;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters;
@@ -199,6 +199,10 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             if (_chartData.Objects.Flights != null)
             {
                 List<Flight> flights = _chartData.Objects.Flights;
+                if (_chartData.Objects.LinkedFlights != null)
+                {
+                    flights.AddRange(_chartData.Objects.LinkedFlights);
+                }
                 List<FlightHelper> intersectFlights = new List<FlightHelper>();
                 if (_viewMode == FormattedPlanViewMode.Weekly)
                 {
@@ -210,9 +214,12 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                 }
             
                 FlightHelper lastFlightHelper = null;
+                int fc = 0;
                     foreach (var flight in flights)
                     {
-                        VehicleModel vehicle = null;
+                    fc++;
+                    VehicleModel vehicle = null;
+                        
                         if (flight.VehicleID.HasValue)
                         {
                             vehicle = _chartData.Vehicles.FirstOrDefault(x => x.ID == flight.VehicleID);
@@ -234,6 +241,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                             Flight nextFlight = flights.ElementAtOrDefault(index + 1);
                             int currIndex = 0;
                             int nextIndex = 0;
+                            mRowIndex = flight.RowIndex;
                             while ((nextFlight != null) && (nextFlight.RowIndex == mRowIndex) && (currIndex == nextIndex))
                             {
                                 currIndex = _columnsLookup[flight.EndDate.AddDays(-1).Date];

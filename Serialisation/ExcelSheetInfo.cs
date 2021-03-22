@@ -1,9 +1,5 @@
-﻿using SQAD.MTNext.Business.Models.Attributes;
+﻿using SQAD.XlsxExportImport.Base.Attributes;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 {

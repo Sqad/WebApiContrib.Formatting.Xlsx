@@ -1,10 +1,10 @@
-﻿using OfficeOpenXml;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using OfficeOpenXml;
 using OfficeOpenXml.Drawing;
 using OfficeOpenXml.Style;
 using SQAD.MTNext.Business.Models.FlowChart.DataModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using SQAD.MTNext.Business.Models.Core.Currency;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Formulas;
 using WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Helpers;
@@ -40,8 +40,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             {
                 return DrawFlightUnsafe(flightHelper, vehicle);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                var msg = ex.Message;
                 return 0;
             }
         }
@@ -220,7 +221,8 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     cells.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
                     break;
             }
-
+            
+            AppearanceHelper.SetFromFont(cells.Style.Font.SetFromFont, appearance.FontFamily, appearance.FontSize);
             cells.Style.Font.Color.SetColor(appearance.TextColor);
             cells.Style.Font.Size = appearance.FontSize;
             cells.Style.Font.Bold = appearance.Bold;

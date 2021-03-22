@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using SQAD.XlsxExportImport.Base.Models;
 
 namespace SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation
 {

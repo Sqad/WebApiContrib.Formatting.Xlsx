@@ -1,11 +1,10 @@
-﻿using OfficeOpenXml;
-using SQAD.MTNext.Business.Models.Attributes;
-using SQAD.MTNext.Business.Models.FlowChart.DataModels;
+﻿using SQAD.MTNext.Business.Models.FlowChart.DataModels;
 using SQAD.MTNext.Business.Models.FlowChart.Enums;
-using SQAD.MTNext.Interfaces.WebApiContrib.Formatting.Xlsx.Interfaces;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Base;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans;
-using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Views;
+using SQAD.XlsxExportView;
+using SQAD.XlsxExportImport.Base.Attributes;
+using SQAD.XlsxExportImport.Base.Builders;
+using SQAD.XlsxExportImport.Base.Interfaces;
+using SQAD.XlsxExportImport.Base.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -137,7 +136,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
             return valueType == typeof(ApprovalReportExportRequestModel);
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, SqadXlsxPlanSheetBuilder sheetbuilderOverride)
+        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetbuilderOverride)
         {
             if (!(value is ApprovalReportExportRequestModel approvalReportExportRequest))
             {

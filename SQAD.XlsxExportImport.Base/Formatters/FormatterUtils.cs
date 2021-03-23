@@ -171,12 +171,12 @@ namespace SQAD.XlsxExportImport.Base.Formatters
         /// <param name="name">The name of the field or property we want.</param>
         public static T GetFieldOrPropertyValue<T>(object obj, string name)
         {
-            if (obj == null) return default;
+            if (obj == null) return default(T);
 
             var type = obj.GetType();
             var member = type.GetField(name) ?? type.GetProperty(name) as MemberInfo;
 
-            if (member == null) return default;
+            if (member == null) return default(T);
 
             var value = GetFieldOrPropertyValue(obj, name);
 

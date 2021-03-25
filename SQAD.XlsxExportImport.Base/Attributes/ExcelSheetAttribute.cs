@@ -8,7 +8,7 @@ namespace SQAD.XlsxExportImport.Base.Attributes
 
         public int Order
         {
-            get { return _order ?? default; }
+            get { return _order ?? default(int); }
             set { _order = value; }
         }
 

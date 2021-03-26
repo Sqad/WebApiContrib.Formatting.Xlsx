@@ -457,6 +457,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                             customValueHeaderCell.CellHeader = customColumn.Header;
 
+                            if (customFieldItem is CustomFieldModel)
+                            {
+                                if (!String.IsNullOrEmpty((customFieldItem as CustomFieldModel).Key))
+                                {
+                                    ExcelCell keyPreservationCell = new ExcelCell();
+                                    keyPreservationCell.CellHeader = $"{columnNameCombined}:Key:{objID}";
+                                    keyPreservationCell.CellValue = customFieldItem.Key?.ToString();
+                                    CreatePreserveCell(keyPreservationCell, document);
+                                }
+                            }
 
                             ExcelCell valuePreservationCell = new ExcelCell();
                             valuePreservationCell.CellHeader = $"{columnNameCombined}:Value:{objID}";
@@ -497,11 +507,27 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             hiddenTextPreservationCell.CellHeader = $"{columnNameCombined}:HiddenText:{objID}";
                             hiddenTextPreservationCell.CellValue = $"\"{customFieldItem.HiddenText}\"";
                             CreatePreserveCell(hiddenTextPreservationCell, document);
-
-                            //ExcelCell mixedPropertyPreservationCell = new ExcelCell();
-                            //mixedPropertyPreservationCell.CellHeader = $"{columnNameCombined}:Mixed:{objID}";
-                            //mixedPropertyPreservationCell.CellValue = $"\"{customFieldItem.Mixed}\"";
-                            //CreatePreserveCell(mixedPropertyPreservationCell, document);
+                            
+                            try
+                            {
+                                if (customFieldItem is CustomFieldModel 
+                                      && (customFieldItem as CustomFieldModel).ValueMix != null)
+                                {
+                                    foreach (var valueM in (customFieldItem as CustomFieldModel).ValueMix)
+                                    {
+                                        string valueMKey = valueM.Key;
+                                        decimal valueMValue = valueM.Value;
+                                        ExcelCell mixedPropertyPreservationCell = new ExcelCell();
+                                        mixedPropertyPreservationCell.CellHeader = $"{columnNameCombined}:ValueMix:{valueM.Key}:{objID}";
+                                        mixedPropertyPreservationCell.CellValue = $"\"{valueM.Value.ToString()}\"";
+                                        CreatePreserveCell(mixedPropertyPreservationCell, document);
+                                    }
+                                }
+                            }
+                            catch(Exception ex)
+                            {
+                                string s = ex.Message;
+                            }
 
                             ExcelCell commonPropertyPreservationCell = new ExcelCell();
                             commonPropertyPreservationCell.CellHeader = $"{columnNameCombined}:Common:{objID}";

@@ -8,16 +8,16 @@ using SQAD.XlsxExportImport.Base.Serialization;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.DeliverySources
 {
-    public class SqadDeliverySourceXlsxSerializer : IXlsxSerialiser
+    public class SqadDeliverySourceXlsxSerializer : IXlsxSerializer
     {
         public SerializerType SerializerType => SerializerType.Default;
 
-        public bool CanSerialiseType(Type valueType, Type itemType)
+        public bool CanSerializeType(Type valueType, Type itemType)
         {
             return valueType == typeof(DeliverySourceExportDataModel);
         }
 
-        public void Serialise(Type itemType,
+        public void Serialize(Type itemType,
                               object value,
                               IXlsxDocumentBuilder document,
                               string sheetName,

@@ -8,7 +8,7 @@ using SQAD.XlsxExportImport.Base.Serialization;
 
 namespace SQAD.XlsxExportView.Formatted
 {
-    public class SqadFormattedViewXlsxSerializer : IXlsxSerialiser
+    public class SqadFormattedViewXlsxSerializer : IXlsxSerializer
     {
         private readonly string _viewLabel;
         public SerializerType SerializerType => SerializerType.Default;
@@ -17,12 +17,12 @@ namespace SQAD.XlsxExportView.Formatted
         {
             _viewLabel = viewLabel;
         }
-        public bool CanSerialiseType(Type valueType, Type itemType)
+        public bool CanSerializeType(Type valueType, Type itemType)
         {
             return valueType == typeof(DataTable);
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetBuilderOverride)
+        public void Serialize(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetBuilderOverride)
         {
             if (!(value is DataTable dataTable))
             {

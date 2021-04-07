@@ -12,15 +12,15 @@ using System.Linq;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 {
-    class SqadActualXlsSerialiser : IXlsxSerialiser
+    class SqadActualXlsSerializer : IXlsxSerializer
     {
         public SerializerType SerializerType => SerializerType.Default;
-        public bool CanSerialiseType(Type valueType, Type itemType)
+        public bool CanSerializeType(Type valueType, Type itemType)
         {
             return valueType == typeof(ActualExport);
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetBuilderOverride)
+        public void Serialize(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetBuilderOverride)
         {
             if (!(value is ActualExport ae))
             {

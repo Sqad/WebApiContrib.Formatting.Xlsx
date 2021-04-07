@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports
 {
-    public class SQADApprovalReportXlsSerialiser : IXlsxSerialiser
+    public class SQADApprovalReportXlsSerializer : IXlsxSerializer
     {
         private static void PopulateData(SqadXlsxSheetBuilderBase sheetBuilder, DataColumnCollection columns, IEnumerable<ExcelDataRow> records)
         {
@@ -131,12 +131,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
         }
         public SerializerType SerializerType => SerializerType.Default;
 
-        public bool CanSerialiseType(Type valueType, Type itemType)
+        public bool CanSerializeType(Type valueType, Type itemType)
         {
             return valueType == typeof(ApprovalReportExportRequestModel);
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetbuilderOverride)
+        public void Serialize(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetbuilderOverride)
         {
             if (!(value is ApprovalReportExportRequestModel approvalReportExportRequest))
             {

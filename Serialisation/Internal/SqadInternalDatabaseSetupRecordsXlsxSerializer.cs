@@ -10,16 +10,16 @@ using SQAD.XlsxExportImport.Base.Serialization;
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Internal
 {
     //todo vv: need to define use common types (IXlsxSerialiser, IXlsxDocumentBuilder, etc.) or just create separate simple formatter
-    public class SqadInternalDatabaseSetupRecordsXlsxSerializer : IXlsxSerialiser
+    public class SqadInternalDatabaseSetupRecordsXlsxSerializer : IXlsxSerializer
     {
         public SerializerType SerializerType => SerializerType.Default;
 
-        public bool CanSerialiseType(Type valueType, Type itemType)
+        public bool CanSerializeType(Type valueType, Type itemType)
         {
             return typeof(IEnumerable<ExportResultItem<ExcelRowBase>>).IsAssignableFrom(valueType);
         }
 
-        public void Serialise(Type itemType,
+        public void Serialize(Type itemType,
                               object value,
                               IXlsxDocumentBuilder document,
                               string sheetName,

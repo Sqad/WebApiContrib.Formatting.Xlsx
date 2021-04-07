@@ -17,7 +17,7 @@ using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 {
-    public class SQADPlanXlsSerialiser : IXlsxSerialiser
+    public class SQADPlanXlsSerializer : IXlsxSerializer
     {
         public SerializerType SerializerType => SerializerType.Default;
 
@@ -30,14 +30,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         private Dictionary<string, DataTable> _resolveTables = new Dictionary<string, DataTable>();
         public bool IgnoreFormatting => false;
 
-        public SQADPlanXlsSerialiser(IExportHelpersRepository staticValuesResolver, IModelMetadataProvider modelMetadataProvider
+        public SQADPlanXlsSerializer(IExportHelpersRepository staticValuesResolver, IModelMetadataProvider modelMetadataProvider
                , bool isExportJsonToXls = false)
             : this(new DefaultSheetResolver(), new DefaultColumnResolver(modelMetadataProvider), staticValuesResolver, isExportJsonToXls)
         {
 
         }
 
-        public SQADPlanXlsSerialiser(ISheetResolver sheetResolver,
+        public SQADPlanXlsSerializer(ISheetResolver sheetResolver,
                                      IColumnResolver columnResolver,
                                      IExportHelpersRepository StaticValuesResolver,
                                      bool isExportJsonToXls = false)
@@ -48,13 +48,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             _isExportJsonToXls = isExportJsonToXls;
         }
 
-        public bool CanSerialiseType(Type valueType, Type itemType)
+        public bool CanSerializeType(Type valueType, Type itemType)
         {
 
             return valueType == typeof(ChartData);
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName = null, string columnPrefix = null, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetBuilderOverride = null)
+        public void Serialize(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName = null, string columnPrefix = null, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetBuilderOverride = null)
         {
             ExcelColumnInfoCollection columnInfo = _columnResolver.GetExcelColumnInfo(itemType, value, sheetName);
 
@@ -131,7 +131,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             else
                             {
                                 string path = col.PropertyName.Replace("_Dict_", $":Value:{count}");
-                                this.Serialise(currentItem.GetType(), value, document, sheetName, path, sheetBuilderOverride);
+                                this.Serialize(currentItem.GetType(), value, document, sheetName, path, sheetBuilderOverride);
                             }
 
                             count++;
@@ -163,7 +163,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             }
                             else
                             {
-                                this.Serialise(colListValue[i].GetType(), colListValue[i], document, null, listColumnPrefix, sheetBuilder);
+                                this.Serialize(colListValue[i].GetType(), colListValue[i], document, null, listColumnPrefix, sheetBuilder);
                             }
 
                         }
@@ -625,7 +625,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                 //sheetBuilder = new SqadXlsxSheetBuilder(document.AppendSheet(sheetName));
 
-                this.Serialise(sheet.SheetType, sheet.SheetObject, document, sheetName);//, sheetBuilder);
+                this.Serialize(sheet.SheetType, sheet.SheetObject, document, sheetName);//, sheetBuilder);
 
                 //sheetBuilder = null;
             }

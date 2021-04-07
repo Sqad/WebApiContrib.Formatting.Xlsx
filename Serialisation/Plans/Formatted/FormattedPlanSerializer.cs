@@ -6,16 +6,16 @@ using System;
 
 namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
 {
-    internal class FormattedPlanSerializer : IXlsxSerialiser
+    internal class FormattedPlanSerializer : IXlsxSerializer
     {
         public SerializerType SerializerType => SerializerType.FormattedPlan;
 
-        public bool CanSerialiseType(Type valueType, Type itemType)
+        public bool CanSerializeType(Type valueType, Type itemType)
         {
             return valueType == typeof(ExportPlanRequest);
         }
 
-        public void Serialise(Type itemType,
+        public void Serialize(Type itemType,
                               object value,
                               IXlsxDocumentBuilder document,
                               string sheetName,

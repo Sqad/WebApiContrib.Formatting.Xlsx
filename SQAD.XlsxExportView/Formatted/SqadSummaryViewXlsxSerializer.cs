@@ -8,16 +8,16 @@ using SQAD.XlsxExportImport.Base.Serialization;
 
 namespace SQAD.XlsxExportView.Formatted
 {
-    public class SqadSummaryViewXlsxSerializer : IXlsxSerialiser
+    public class SqadSummaryViewXlsxSerializer : IXlsxSerializer
     {
         public SerializerType SerializerType => SerializerType.SummaryPlan;
-        
-        public bool CanSerialiseType(Type valueType, Type itemType)
+
+        public bool CanSerializeType(Type valueType, Type itemType)
         {
             return valueType == typeof(DataTable);
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetBuilderOverride)
+        public void Serialize(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, SqadXlsxSheetBuilder sheetBuilderOverride)
         {
             if (!(value is DataTable dataTable))
             {

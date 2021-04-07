@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using OfficeOpenXml;
 using SQAD.XlsxExportView.Helpers;
@@ -52,6 +50,7 @@ namespace SQAD.XlsxExportView.Formatted
 
             FormatSummaryRows(worksheet);
         }
+
         //protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
         //{
         //    Dictionary<string, TimeSpan> stats = new Dictionary<string, TimeSpan>();
@@ -406,7 +405,7 @@ namespace SQAD.XlsxExportView.Formatted
             var measureCellValue = "";
             if (_isMeasureColumnExists)
             {
-                measureCellValue = (string) sheet.Cells[rowIndex, WorksheetHelpers.RowMeasureColumnIndex].Value;
+                measureCellValue = (string)sheet.Cells[rowIndex, WorksheetHelpers.RowMeasureColumnIndex].Value;
             }
 
             return measureCellValue;
@@ -632,7 +631,7 @@ namespace SQAD.XlsxExportView.Formatted
                 var startGroupRowIndex = rowIndex;
                 var groupName = sheet.Cells[rowIndex, WorksheetHelpers.RowNameColumnIndex].Value.ToString().Trim();
 
-                var endGroupRowIndex = startGroupRowIndex;
+                var endGroupRowIndex = endRowIndex;
                 var isEndGroupFound = false;
                 var duplicatesCount = 0;
                 for (var i = startGroupRowIndex + 1; i <= endRowIndex/*sheet.Dimension.Rows*/; i++)
@@ -669,13 +668,12 @@ namespace SQAD.XlsxExportView.Formatted
                     if (duplicatesCount == 0)
                     {
                         isEndGroupFound = true;
-                    }
-                    else
+                    } else
                     {
                         duplicatesCount--;
                     }
                 }
-                
+
                 ProcessGroups(sheet, startGroupRowIndex + 1, endGroupRowIndex - 1, outlineLevel + 1);
                 rowIndex = endGroupRowIndex;
 

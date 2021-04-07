@@ -70,8 +70,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
                 if (approvalReportExportRequest.IsGrossCost)
                 {
                     dataRow[columns[(int)ApprovalReportElement.GrossCost]] = approvalReports[i].GrossCost;
-                }
-                else
+                } else
                 {
                     countDeletedColumns++;
                 }
@@ -79,8 +78,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
                 if (approvalReportExportRequest.IsNetCost)
                 {
                     dataRow[columns[(int)ApprovalReportElement.NetCost - countDeletedColumns]] = approvalReports[i].NetCost;
-                }
-                else
+                } else
                 {
                     countDeletedColumns++;
                 }
@@ -90,8 +88,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
                 if (approvalReportExportRequest.IsIncludeNonWorking)
                 {
                     dataRow[columns[(int)ApprovalReportElement.NonWorkingCosts - countDeletedColumns]] = approvalReports[i].NonWorkingCosts;
-                }
-                else
+                } else
                 {
                     countDeletedColumns++;
                 }
@@ -99,8 +96,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
                 if (approvalReportExportRequest.IsIncludeFees)
                 {
                     dataRow[columns[(int)ApprovalReportElement.Fees - countDeletedColumns]] = approvalReports[i].Fees;
-                }
-                else
+                } else
                 {
                     countDeletedColumns++;
                 }
@@ -153,7 +149,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
             //We should minus 2 for count columns for delete IsEvenGroup and CurrencySymbol from Worksheet. Because it's flag field
             var sheetBuilder = new SqadXlsxApprovalReportSheetBuilder(startHeaderIndex: 5, startDataIndex: 6,
                 totalCountColumns: columns.Count - 2, totalCountRows: rows.Count, startDateApprovalReport: startDateApprovalReport,
-                endDateApprovalReport: endDateApprovalReport,approvalType: approvalType);
+                endDateApprovalReport: endDateApprovalReport, approvalType: approvalType);
             document.AppendSheet(sheetBuilder);
 
             sheetBuilder.AppendColumns(columns);

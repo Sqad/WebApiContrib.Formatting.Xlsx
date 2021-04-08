@@ -2,6 +2,7 @@
 using System.Data;
 using System.Linq;
 using OfficeOpenXml;
+
 using SQAD.XlsxExportView.Helpers;
 using SQAD.XlsxExportImport.Base.Builders;
 
@@ -49,6 +50,14 @@ namespace SQAD.XlsxExportView.Formatted
             WorksheetHelpers.FormatHeader(worksheet, _headerRowsCount, _totalColumnIndexes);
 
             FormatSummaryRows(worksheet);
+        }
+
+        protected override void PostCompileActions(ExcelWorksheet worksheet)
+        {
+            ProcessGroups(worksheet,
+                startRowIndex: _headerRowsCount + 1,
+                endRowIndex: worksheet.Dimension.Rows,
+                outlineLevel: 0);
         }
 
         //protected override void CompileSheet(ExcelWorksheet worksheet, DataTable table)
@@ -151,11 +160,6 @@ namespace SQAD.XlsxExportView.Formatted
                     startColumnIndex = endColumnIndex;
                 }
             }
-        }
-
-        protected override void PostCompileActions(ExcelWorksheet worksheet)
-        {
-            ProcessGroups(worksheet, _headerRowsCount + 1, worksheet.Dimension.Rows, 0);
         }
 
         private void ObtainLeftPaneWidth(ExcelWorksheet worksheet)
@@ -631,17 +635,10 @@ namespace SQAD.XlsxExportView.Formatted
                 var startGroupRowIndex = rowIndex;
                 var groupName = sheet.Cells[rowIndex, WorksheetHelpers.RowNameColumnIndex].Value.ToString().Trim();
 
-                var endGroupRowIndex = endRowIndex;
-                var isEndGroupFound = false;
+                var endGroupRowIndex = startGroupRowIndex;
                 var duplicatesCount = 0;
-                for (var i = startGroupRowIndex + 1; i <= endRowIndex/*sheet.Dimension.Rows*/; i++)
+                for (var i = startGroupRowIndex + 1; i <= endRowIndex; i++)
                 {
-                    if (isEndGroupFound)
-                    {
-                        endGroupRowIndex = i - 1;
-                        break;
-                    }
-
                     var nameCell = sheet.Cells[i, WorksheetHelpers.RowNameColumnIndex];
                     if (nameCell.Value == null)
                     {
@@ -667,7 +664,8 @@ namespace SQAD.XlsxExportView.Formatted
 
                     if (duplicatesCount == 0)
                     {
-                        isEndGroupFound = true;
+                        endGroupRowIndex = i;
+                        break;
                     } else
                     {
                         duplicatesCount--;
@@ -678,14 +676,15 @@ namespace SQAD.XlsxExportView.Formatted
                 rowIndex = endGroupRowIndex;
 
                 var rowsWithData = _cellsWithData.Keys.Where(x => x > startGroupRowIndex && x <= endGroupRowIndex)
-                                                 .OrderBy(x => x);
+                                                    .OrderBy(x => x);
                 if (!rowsWithData.Any())
                 {
                     continue;
                 }
 
                 var color = _neutralColorGenerator.GetNextColor();
-                var columnsWithData = rowsWithData.SelectMany(x => _cellsWithData[x]).Distinct();
+                var columnsWithData = rowsWithData.SelectMany(x => _cellsWithData[x])
+                                                .Distinct();
                 foreach (var column in columnsWithData)
                 {
                     var cell = sheet.Cells[startGroupRowIndex, column];

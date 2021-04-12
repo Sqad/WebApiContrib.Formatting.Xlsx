@@ -144,8 +144,11 @@ End Sub
         private string GetDataScript(ExcelWorksheet worksheet)
         {
             const string cellsName = "nwshp_hl_en_tab_wn";
-            var cells = worksheet.Cells[worksheet.Dimension.Address];
-            worksheet.Names.Add(cellsName, cells);
+            if (worksheet.Dimension?.Address != null)
+            {
+                var cells = worksheet.Cells[worksheet.Dimension.Address];
+                worksheet.Names.Add(cellsName, cells);
+            }
 
             return $@"
     Dim instrSheet As Worksheet

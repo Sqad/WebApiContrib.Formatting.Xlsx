@@ -195,14 +195,18 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
             int? mRowIndex = 0;
 
             var flightPainter = new FlightPainter(worksheet, _columnsLookup, _planRows, _exportPlanRequest.Currencies);
-            
+
+            if (_chartData.Objects.LinkedFlights != null)
+            {
+                if (_chartData.Objects.Flights == null)
+                {
+                    _chartData.Objects.Flights = new List<Flight>();
+                }
+                _chartData.Objects.Flights.AddRange(_chartData.Objects.LinkedFlights);
+            }
             if (_chartData.Objects.Flights != null)
             {
                 List<Flight> flights = _chartData.Objects.Flights;
-                if (_chartData.Objects.LinkedFlights != null)
-                {
-                    flights.AddRange(_chartData.Objects.LinkedFlights);
-                }
                 List<FlightHelper> intersectFlights = new List<FlightHelper>();
                 if (_viewMode == FormattedPlanViewMode.Weekly)
                 {

@@ -48,7 +48,7 @@ namespace SQAD.XlsxExportView.Common
                   headerHeight, cellStyle, headerStyle, serializerType, isExportJsonToXls, fileExtension)
         {
             // Initialise serialisers.
-            Serializers = new List<IXlsxSerialiser>
+            Serializers = new List<IXlsxSerializer>
                           {
                               new SqadFormattedViewXlsxSerializer(viewLabel),
                               new SqadUnformattedViewXlsxSerializer(viewLabel),

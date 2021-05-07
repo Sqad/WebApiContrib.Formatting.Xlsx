@@ -12,15 +12,15 @@ using System.Linq;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 {
-    class SqadActualXlsSerialiser : IXlsxSerialiser
+    class SqadActualXlsSerializer : IXlsxSerializer
     {
         public SerializerType SerializerType => SerializerType.Default;
-        public bool CanSerialiseType(Type valueType, Type itemType)
+        public bool CanSerializeType(Type valueType, Type itemType)
         {
             return valueType == typeof(ActualExport);
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetBuilderOverride)
+        public void Serialize(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetBuilderOverride)
         {
             if (!(value is ActualExport ae))
             {
@@ -37,7 +37,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
         }
         private void CreateReferenceSheet(IXlsxDocumentBuilder document, int id)
         {
-            var builder = new XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder("Reference",isPreservationSheet:true,isHidden:true);
+            var builder = new XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder("Reference", isPreservationSheet: true, isHidden: true);
             builder.ActualRow = true;
 
             document.AppendSheet(builder);
@@ -56,13 +56,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
         }
 
-        private void CreatePropertySheet( IXlsxDocumentBuilder document, ActualExport value)
+        private void CreatePropertySheet(IXlsxDocumentBuilder document, ActualExport value)
         {
             string name = "Properties";
 
             //var instructionsDataTable = tables[InstructionsTableName];
 
-            var properties =  new XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder(name);
+            var properties = new XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder(name);
             properties.ActualRow = true;
 
             document.AppendSheet(properties);
@@ -219,8 +219,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                         builder.AppendColumnHeaderRowItem(excelinfo);
 
 
-                    }
-                    else
+                    } else
                     {
                         var excelinfo = new ExcelColumnInfo(item.ActualProduction, null, new ExcelColumnAttribute(), null);
                         builder.AppendColumnHeaderRowItem(excelinfo);
@@ -262,8 +261,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
                         excelinfo = new ExcelColumnInfo(item.PlannedAdServing, null, new ExcelColumnAttribute(), null);
                         builder.AppendColumnHeaderRowItem(excelinfo);
-                    }
-                    else
+                    } else
                     {
                         var excelinfo = new ExcelColumnInfo(item.ActualProduction, null, new ExcelColumnAttribute() { IsHidden = true }, null);
                         builder.AppendColumnHeaderRowItem(excelinfo);
@@ -306,8 +304,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                         excelinfo = new ExcelColumnInfo(item.PlannedAdServing, null, new ExcelColumnAttribute() { IsHidden = true }, null);
                         builder.AppendColumnHeaderRowItem(excelinfo);
 
-                    }
-                    else
+                    } else
                     {
                         var excelinfo = new ExcelColumnInfo(item.ActualProduction, null, new ExcelColumnAttribute(), null);
                         builder.AppendColumnHeaderRowItem(excelinfo);
@@ -366,8 +363,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                     excelinfo = new ExcelColumnInfo(it.Key, null, new ExcelColumnAttribute(), null);
                     builder.AppendColumnHeaderRowItem(excelinfo);
                 }
-            }
-            else
+            } else
             {
                 excelinfo = new ExcelColumnInfo(item.CreativeName, null, new ExcelColumnAttribute(), null);
                 builder.AppendColumnHeaderRowItem(excelinfo);
@@ -390,17 +386,17 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
             builder.AppendColumnHeaderRowItem(excelinfo);
 
             var hidden = !(Convert.ToBoolean(item.MediaType.EnableWeeklyReach) || Convert.ToInt16(item.MediaType.ReachType) > 0);
-            excelinfo = new ExcelColumnInfo(item.PlannedReach, null, new ExcelColumnAttribute() { IsHidden=hidden}, null);
+            excelinfo = new ExcelColumnInfo(item.PlannedReach, null, new ExcelColumnAttribute() { IsHidden = hidden }, null);
             builder.AppendColumnHeaderRowItem(excelinfo);
 
             excelinfo = new ExcelColumnInfo(item.PlannedFrequency, null, new ExcelColumnAttribute() { IsHidden = hidden }, null);
             builder.AppendColumnHeaderRowItem(excelinfo);
 
             var shownet = Convert.ToBoolean(item.MediaType.ExternalActualsNet);
-            excelinfo = new ExcelColumnInfo(item.PlannedGross, null, new ExcelColumnAttribute() {IsHidden = shownet }, null);
+            excelinfo = new ExcelColumnInfo(item.PlannedGross, null, new ExcelColumnAttribute() { IsHidden = shownet }, null);
             builder.AppendColumnHeaderRowItem(excelinfo);
 
-            excelinfo = new ExcelColumnInfo(item.PlannedNet, null, new ExcelColumnAttribute() { IsHidden =!shownet}, null);
+            excelinfo = new ExcelColumnInfo(item.PlannedNet, null, new ExcelColumnAttribute() { IsHidden = !shownet }, null);
             builder.AppendColumnHeaderRowItem(excelinfo);
 
             PopulatePlannedActualColumns(builder, item);
@@ -455,7 +451,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
             List<ExcelCell> row = new List<ExcelCell>();
             ExcelCell cell = new ExcelCell();
 
-            foreach(var rec in list)
+            foreach (var rec in list)
             {
                 cell = new ExcelCell();
                 cell.CellHeader = item.Data;
@@ -497,7 +493,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                 cell.CellValue = rec.DemoName;
                 row.Add(cell);
 
-                foreach(var it in rec.CustomColumnsValues)
+                foreach (var it in rec.CustomColumnsValues)
                 {
                     cell = new ExcelCell();
                     cell.CellHeader = it.Key;
@@ -505,7 +501,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                     row.Add(cell);
 
                 }
-                if(rec.CustomColumnsValues == null || rec.CustomColumnsValues.Count == 0)
+                if (rec.CustomColumnsValues == null || rec.CustomColumnsValues.Count == 0)
                 {
                     cell = new ExcelCell();
                     cell.CellHeader = item.CreativeName;
@@ -520,12 +516,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.StartDate;
-                cell.CellValue = string.Format("{0:MM/dd/yyyy}",rec.StartDate);
+                cell.CellValue = string.Format("{0:MM/dd/yyyy}", rec.StartDate);
                 row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.EndDate;
-                cell.CellValue = string.Format("{0:MM/dd/yyyy}",rec.EndDate);
+                cell.CellValue = string.Format("{0:MM/dd/yyyy}", rec.EndDate);
                 row.Add(cell);
 
                 //planned
@@ -537,7 +533,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedGross;
                 cell.CellValue = rec.Planned.GrossCost;
-                if(sheet.SheetColumns.Any(x=>x.Header==item.PlannedGross)) row.Add(cell);
+                if (sheet.SheetColumns.Any(x => x.Header == item.PlannedGross)) row.Add(cell);
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.PlannedNet;
@@ -600,8 +596,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                     cell.CellHeader = item.ActualizedBy;
                     cell.CellValue = rec.ActualizedBy;
                     row.Add(cell);
-                }
-                else
+                } else
                 {
                     cell.CellHeader = item.DateActualized;
                     cell.CellValue = string.Empty;
@@ -623,11 +618,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
 
                 cell = new ExcelCell();
                 cell.CellHeader = item.ActualGRPs;
-                cell.CellValue = (rec.Actual == null)? 0 : rec.Actual.GRPs;
+                cell.CellValue = (rec.Actual == null) ? 0 : rec.Actual.GRPs;
                 row.Add(cell);
 
                 cell = new ExcelCell();
-                cell.CellHeader = item.ActualGross;                
+                cell.CellHeader = item.ActualGross;
                 cell.CellValue = (rec.Actual == null) ? 0 : rec.Actual.GrossCost;
                 if (sheet.SheetColumns.Any(x => x.Header == item.ActualGross)) row.Add(cell);
 
@@ -697,28 +692,28 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals
                 var offset = export.Flights.FirstOrDefault(x => x.MediaTypeID == item.MediaType.Id);
                 item.SetActualWorksheet(offset.CustomColumnsValues.Count);
                 FormatWorkSheet(sheet, item, offset.CustomColumnsValues);
-                PopulateSheetData(export.Flights.Where(x=>x.MediaTypeID==item.MediaType.Id).ToList(), sheet, item);
+                PopulateSheetData(export.Flights.Where(x => x.MediaTypeID == item.MediaType.Id).ToList(), sheet, item);
                 //HideShowMeasureColumns(sheet, item);
                 document.AppendSheet(sheet);
             }
 
         }
-        private Dictionary<string, Tuple<string,bool>> PopulateNameCollection(ActualWorksheet item)
+        private Dictionary<string, Tuple<string, bool>> PopulateNameCollection(ActualWorksheet item)
         {
             var names = new Dictionary<string, Tuple<string, bool>>();
             names.Add(item.Data, new Tuple<string, bool>("FlightData", false));
             names.Add(item.ActualGross, new Tuple<string, bool>("ActualGross", true));
-            names.Add(item.ActualGRPs, new Tuple<string, bool>(item.ActualGRPs,false));
-            names.Add(item.ActualTRPs, new Tuple<string, bool>(item.ActualTRPs,false));
-            names.Add(item.ActualNet, new Tuple<string, bool>("ActualNet",true));
-            names.Add(item.ActualProduction, new Tuple<string, bool>(item.ActualProduction,true));
-            names.Add(item.ActualImpressions, new Tuple<string, bool>(item.ActualImpressions,false));
-            names.Add(item.ActualClicks, new Tuple<string, bool>(item.ActualClicks,false));
-            names.Add(item.ActualLeads, new Tuple<string, bool>(item.ActualLeads,false));
-            names.Add(item.ActualAdServing, new Tuple<string, bool>(item.ActualAdServing,true));
-            names.Add(item.ActualRichMedia, new Tuple<string, bool>(item.ActualRichMedia,true));
-            names.Add(item.ActualReach, new Tuple<string, bool>(item.ActualReach,false));
-            names.Add(item.ActualFrequency, new Tuple<string, bool>(item.ActualFrequency,false));
+            names.Add(item.ActualGRPs, new Tuple<string, bool>(item.ActualGRPs, false));
+            names.Add(item.ActualTRPs, new Tuple<string, bool>(item.ActualTRPs, false));
+            names.Add(item.ActualNet, new Tuple<string, bool>("ActualNet", true));
+            names.Add(item.ActualProduction, new Tuple<string, bool>(item.ActualProduction, true));
+            names.Add(item.ActualImpressions, new Tuple<string, bool>(item.ActualImpressions, false));
+            names.Add(item.ActualClicks, new Tuple<string, bool>(item.ActualClicks, false));
+            names.Add(item.ActualLeads, new Tuple<string, bool>(item.ActualLeads, false));
+            names.Add(item.ActualAdServing, new Tuple<string, bool>(item.ActualAdServing, true));
+            names.Add(item.ActualRichMedia, new Tuple<string, bool>(item.ActualRichMedia, true));
+            names.Add(item.ActualReach, new Tuple<string, bool>(item.ActualReach, false));
+            names.Add(item.ActualFrequency, new Tuple<string, bool>(item.ActualFrequency, false));
             names.Add(item.PlannedGross, new Tuple<string, bool>(item.PlannedGross, true));
             names.Add(item.PlannedNet, new Tuple<string, bool>(item.PlannedNet, true));
             names.Add(item.PlannedProduction, new Tuple<string, bool>(item.PlannedProduction, true));

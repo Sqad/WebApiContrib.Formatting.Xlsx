@@ -12,7 +12,7 @@ using System.Linq;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports
 {
-    public class SQADApprovalReportXlsSerialiser : IXlsxSerialiser
+    public class SQADApprovalReportXlsSerializer : IXlsxSerializer
     {
         private static void PopulateData(SqadXlsxSheetBuilderBase sheetBuilder, DataColumnCollection columns, IEnumerable<ExcelDataRow> records)
         {
@@ -70,8 +70,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
                 if (approvalReportExportRequest.IsGrossCost)
                 {
                     dataRow[columns[(int)ApprovalReportElement.GrossCost]] = approvalReports[i].GrossCost;
-                }
-                else
+                } else
                 {
                     countDeletedColumns++;
                 }
@@ -79,8 +78,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
                 if (approvalReportExportRequest.IsNetCost)
                 {
                     dataRow[columns[(int)ApprovalReportElement.NetCost - countDeletedColumns]] = approvalReports[i].NetCost;
-                }
-                else
+                } else
                 {
                     countDeletedColumns++;
                 }
@@ -90,8 +88,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
                 if (approvalReportExportRequest.IsIncludeNonWorking)
                 {
                     dataRow[columns[(int)ApprovalReportElement.NonWorkingCosts - countDeletedColumns]] = approvalReports[i].NonWorkingCosts;
-                }
-                else
+                } else
                 {
                     countDeletedColumns++;
                 }
@@ -99,8 +96,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
                 if (approvalReportExportRequest.IsIncludeFees)
                 {
                     dataRow[columns[(int)ApprovalReportElement.Fees - countDeletedColumns]] = approvalReports[i].Fees;
-                }
-                else
+                } else
                 {
                     countDeletedColumns++;
                 }
@@ -131,12 +127,12 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
         }
         public SerializerType SerializerType => SerializerType.Default;
 
-        public bool CanSerialiseType(Type valueType, Type itemType)
+        public bool CanSerializeType(Type valueType, Type itemType)
         {
             return valueType == typeof(ApprovalReportExportRequestModel);
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetbuilderOverride)
+        public void Serialize(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName, string columnPrefix, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetbuilderOverride)
         {
             if (!(value is ApprovalReportExportRequestModel approvalReportExportRequest))
             {
@@ -153,7 +149,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
             //We should minus 2 for count columns for delete IsEvenGroup and CurrencySymbol from Worksheet. Because it's flag field
             var sheetBuilder = new SqadXlsxApprovalReportSheetBuilder(startHeaderIndex: 5, startDataIndex: 6,
                 totalCountColumns: columns.Count - 2, totalCountRows: rows.Count, startDateApprovalReport: startDateApprovalReport,
-                endDateApprovalReport: endDateApprovalReport,approvalType: approvalType);
+                endDateApprovalReport: endDateApprovalReport, approvalType: approvalType);
             document.AppendSheet(sheetBuilder);
 
             sheetBuilder.AppendColumns(columns);

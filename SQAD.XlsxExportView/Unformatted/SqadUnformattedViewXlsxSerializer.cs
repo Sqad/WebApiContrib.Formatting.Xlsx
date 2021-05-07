@@ -8,7 +8,7 @@ using SQAD.XlsxExportView.Unformatted.Models;
 
 namespace SQAD.XlsxExportView.Unformatted
 {
-    public class SqadUnformattedViewXlsxSerializer : IXlsxSerialiser
+    public class SqadUnformattedViewXlsxSerializer : IXlsxSerializer
     {
         private const string InstructionsTableName = "Instructions";
         private const string PivotTableName = "Pivot";
@@ -22,12 +22,12 @@ namespace SQAD.XlsxExportView.Unformatted
             _dataTableName = string.IsNullOrEmpty(viewLabel)
                 ? ExportViewConstants.UnformattedViewDataSheetName : viewLabel;
         }
-        public bool CanSerialiseType(Type valueType, Type itemType)
+        public bool CanSerializeType(Type valueType, Type itemType)
         {
             return valueType == typeof(DataSet);
         }
 
-        public void Serialise(Type itemType,
+        public void Serialize(Type itemType,
                               object value,
                               IXlsxDocumentBuilder document,
                               string sheetName,

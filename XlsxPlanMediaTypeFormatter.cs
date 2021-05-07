@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Microsoft.Extensions.DependencyInjection;
 using OfficeOpenXml.Style;
 
 using SQAD.MTNext.Services.Repositories.Export;
-using SQAD.MTNext.Data.EntityFramework.Core.MTEntities;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReports;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Actuals;
 using SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.CostSources;
@@ -55,7 +52,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
                                       bool isExportJsonToXls = false,
                                       string fileExtension = null,
                                       string viewLabel = null,
-                                      IExportHelpersRepository staticValuesResolver = null):
+                                      IExportHelpersRepository staticValuesResolver = null) :
             base(httpContextAccessor, modelMetadataProvider, autoFit, autoFilter, freezeHeader,
                   headerHeight, cellStyle, headerStyle, serializerType, isExportJsonToXls, fileExtension)
         {
@@ -64,23 +61,23 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx
             //   viewLabel = httpContextAccessor.HttpContext?.RequestServices.GetService<MTEntitiesContextWithViews>()
             //     ?.DatabaseSettings.Where(x => x.Key.Equals("ViewLabel")).FirstOrDefault()?.Value;
             //}
-            // Initialise serialisers.
-            Serializers = new List<IXlsxSerialiser>
+
+            // Initialize serializers.
+            Serializers = new List<IXlsxSerializer>
                           {
-                              new SQADPlanXlsSerialiser(staticValuesResolver, modelMetadataProvider, isExportJsonToXls: isExportJsonToXls),
+                              new SQADPlanXlsSerializer(staticValuesResolver, modelMetadataProvider, isExportJsonToXls: isExportJsonToXls),
                               new SqadFormattedViewXlsxSerializer(viewLabel),
                               new SqadUnformattedViewXlsxSerializer(viewLabel),
                               new SqadSummaryViewXlsxSerializer(),
-                              new SqadActualXlsSerialiser(),
+                              new SqadActualXlsSerializer(),
                               new SqadCostSourceXlsxSerializer(),
                               new SqadDeliverySourceXlsxSerializer(),
-                              new SQADApprovalReportXlsSerialiser(),
+                              new SQADApprovalReportXlsSerializer(),
                               new SqadInternalDatabaseSetupRecordsXlsxSerializer(),
                               new FormattedPlanSerializer()
                           };
-
         }
 
         #endregion
-     }
+    }
 }

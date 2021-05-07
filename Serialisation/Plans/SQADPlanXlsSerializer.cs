@@ -17,7 +17,7 @@ using SQAD.MTNext.Serialisation.WebApiContrib.Formatting.Xlsx.Serialisation;
 
 namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 {
-    public class SQADPlanXlsSerialiser : IXlsxSerialiser
+    public class SQADPlanXlsSerializer : IXlsxSerializer
     {
         public SerializerType SerializerType => SerializerType.Default;
 
@@ -30,14 +30,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
         private Dictionary<string, DataTable> _resolveTables = new Dictionary<string, DataTable>();
         public bool IgnoreFormatting => false;
 
-        public SQADPlanXlsSerialiser(IExportHelpersRepository staticValuesResolver, IModelMetadataProvider modelMetadataProvider
+        public SQADPlanXlsSerializer(IExportHelpersRepository staticValuesResolver, IModelMetadataProvider modelMetadataProvider
                , bool isExportJsonToXls = false)
             : this(new DefaultSheetResolver(), new DefaultColumnResolver(modelMetadataProvider), staticValuesResolver, isExportJsonToXls)
         {
 
         }
 
-        public SQADPlanXlsSerialiser(ISheetResolver sheetResolver,
+        public SQADPlanXlsSerializer(ISheetResolver sheetResolver,
                                      IColumnResolver columnResolver,
                                      IExportHelpersRepository StaticValuesResolver,
                                      bool isExportJsonToXls = false)
@@ -48,13 +48,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             _isExportJsonToXls = isExportJsonToXls;
         }
 
-        public bool CanSerialiseType(Type valueType, Type itemType)
+        public bool CanSerializeType(Type valueType, Type itemType)
         {
 
             return valueType == typeof(ChartData);
         }
 
-        public void Serialise(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName = null, string columnPrefix = null, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetBuilderOverride = null)
+        public void Serialize(Type itemType, object value, IXlsxDocumentBuilder document, string sheetName = null, string columnPrefix = null, XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder sheetBuilderOverride = null)
         {
             ExcelColumnInfoCollection columnInfo = _columnResolver.GetExcelColumnInfo(itemType, value, sheetName);
 
@@ -96,8 +96,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         if (sheetName == col.PropertyName.Replace("_Dict_", ""))
                         {
                             colValueDict = value;
-                        }
-                        else
+                        } else
                         {
                             colValueDict = GetFieldOrPropertyValue(value, col.PropertyName.Replace("_Dict_", ""));
                         }
@@ -127,17 +126,15 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                                 ExcelColumnInfo temlValueColumn = col.Clone() as ExcelColumnInfo;
                                 temlValueColumn.PropertyName = temlValueColumn.PropertyName.Replace("_Dict_", $":Value:{count}");
                                 sheetBuilder.AppendColumnHeaderRowItem(temlValueColumn);
-                            }
-                            else
+                            } else
                             {
                                 string path = col.PropertyName.Replace("_Dict_", $":Value:{count}");
-                                this.Serialise(currentItem.GetType(), value, document, sheetName, path, sheetBuilderOverride);
+                                this.Serialize(currentItem.GetType(), value, document, sheetName, path, sheetBuilderOverride);
                             }
 
                             count++;
                         }
-                    }
-                    else if (col.PropertyName.EndsWith("_List_"))
+                    } else if (col.PropertyName.EndsWith("_List_"))
                     {
                         string columnName = col.PropertyName.Replace("_List_", "");
 
@@ -157,18 +154,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             string listColumnPrefix = col.PropertyName.Replace("_List_", $":{i}");
                             if (FormatterUtils.IsSimpleType(colListValue[i].GetType()))
                             {
-                                ExcelColumnInfo colToAppend = (ExcelColumnInfo) col.Clone();
+                                ExcelColumnInfo colToAppend = (ExcelColumnInfo)col.Clone();
                                 colToAppend.PropertyName = listColumnPrefix;
                                 sheetBuilder.AppendColumnHeaderRowItem(colToAppend);
-                            }
-                            else
+                            } else
                             {
-                                this.Serialise(colListValue[i].GetType(), colListValue[i], document, null, listColumnPrefix, sheetBuilder);
+                                this.Serialize(colListValue[i].GetType(), colListValue[i], document, null, listColumnPrefix, sheetBuilder);
                             }
 
                         }
-                    }
-                    else if (col.PropertyName.EndsWith("_CustomField_") || col.PropertyName.EndsWith("_CustomField_Single_"))
+                    } else if (col.PropertyName.EndsWith("_CustomField_") || col.PropertyName.EndsWith("_CustomField_Single_"))
                     {
                         string columnName = col.PropertyName.Replace("_CustomField_", "").Replace("Single_", "");
 
@@ -199,8 +194,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                                 temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_Single_", $"{propetyActual}");
                                 temlKeyColumn.ExcelColumnAttribute.Header = temlKeyColumn.Header = temlKeyColumn.PropertyName;
 
-                            }
-                            else
+                            } else
                             {
                                 temlKeyColumn.PropertyName = temlKeyColumn.PropertyName.Replace("_CustomField_", $"{propetyActual}:{customFieldId}");
                                 temlKeyColumn.ExcelColumnAttribute.Header = temlKeyColumn.Header = temlKeyColumn.PropertyName + ":" + customFieldDef;
@@ -212,16 +206,14 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             sheetBuilder.AppendColumnHeaderRowItem(temlKeyColumn);
                         }
 
-                    }
-                    else
+                    } else
                     {
                         if (columnPrefix != null)
                         {
                             ExcelColumnInfo temlKeyColumn = col.Clone() as ExcelColumnInfo;
                             temlKeyColumn.PropertyName = $"{columnPrefix}:{temlKeyColumn.PropertyName}";
                             sheetBuilder.AppendColumnHeaderRowItem(temlKeyColumn);
-                        }
-                        else
+                        } else
                         {
                             sheetBuilder.AppendColumnHeaderRowItem(col);
                         }
@@ -253,8 +245,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         var deepSheetsInfo = _sheetResolver.GetExcelSheetInfo(itemType, dataObj);
                         PopulateInnerObjectSheets(deepSheetsInfo, document, itemType);
                     }
-                }
-                else if (!(value is IEnumerable<object>))
+                } else if (!(value is IEnumerable<object>))
                 {
                     PopulateRows(columns, value, sheetBuilder, columnInfo, document);
                     var sheetsInfo = _sheetResolver.GetExcelSheetInfo(itemType, value);
@@ -293,12 +284,10 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     if (sheetBuilder.GetCurrentTableName == columnName)
                     {
                         dictionaryObj = value;
-                    }
-                    else if (columnName.Contains(":"))
+                    } else if (columnName.Contains(":"))
                     {
                         dictionaryObj = GetFieldPathValue(value, columnName);
-                    }
-                    else
+                    } else
                     {
                         dictionaryObj = (Dictionary<int, double>)GetFieldOrPropertyValue(value, columnName);
                     }
@@ -330,8 +319,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             valueCell.CellHeader = columnName + $":Value:{colCount}";
                             valueCell.CellValue = currentItem;
                             row.Add(valueCell);
-                        }
-                        else
+                        } else
                         {
                             string path = columnName + $":Value:{colCount}";
                             ExcelColumnInfoCollection listInnerObjectColumnInfo = _columnResolver.GetExcelColumnInfo(currentItem.GetType(), currentItem, path, true);
@@ -342,8 +330,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                         colCount++;
                     }
-                }
-                else if (columnName.EndsWith("_List_"))
+                } else if (columnName.EndsWith("_List_"))
                 {
                     columnName = columnName.Replace("_List_", "");
 
@@ -356,8 +343,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         {
                             listValue = (List<object>)valueObject;
                         }
-                    }
-                    else
+                    } else
                     {
                         listValue = (List<object>)GetFieldOrPropertyValue(value, columnName);
                     }
@@ -373,8 +359,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             listValueCell.CellHeader = listColumnPrefix;
                             listValueCell.CellValue = kv;
                             row.Add(listValueCell);
-                        }
-                        else
+                        } else
                         {
                             ExcelColumnInfoCollection listInnerObjectColumnInfo = _columnResolver.GetExcelColumnInfo(kv.GetType(), kv, listColumnPrefix, true);
                             PopulateRows(listInnerObjectColumnInfo.Keys.ToList(), kv, sheetBuilder, listInnerObjectColumnInfo, document, row);
@@ -383,8 +368,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         colCount++;
                     }
 
-                }
-                else if (columnName.EndsWith("_CustomField_") || columnName.EndsWith("_CustomField_Single_"))
+                } else if (columnName.EndsWith("_CustomField_") || columnName.EndsWith("_CustomField_Single_"))
                 {
                     bool isSingleValue = columnName.Contains("Single_");
 
@@ -398,8 +382,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         {
                             customFields = (List<object>)valueObject;
                         }
-                    }
-                    else
+                    } else
                     {
                         customFields = (List<object>)GetFieldOrPropertyValue(value, columnName);
                     }
@@ -413,8 +396,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     if (isSingleValue)
                     {
                         allCustomColumns = sheetBuilder.SheetColumns.Where(w => w.PropertyName == columnName).ToList();
-                    }
-                    else
+                    } else
                     {
                         allCustomColumns = sheetBuilder.SheetColumns.Where(w => w.PropertyName.StartsWith(columnName)).ToList();
                     }
@@ -433,8 +415,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             customValueHeaderCell.IsLocked = true;
                             customValueHeaderCell.CellHeader = customColumn.Header;
                             customValueHeaderCell.CellValue = "n/a";
-                        }
-                        else
+                        } else
                         {
                             dynamic customFieldItem = (dynamic)objectCustomField;
 
@@ -448,8 +429,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                                 isActualText = columnName.Contains("Actual") ? ":Actual" : string.Empty;
                                 columnNameCombined = $"{columnName}{isActualText}";
                                 customFieldItem = (dynamic)customFields.First();
-                            }
-                            else
+                            } else
                             {
                                 isActualText = customFieldItem.Actual ? ":Actual" : string.Empty;
                                 columnNameCombined = $"{columnName}{isActualText}:{customFieldItem.ID}";
@@ -457,6 +437,16 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                             customValueHeaderCell.CellHeader = customColumn.Header;
 
+                            if (customFieldItem is CustomFieldModel)
+                            {
+                                if (!String.IsNullOrEmpty((customFieldItem as CustomFieldModel).Key))
+                                {
+                                    ExcelCell keyPreservationCell = new ExcelCell();
+                                    keyPreservationCell.CellHeader = $"{columnNameCombined}:Key:{objID}";
+                                    keyPreservationCell.CellValue = customFieldItem.Key?.ToString();
+                                    CreatePreserveCell(keyPreservationCell, document);
+                                }
+                            }
 
                             ExcelCell valuePreservationCell = new ExcelCell();
                             valuePreservationCell.CellHeader = $"{columnNameCombined}:Value:{objID}";
@@ -498,10 +488,25 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                             hiddenTextPreservationCell.CellValue = $"\"{customFieldItem.HiddenText}\"";
                             CreatePreserveCell(hiddenTextPreservationCell, document);
 
-                            //ExcelCell mixedPropertyPreservationCell = new ExcelCell();
-                            //mixedPropertyPreservationCell.CellHeader = $"{columnNameCombined}:Mixed:{objID}";
-                            //mixedPropertyPreservationCell.CellValue = $"\"{customFieldItem.Mixed}\"";
-                            //CreatePreserveCell(mixedPropertyPreservationCell, document);
+                            try
+                            {
+                                if (customFieldItem is CustomFieldModel
+                                      && (customFieldItem as CustomFieldModel).ValueMix != null)
+                                {
+                                    foreach (var valueM in (customFieldItem as CustomFieldModel).ValueMix)
+                                    {
+                                        string valueMKey = valueM.Key;
+                                        decimal valueMValue = valueM.Value;
+                                        ExcelCell mixedPropertyPreservationCell = new ExcelCell();
+                                        mixedPropertyPreservationCell.CellHeader = $"{columnNameCombined}:ValueMix:{valueM.Key}:{objID}";
+                                        mixedPropertyPreservationCell.CellValue = $"\"{valueM.Value.ToString()}\"";
+                                        CreatePreserveCell(mixedPropertyPreservationCell, document);
+                                    }
+                                }
+                            } catch (Exception ex)
+                            {
+                                string s = ex.Message;
+                            }
 
                             ExcelCell commonPropertyPreservationCell = new ExcelCell();
                             commonPropertyPreservationCell.CellHeader = $"{columnNameCombined}:Common:{objID}";
@@ -510,8 +515,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         }
                         row.Add(customValueHeaderCell);
                     }
-                }
-                else
+                } else
                 {
                     ExcelCell cell = new ExcelCell();
 
@@ -565,15 +569,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                         int i = 0;
                         if (int.TryParse(r[c].ToString(), out i))
                             resolveRow.Add(c.Caption, Convert.ToInt32(i));
-                    }
-                    else if (c.DataType == typeof(DateTime))
+                    } else if (c.DataType == typeof(DateTime))
                     {
                         if (r[c] is System.DBNull)
                             resolveRow.Add(c.Caption, string.Empty);
                         else
                             resolveRow.Add(c.Caption, Convert.ToDateTime(r[c]));
-                    }
-                    else
+                    } else
                         resolveRow.Add(c.Caption, r[c].ToString());
                 }
 
@@ -599,7 +601,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                 //sheetBuilder = new SqadXlsxSheetBuilder(document.AppendSheet(sheetName));
 
-                this.Serialise(sheet.SheetType, sheet.SheetObject, document, sheetName);//, sheetBuilder);
+                this.Serialize(sheet.SheetType, sheet.SheetObject, document, sheetName);//, sheetBuilder);
 
                 //sheetBuilder = null;
             }
@@ -637,8 +639,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             if (rowObject is IEnumerable<object> && (rowObject as IEnumerable<object>).Count() > 0)
             {
                 itemsToProcess = (rowObject as IEnumerable<object>).ToList();
-            }
-            else
+            } else
             {
                 itemsToProcess = new List<object>() { rowObject };
             }
@@ -673,13 +674,11 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     if (matchingProperties.Count() > 0)
                     {
                         member = matchingProperties.First();
-                    }
-                    else if ((matchingProperties = type.GetProperties().Where(w => w.Name == "Value").ToList()).Count() > 1)
+                    } else if ((matchingProperties = type.GetProperties().Where(w => w.Name == "Value").ToList()).Count() > 1)
                     {
                         //property overwriten, and must take first
                         member = matchingProperties.First();
-                    }
-                    else
+                    } else
                     {
                         member = type.GetField(objName) ?? type.GetProperty(objName) as System.Reflection.MemberInfo;
                     }
@@ -731,8 +730,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                                 var filtereCustomFields = (result as IEnumerable<object>).Where(w => ids.Contains(((dynamic)w).ID) == false).ToList();
                                 resultsList.AddRange(filtereCustomFields);
                                 isResultCustomField = true;
-                            }
-                            else
+                            } else
                             {
                                 foreach (var resultItem in (System.Collections.IList)result)
                                 {
@@ -741,43 +739,38 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                                 isResultList = true;
                             }
-                        }
-                        else if (result.GetType().FullName.Contains("CustomFieldModel") || result.GetType().FullName.Contains("OverrideProperty"))
+                        } else if (result.GetType().FullName.Contains("CustomFieldModel") || result.GetType().FullName.Contains("OverrideProperty"))
                         {
                             var exist = resultsList.Any(a => ((dynamic)a).ID == ((dynamic)result).ID);
                             if (!exist)
                                 resultsList.Add(result);
                             isResultCustomField = true;
-                        }
-                        else if (result.GetType().Name.StartsWith("Dictionary"))
+                        } else if (result.GetType().Name.StartsWith("Dictionary"))
                         {
                             try
                             {
-                                if(resultsList.Any())
+                                if (resultsList.Any())
                                 {
                                     //TODO: Change this to dynamic/generic implementation, because this dictionary can possibly be not only 'Dictionary<int, double>'
                                     //This fix was done according to https://gitlab.com/SQAD-MT/Web/WEBPro/-/issues/3410
                                     var firstListItem = resultsList[0] as Dictionary<int, double>;
                                     var сastedResult = result as Dictionary<int, double>;
 
-                                    foreach(var item in сastedResult)
+                                    foreach (var item in сastedResult)
                                     {
                                         firstListItem[item.Key] = item.Value;
                                     }
-                                }
-                                else
+                                } else
                                 {
                                     //if dictionary with outher values it will failure
                                     resultsList.Add(result);
                                 }
                                 isResultDictionary = true;
-                            }
-                            catch
+                            } catch
                             {
 
                             }
-                        }
-                        else
+                        } else
                             resultsList.Add(result);
                     }
                 }
@@ -789,16 +782,13 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             if (isResultCustomField)
             {
                 return resultsList;
-            }
-            else if (isResultList)
+            } else if (isResultList)
             {
                 return resultsList;
-            }
-            else if (isResultDictionary)
+            } else if (isResultDictionary)
             {
                 return resultsList.FirstOrDefault();
-            }
-            else
+            } else
             {
                 returnString = resultsList.Count() > 0 ? resultsList.First().ToString() : string.Empty;
             }
@@ -838,8 +828,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             {
                 columntResolveTable = _staticValuesResolver.GetRecordsFromEnum(info.PropertyType);
                 info.ExcelColumnAttribute.ResolveFromTable = columnName;
-            }
-            else if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false)
+            } else if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false)
             {
                 _resolveTables.TryGetValue(info.ExcelColumnAttribute.ResolveFromTable, out columntResolveTable);
                 if (columntResolveTable == default(DataTable))
@@ -868,8 +857,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
                     {
                         referenceSheet = new XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder(cell.DataValidationSheet, true);
                         document.AppendSheet(referenceSheet);
-                    }
-                    else
+                    } else
                     {
                         referenceSheet.AddAndActivateNewTable(cell.DataValidationSheet);
                     }
@@ -885,8 +873,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
 
                     if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveValue) == false)
                         cell.DataValidationValueCellIndex = referenceSheet.GetColumnIndexByColumnName(info.ExcelColumnAttribute.ResolveValue);
-                }
-                else if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false)
+                } else if (string.IsNullOrEmpty(info.ExcelColumnAttribute.ResolveFromTable) == false)
                 {
                     columntResolveTable = _staticValuesResolver.GetRecordsByTableName(info.ExcelColumnAttribute.ResolveFromTable);
                 }
@@ -903,8 +890,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.Plans
             {
                 preservationSheet = new XlsxExportImport.Base.Builders.SqadXlsxSheetBuilder(_PreservationSheetName_, false, true, true);
                 document.AppendSheet(preservationSheet);
-            }
-            else
+            } else
             {
                 preservationSheet.AddAndActivateNewTable(_PreservationSheetName_);
             }

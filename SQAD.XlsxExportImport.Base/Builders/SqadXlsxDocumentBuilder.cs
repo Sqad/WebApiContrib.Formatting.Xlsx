@@ -61,14 +61,12 @@ namespace SQAD.XlsxExportImport.Base.Builders
                                                  if (_templateInfo == null)
                                                  {
                                                      excelPackage = new ExcelPackage();
-                                                 }
-                                                 else
+                                                 } else
                                                  {
                                                      templateStream = File.OpenRead(_templateInfo.Path);
                                                      excelPackage = new ExcelPackage(templateStream);
                                                  }
-                                             }
-                                             finally
+                                             } finally
                                              {
                                                  templateStream?.Dispose();
                                              }

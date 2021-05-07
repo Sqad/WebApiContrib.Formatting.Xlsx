@@ -62,7 +62,7 @@ namespace SQAD.XlsxExportImport.Base.Formatters
         /// <summary>
         /// Non-default serialisers to be used by this formatter instance.
         /// </summary>
-        protected List<IXlsxSerialiser> Serializers { get; set; }
+        protected List<IXlsxSerializer> Serializers { get; set; }
 
         #endregion
 
@@ -200,14 +200,14 @@ namespace SQAD.XlsxExportImport.Base.Formatters
             }
 
             // Used if no other matching serialiser can be found.
-            IXlsxSerialiser serializer = null; 
+            IXlsxSerializer serializer = null; 
 
             // Determine if a more specific serialiser might apply.
             if (Serializers != null)
             {
                 foreach (var s in Serializers)
                 {
-                    if (!s.CanSerialiseType(valueType, itemType) || s.SerializerType != _serializerType)
+                    if (!s.CanSerializeType(valueType, itemType) || s.SerializerType != _serializerType)
                     {
                         continue;
                     }
@@ -217,7 +217,7 @@ namespace SQAD.XlsxExportImport.Base.Formatters
                 }
             }
            
-            serializer?.Serialise(itemType, value, document, null, null, null);
+            serializer?.Serialize(itemType, value, document, null, null, null);
 
             if (!document.IsVBA)
             {

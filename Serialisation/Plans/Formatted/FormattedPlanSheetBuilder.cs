@@ -301,7 +301,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted
                                         weekNumber = _columnsLookup[fl.Flight.StartDate.Date];
                                         DateTime dateTime = fl.Flight.StartDate.AddDays(currDaysInWeek).Date;
                                             while ((currDaysInWeek < 7)
-                                             && (_columnsLookup[dateTime] == weekNumber) && (dateTime <= fl.Flight.EndDate.AddDays(-1).Date))
+                                                && (dateTime <= fl.Flight.EndDate.AddDays(-1).Date) && (_columnsLookup[dateTime] == weekNumber))
                                             {
                                                 currDaysInWeek += 1;
                                                 dateTime = fl.Flight.StartDate.AddDays(currDaysInWeek).Date;

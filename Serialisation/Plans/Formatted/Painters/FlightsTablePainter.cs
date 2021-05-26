@@ -36,8 +36,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             try
             {
                 return DrawFlightsTableUnsafe(chartData);
-            }
-            catch (Exception ex)
+            } catch (Exception ex)
             {
                 return 1;
             }
@@ -59,9 +58,9 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                               {
                                   Label = "#",
                                   Appearances = new Appearance
-                                                {
-                                                    TextAlign = ""
-                                                }
+                                  {
+                                      TextAlign = ""
+                                  }
                               });
 
             var separateCells = new Dictionary<string, CellAddress>();
@@ -78,12 +77,15 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                     continue;
                 }
 
-                address.Cell = cell;
                 var key = $"{address.RowIndex}-{address.ColumnIndex}";
-                if (!separateCells.ContainsKey(key))
+                if (separateCells.TryGetValue(key, out var cellAddress))
                 {
-                    separateCells.Add(key, address);
+                    cellAddress.Cell = cell;
+                    continue;
                 }
+
+                address.Cell = cell;
+                separateCells.Add(key, address);
             }
 
             foreach (var tableCell in chartData.Cells ?? new List<TextValue>())
@@ -158,8 +160,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             try
             {
                 FillRowNumbersUnsafe(maxColumnIndex);
-            }
-            catch
+            } catch
             {
                 // ignored
             }
@@ -241,8 +242,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                 if (leftTableColumn == null)
                 {
                     labelCell.Style.Font.Color.SetColor(Colors.DayHeaderHolidayFontColor);
-                }
-                else
+                } else
                 {
                     var appearance = GetAppearance(leftTableColumn);
                     var columnValues = _worksheet.Cells[HEADER_ROW_INDEX + 2,
@@ -273,8 +273,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             {
                 range.Style.Font.UnderLine = true;
                 range.Style.Font.UnderLineType = ExcelUnderLineType.Single;
-            }
-            else
+            } else
             {
                 range.Style.Font.UnderLine = false;
             }
@@ -283,8 +282,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
             {
                 range.Style.Fill.PatternType = ExcelFillStyle.Solid;
                 range.Style.Fill.BackgroundColor.SetColor(appearance.BackgroundColor);
-            }
-            else
+            } else
             {
                 range.Style.Fill.PatternType = ExcelFillStyle.None;
             }
@@ -327,7 +325,7 @@ namespace WebApiContrib.Formatting.Xlsx.Serialisation.Plans.Formatted.Painters
                 if (column.Options?.GetValueOrDefault("currency") is long currency)
                 {
                     appearance.UseCurrencySymbol = true;
-                    appearance.CurrencySymbol = (int) currency;
+                    appearance.CurrencySymbol = (int)currency;
                     appearance.FloatingPointAccuracy = 2;
                 }
             }

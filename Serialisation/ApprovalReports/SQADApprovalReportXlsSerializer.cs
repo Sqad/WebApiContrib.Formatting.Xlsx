@@ -84,6 +84,7 @@ namespace SQAD.MTNext.WebApiContrib.Formatting.Xlsx.Serialisation.ApprovalReport
                 }
 
                 dataRow[columns[(int)ApprovalReportElement.WorkingCost - countDeletedColumns]] = approvalReports[i].WorkingCost;
+                dataRow[columns[(int)ApprovalReportElement.ConcurMemberAction - countDeletedColumns]] = approvalReports[i].ConcurMemberAction;
 
                 if (approvalReportExportRequest.IsIncludeNonWorking)
                 {
